@@ -371,4 +371,125 @@ cost delta.
 
 ---
 
-*End of decisions. Next entry would be D012.*
+## D012 — Resolutions to the CONTRACTS / PRE-REGISTRATION review (F1–F26)
+
+**Decision.** `docs/research/reviews/2026-09-02-contracts-review.md` (a
+separate-context review) returned FAIL with six S1 findings. Every finding
+is resolved below; CONTRACTS.md moves to `schema_rev` 1.1.0 and
+PRE-REGISTRATION.md to v1.1.0 with an Amendments section, and the
+`docs-frozen` tag moves to the commit that applies them. Numbered by the
+review's finding ids.
+
+- **F1 + F7 + F8, verdict rule.** The Holm-adjusted p governs. Family =
+  brands × {net WoW, share WoW}; per-test two-sided bootstrap p as stated.
+  `SIGNIFICANT` iff `p_holm < 0.05` on the full set **and**, for net, the
+  confirmed-only 95 % CI excludes 0 with the same sign as the full-set
+  point estimate; for share (no confirmed-only interval) iff `p_holm < 0.05`.
+  `SUGGESTIVE` iff `p_raw < 0.05` but not SIGNIFICANT. `NO_CHANGE_DETECTED`
+  iff `p_raw ≥ 0.05` with minimums met. `ABSTAIN` iff minimums not met
+  **or** the full-set and confirmed-only CIs exclude 0 with opposite signs
+  (reason `signals_conflict`). CIs are still published; they are display,
+  not the rule. Share WoW (OQ-7) is confirmed as part of the design.
+- **F2 + F11, abstain reasons.** `no_timestamps` is removed from the
+  abstention enum; it becomes a per-source scope flag `wow_scope=false`
+  (source counts for share, excluded from WoW and events, listed under
+  `what_could_not_be_checked`). The enum gains `below_minimum` (brand-level
+  minimums), `halted` (402 breaker), `embedding_failed` (topics only) and
+  `signals_conflict` (verdict only). Instagram wording: "items lacking a
+  timestamp", not the whole source.
+- **F3, H2 fields.** `BySourceEntry` gains `ci95`, `ci95_iid`,
+  `design_effect`, all nullable. H2 is scored on the two thread-clustered
+  comment sources, `reddit` and `youtube_comment`: pass iff
+  `design_effect ≥ 1.5` on each that meets minimums; author-clustered
+  sources (tiktok, instagram) are reported, not scored.
+- **F4, audit fields.** `Receipt` gains `audit {n_sample, n_agree,
+  agreement, tiebreak_calls, tiebreak_overflow}`; H3 reads
+  `audit.agreement`.
+- **F5, nullability.** Every estimate on `SovEntry`, `SentimentEntry`,
+  `BySourceEntry`, `Topic` (`share`, `net`, `ci95`, `ci95_iid`,
+  `design_effect`) and `WowNet`/`WowShare` (`delta`, `ci95`, `p_raw`,
+  `p_holm`) is `T | None`; a null is always paired with an `Abstention`
+  row naming the brand, source (or null) and reason.
+- **F6, window.** `Query.window_days` is fixed at 14 in v1 (validator:
+  `== 14`); periods are `current = [now − 7 d, now)`, `previous =
+  [now − 14 d, now − 7 d)`; minimums apply per period; the event baseline
+  is the 14-day window excluding the tested day.
+- **F9 + F10 + F17, two-signal policy.** Precedence: (1) if the classifier
+  agrees with a non-null deterministic signal the mention is `confirmed`
+  and no tiebreak result can override it (audit-sample tiebreaks on such
+  mentions are recorded in `signals.tiebreak` and counted in H3 only);
+  (2) a tiebreak triggered by disagreement or low confidence wins when it
+  disagrees with the classifier (`contested`, `decided_by=tiebreak`) and
+  confirms when it agrees (`confirmed`); (3) a mention that would have
+  triggered a tiebreak but hit the 40 % cap keeps the classifier label,
+  is `model_only` with `signals.overflow=true`, and is excluded from the
+  confirmed-only subset. Denominators for the 10 % audit sample and the
+  40 % cap: relevant mention–brand rows after dedup, per brand, per
+  session; a mention kept for two brands is two rows and may be sampled
+  in each.
+- **F12 + F13, run ids.** `Mention.run_id` is `str | None`; `raw_ref`
+  references `local_seq`. `CostSource` gains `local`: rows with
+  `run_id = null` (`LOCAL_*` statuses) are reconciled by construction with
+  `cost_usd = 0.0`, `cost_source = "local"`, and counted in
+  `monid_runs_failed`. `RECONCILED` iff every row with a `run_id` has
+  `cost_source = "/v1/runs"` and `unmatched_remote_run_ids` is empty.
+- **F14.** `lite` allows at most one competitor; it is a `Query`
+  validator (exit 2).
+- **F15, resampling frame.** One global index over the units
+  `(brand, cluster_key)` present in the session, drawn once per bootstrap
+  iteration and shared by every estimand, period and brand; a cluster
+  spanning both periods is resampled as one unit carrying both periods'
+  mentions.
+- **F16.** Topic cut: average-linkage cosine distance 0.35, `min_size 3`,
+  `min_breadth 2`, all in `config` and in the threshold index; RED-TEAM
+  gains an attack noting the cut was chosen before any demo data and not
+  tuned on it.
+- **F18.** Share minimums use `SovEntry.n` (mention–brand pairs over
+  `basis_sources`) per period; net minimums use `SentimentEntry.n`
+  (relevant mentions) per period.
+- **F19.** `Event` gains `baseline_mad` and `threshold`; the tested day is
+  excluded from the baseline; days are UTC.
+- **F20.** `Answer.numbers_verified` is renamed `verified_numbers:
+  list[str]`; `Narration.numbers_verified: bool` is unchanged.
+- **F21.** `stats.json` is defined in CONTRACTS as the `StatsFile` record:
+  the Digest's `share_of_voice`, `sentiment`, `by_source`, `events` and
+  `window` fields, written separately so the video imports numbers without
+  narration or quotes; `topics.json` is `Digest.topics`.
+- **F22.** `excluded_with_reason` keys are exactly `{not_about_brand,
+  irrelevant_label, refused, unparseable, error, dedup_native_id,
+  dedup_url, dedup_text}`.
+- **F23.** `top_mentions` sorts by `engagement_score`, the sum of the
+  numeric values of `engagement`, ties broken by `published_at`
+  descending then `mention_id`.
+- **F24.** H1 reads: `receipt.totals.total_usd < 5`, where `total_usd =
+  monid_usd + llm_usd` and `elevenlabs_usd` is a breakout of `monid_usd`.
+- **F25.** H5 sample: 50 relevant mention–brand rows from the frozen demo,
+  all brands pooled, drawn with seed 777 stratified by source in
+  proportion; the rater sees text only (no rationale, no deterministic
+  signal, no source, no brand label); agreement is raw agreement with the
+  final `label`.
+- **F26.** The same-day gate corrections to PRE-REGISTRATION are recorded
+  here as amendment A1 of v1.1.0; from v1.1.0 onward every change is an
+  amendment entry plus a version bump, as the banner says.
+
+**Rationale.** Each finding either made a published number ambiguous or
+made a required artifact unrepresentable; the cheapest time to fix a
+contract is before `models.py` and `stats/` encode it.
+
+**Evidence.** The review file, line-referenced. Findings marked
+"confirmed consistent" there are untouched.
+
+**Alternatives rejected.** Verdict by CI with Holm as display (F1
+alternative b): simpler to read, but publishes eight uncorrected tests
+under the word SIGNIFICANT. Removing share WoW: loses the only test that
+compares brands. Keeping `no_timestamps` as an abstention: would remove
+`youtube_comment` from every bootstrap and make H2 unscoreable.
+
+**Reverses when.** A later review finds a contradiction in these rules,
+or the demo shows the Holm family is so small that adjusted and raw
+verdicts never differ (then F1 alternative b is equivalent and simpler).
+Either lands as a new entry; frozen text stays.
+
+---
+
+*End of decisions. Next entry would be D013.*
