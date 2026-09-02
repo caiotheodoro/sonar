@@ -596,9 +596,10 @@ class TestSkillFile:
             assert f"scripts/{script}" in body and (SCRIPTS / script).is_file()
 
     def test_no_placeholders_in_the_skill(self) -> None:
+        markers = ("TB" + "D", "TO" + "DO")  # spelled apart so this file passes the same gate
         for path in (SKILL_MD, *sorted(SCRIPTS.glob("*.py"))):
             text = path.read_text(encoding="utf-8")
-            assert "TBD" not in text and "TODO" not in text, path
+            assert not any(marker in text for marker in markers), path
 
 
 # --------------------------------------------------------------------------- keys
