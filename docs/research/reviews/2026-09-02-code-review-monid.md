@@ -20,6 +20,27 @@ network) that import the real `sonar.monid` package to (a) construct a
 `RunRecord` with `cost_source="local"` and (b) run a full submit → 402 →
 reconcile cycle and evaluate the CONTRACTS verdict rule against the result.
 
+**Note on scope and timing.** `src/sonar/monid/client.py`,
+`src/sonar/monid/ledger.py`, and `tests/test_errors.py` — the three files
+this review targets — are unmodified against `HEAD` at review time (`git
+diff --stat` empty for all three); every finding below about those three
+files is current, not stale. `src/sonar/models.py` is cited only as
+corroborating cross-file evidence for F1 and F3's downstream consequence,
+and it is *not* clean: it was being edited concurrently, uncommitted, by
+another process in this shared working tree while this review ran. The
+`models.py:55` / `models.py:627` line numbers and quoted content below
+reflect a snapshot taken mid-review. Re-checked after the fact: `models.py`'s
+working tree (still uncommitted at time of writing) already has `"local"` in
+`CostSource`, a validator enforcing `run_id is None` iff `cost_source ==
+"local"` with `cost_usd == 0.0`, a verdict computation correctly filtered to
+`if r.run_id is not None`, and an `unreconciled` list keyed on `cost_source
+== "unreconciled"` (excluding `"local"`) — i.e. fix items 1 (the `models.py`
+half) and 8 below are already done there. This does not change the verdict
+on the three reviewed files: `ledger.py` keeps its own, independent
+`CostSource`/`RunRecord` definitions (F5) that still lack `"local"` and are
+not wired to `models.py`'s fix at all — live proof that F5 is a real,
+currently-manifesting divergence, not a hypothetical one.
+
 ---
 
 ## Verdict: **FAIL**
@@ -203,9 +224,10 @@ failure — which the error matrix says is a normal, expected, exit-0 outcome
 Each item is independently applicable.
 
 1. Add `"local"` to the `CostSource` `Literal` in `src/sonar/monid/ledger.py:33`
-   (and in `src/sonar/models.py:55`, even though that file is outside this
-   review's named scope — F1's repro shows the type is unrepresentable
-   without both).
+   — this is the part of F1 still open. (`src/sonar/models.py:55` had the
+   same gap at review time; a concurrent, uncommitted edit to that file
+   already added `"local"` there — see the scope note above — so check its
+   current state before touching it.)
 2. In `src/sonar/monid/ledger.py::Ledger.close()`, when the outcome has
    `run_id is None` and `status` starts with `LOCAL_` **and is not**
    `LOCAL_DEADLINE` (which per CONTRACTS.md:204 uniquely keeps its `run_id`
@@ -242,13 +264,19 @@ Each item is independently applicable.
    `cost_usd == 0.0` immediately, with no call to `reconcile()` — this is
    the "at write time" guarantee from CONTRACTS.md:210 and is currently
    untested.
-8. In `src/sonar/models.py`, fix the `Receipt.verdict` computation (around
-   line 627) to filter `if r.run_id is not None` before checking
-   `r.cost_source == "/v1/runs"`, matching CONTRACTS.md:416-419's verdict
-   rule verbatim — otherwise fixes 1-7 are necessary but not sufficient: a
-   session with any local-only failure will still never reach `RECONCILED`.
-   Also update the `unreconciled` list at line 667 to match fix 4's
-   `cost_source == "local"` exclusion.
+8. **Likely already resolved elsewhere — verify before doing this one.** At
+   review time `src/sonar/models.py`'s `Receipt.verdict` computation lacked
+   the `if r.run_id is not None` filter CONTRACTS.md:416-419 requires before
+   checking `r.cost_source == "/v1/runs"`, which would make fixes 1-7
+   necessary but not sufficient (a session with any local-only failure could
+   never reach `RECONCILED`). A concurrent, uncommitted edit to `models.py`
+   observed during this review already added that filter, a `"local"`
+   `CostSource` member, a validator enforcing `run_id is None` iff
+   `cost_source == "local"`, and an `unreconciled` list excluding `"local"`.
+   Confirm the current state of `models.py` (`grep -n cost_source
+   src/sonar/models.py`) before spending time on this item — it is included
+   for completeness in case that work is lost, reverted, or was on a branch
+   that doesn't land.
 9. Replace the duplicate `RunRecord`/`CostSource` definitions in
    `src/sonar/monid/ledger.py` (lines 33, 53-88) with an import of both from
    `src/sonar/models.py`, per the module's own docstring intent
