@@ -1,0 +1,65 @@
+{
+  "runId": "run_sample_instagram_0001",
+  "status": "SUCCEEDED",
+  "providerResponse": {"httpStatus": 200},
+  "output": [
+    {
+      "id": "3450000000000000001",
+      "type": "Image",
+      "shortCode": "C9abcDEfGh1",
+      "caption": "Recebi meu cartão roxinho hoje, o Nubank entregou em dois dias #nubank #cartao",
+      "hashtags": ["nubank", "cartao"],
+      "mentions": [],
+      "url": "https://www.instagram.com/p/C9abcDEfGh1/",
+      "commentsCount": 14,
+      "likesCount": 230,
+      "timestamp": "2026-08-31T14:22:05.000Z",
+      "ownerUsername": "ana.souza",
+      "ownerId": "1122334455",
+      "displayUrl": "https://scontent.cdninstagram.com/v/t51/1.jpg"
+    },
+    {
+      "id": "3450000000000000002",
+      "type": "Video",
+      "shortCode": "C9xyzABcDe2",
+      "caption": "The Nu app froze twice while I was paying a bill this week, not great #nubank",
+      "hashtags": ["nubank"],
+      "url": "https://www.instagram.com/p/C9xyzABcDe2/?utm_source=ig_web_copy_link",
+      "commentsCount": 3,
+      "likesCount": 41,
+      "videoViewCount": 900,
+      "ownerUsername": "ana.souza",
+      "ownerId": "1122334455"
+    },
+    {
+      "id": "3450000000000000003",
+      "type": "Sidecar",
+      "shortCode": "C9sidecar03",
+      "caption": "Nubank",
+      "hashtags": ["nubank"],
+      "url": "https://www.instagram.com/p/C9sidecar03/",
+      "commentsCount": 0,
+      "likesCount": 5,
+      "timestamp": "2026-08-27T09:00:00.000Z"
+    },
+    {
+      "id": "3450000000000000004",
+      "type": "Image",
+      "shortCode": "C9unrelated4",
+      "caption": "Sunset at the beach, best weekend of the summer",
+      "hashtags": ["nubank"],
+      "url": "https://www.instagram.com/p/C9unrelated4/",
+      "likesCount": 77,
+      "timestamp": "2026-08-26T18:30:00.000Z",
+      "ownerUsername": "beachlover"
+    },
+    {
+      "id": "3450000000000000005",
+      "type": "Image",
+      "shortCode": "C9empty0005",
+      "caption": "",
+      "url": "https://www.instagram.com/p/C9empty0005/",
+      "ownerUsername": "quiet"
+    }
+  ]
+}
