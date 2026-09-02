@@ -60,6 +60,13 @@ Recurring operator jobs, all free:
   print `RECONCILED` before the row is written here.
 - `make validate` before every commit that touches docs or results.
 
+### 2026-09-02 — Wave 2 review and fix cycle
+
+- Three separate-context reviews of Wave 2 code (`docs/research/reviews/2026-09-02-code-review-{monid,llm-text,config-providers}.md`) all returned FAIL; every numbered item was applied by a fix worker on disjoint files (commits `450a7d7`, `de53299`, `cd0da1e`, `26afa56`, `6fc7b2f`).
+- Contracts went through two reviews (`…contracts-review.md`, `…contracts-review-2.md`) and two decisions (D012, D013); CONTRACTS is at schema_rev 1.1.1, PRE-REGISTRATION at v1.1.1, `docs-frozen` tag at `a852f5c`.
+- An account rate limit killed five workers mid-edit; each was re-dispatched with orders to audit its own leftover diff first. Nothing was lost; nothing partial was committed.
+- Suite: 570 tests green; 6 mypy errors remain in adapter files against the corrected Provider protocol, queued for the Wave 3 fix wave.
+
 ## What not to do
 
 - Do not start a live run while another session is unreconciled.
