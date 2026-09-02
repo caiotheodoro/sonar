@@ -22,7 +22,7 @@ check-placeholders:
 	python scripts/check_placeholders.py
 
 check-claims:
-	@echo "check-claims: pending W1.1/W1.2 docs"
+	uv run pytest -rsx -v tests/test_published_claims.py
 
 demo:
 	@echo "demo: pending pipeline"
