@@ -1,0 +1,7 @@
+{
+    "audio": {
+        "download_link": "https://cdn.monid.ai/audio/sample-abc123.mp3?X-Amz-Signature=fake",
+        "content_type": "audio/mpeg",
+        "character_count": 45
+    }
+}
