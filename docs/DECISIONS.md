@@ -612,4 +612,29 @@ the `about_brand` gate; then inherited matches require the model's
 
 ---
 
-*End of decisions. Next entry would be D015.*
+## D015 — Embedding model id
+
+**Decision.** Topic clustering and chat retrieval embed text with OpenAI
+`text-embedding-3-small` (dated 2026-09-02, listed in `config.LLM`), alongside the two chat
+models fixed in D003.
+
+**Rationale.** D003 named only the classifier and tiebreak models; the
+published-claims gate requires every model id in `config.LLM` to carry a
+dated decision. `text-embedding-3-small` is the cheapest current OpenAI embedding model and
+the clustering cut in D012 (F16) was chosen against its cosine geometry.
+
+**Evidence.** OpenAI models list fetched 2026-09-02 with the project key
+shows `text-embedding-3-small` available; `tests/test_published_claims.py`
+`test_every_model_id_in_config_has_a_dated_decision`.
+
+**Alternatives rejected.** `text-embedding-3-large` (more expensive, no
+measured benefit for clustering short mentions); local sentence
+transformers (adds a model download to a zero-infra tool).
+
+**Reverses when.** The topic clusters on the frozen demo are judged
+unusable (RED-TEAM 17 lands); then the cut and the model are revisited
+together in one entry.
+
+---
+
+*End of decisions. Next entry would be D016.*

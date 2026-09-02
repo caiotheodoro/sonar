@@ -351,12 +351,6 @@ def _decision_entries() -> list[tuple[str, str]]:
     return [(parts[i].strip(), parts[i + 1]) for i in range(1, len(parts) - 1, 2)]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="D003 names only the two chat models; the embedding id is deferred to "
-    "config.py without being spelled out. One dated DECISIONS line naming "
-    "text-embedding-3-small turns this into a pass and this marker must then go.",
-)
 def test_every_model_id_in_config_has_a_dated_decision() -> None:
     """A model id that can change price or behaviour needs a decision with a date."""
     entries = _decision_entries()
