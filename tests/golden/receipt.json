@@ -1,0 +1,296 @@
+{
+  "schema_rev": "1.1.2",
+  "sonar_rev": "0.1.0+82d0ab5",
+  "session_id": "20260902T090000Z-nubank-a1b2c3",
+  "timestamps": {
+    "started_at": "2026-09-02T09:00:00Z",
+    "finished_at": "2026-09-02T09:10:00Z",
+    "reconciled_at": "2026-09-02T09:11:00Z"
+  },
+  "replay": false,
+  "verdict": "PARTIAL",
+  "query": {
+    "brand": "Nubank",
+    "brand_aliases": [],
+    "brand_hint": null,
+    "competitors": [
+      "Inter"
+    ],
+    "window_days": 14,
+    "profile": "lite",
+    "sources": [
+      "reddit",
+      "youtube",
+      "youtube_comment",
+      "tiktok",
+      "instagram",
+      "google_maps",
+      "facebook",
+      "trustpilot",
+      "g2",
+      "news"
+    ]
+  },
+  "runs": [
+    {
+      "local_seq": 1,
+      "run_id": "01RUN1",
+      "provider": "apify",
+      "endpoint": "/trudax/reddit-scraper-lite",
+      "brand": "Nubank",
+      "source": "reddit",
+      "input_digest": "54a752ef7529cbe28bed8b1d",
+      "submitted_at": "2026-09-02T09:00:00Z",
+      "completed_at": "2026-09-02T09:01:30Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 40,
+      "estimate_usd": 0.248,
+      "cost_usd": 0.248,
+      "billed_units": 40,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 2,
+      "run_id": "01RUN2",
+      "provider": "apify",
+      "endpoint": "/compass/google-maps-reviews-scraper",
+      "brand": "Nubank",
+      "source": "google_maps",
+      "input_digest": "7203aa9a092a23fcb23607f7",
+      "submitted_at": "2026-09-02T09:01:30Z",
+      "completed_at": "2026-09-02T09:02:30Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 50,
+      "estimate_usd": 0.03375,
+      "cost_usd": 0.03375,
+      "billed_units": 50,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 3,
+      "run_id": "01RUN3",
+      "provider": "apify",
+      "endpoint": "/trudax/reddit-scraper-lite",
+      "brand": "Inter",
+      "source": "reddit",
+      "input_digest": "4b8a94e70dbeca811f5c3616",
+      "submitted_at": "2026-09-02T09:02:30Z",
+      "completed_at": "2026-09-02T09:03:20Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 0,
+      "estimate_usd": 0.248,
+      "cost_usd": 0.02,
+      "billed_units": 0,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 4,
+      "run_id": null,
+      "provider": "tinyfish",
+      "endpoint": "/search",
+      "brand": "Nubank",
+      "source": "news",
+      "input_digest": "fc02598072f0f4ac7ca903c5",
+      "submitted_at": "2026-09-02T09:03:20Z",
+      "completed_at": "2026-09-02T09:03:25Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 3,
+      "estimate_usd": 0.0,
+      "cost_usd": 0.0,
+      "billed_units": null,
+      "cost_source": "local",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 5,
+      "run_id": null,
+      "provider": "apify",
+      "endpoint": "/apidojo/tiktok-scraper",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "input_digest": "a98d156bd360a5fb6b9b0b5c",
+      "submitted_at": "2026-09-02T09:03:25Z",
+      "completed_at": null,
+      "status": "LOCAL_REJECTED_402",
+      "provider_http_status": null,
+      "n_results": 0,
+      "estimate_usd": 0.009,
+      "cost_usd": 0.0,
+      "billed_units": null,
+      "cost_source": "local",
+      "attempts": 1,
+      "error": "402 Payment Required: insufficient balance"
+    },
+    {
+      "local_seq": 6,
+      "run_id": "01RUN6",
+      "provider": "apify",
+      "endpoint": "/streamers/youtube-scraper",
+      "brand": "Inter",
+      "source": "youtube",
+      "input_digest": "93c1b3e455b0f58d2c551fab",
+      "submitted_at": "2026-09-02T09:03:30Z",
+      "completed_at": "2026-09-02T09:04:20Z",
+      "status": "FAILED",
+      "provider_http_status": 500,
+      "n_results": 0,
+      "estimate_usd": 0.0225,
+      "cost_usd": 0.0,
+      "billed_units": 0,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": "FAILED"
+    },
+    {
+      "local_seq": 7,
+      "run_id": "01RUN7",
+      "provider": "elevenlabs",
+      "endpoint": "/text-to-speech",
+      "brand": null,
+      "source": null,
+      "input_digest": "f7e01782c2cd25a93c04e038",
+      "submitted_at": "2026-09-02T09:06:40Z",
+      "completed_at": "2026-09-02T09:06:45Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 1,
+      "estimate_usd": 0.0015,
+      "cost_usd": 0.0123,
+      "billed_units": 30,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 8,
+      "run_id": "01RUN8",
+      "provider": "apify",
+      "endpoint": "/compass/google-maps-reviews-scraper",
+      "brand": "Inter",
+      "source": "google_maps",
+      "input_digest": "0ece06f9b65eb1803c596169",
+      "submitted_at": "2026-09-02T09:04:20Z",
+      "completed_at": "2026-09-02T09:05:20Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 25,
+      "estimate_usd": 0.016875,
+      "cost_usd": null,
+      "billed_units": null,
+      "cost_source": "unreconciled",
+      "attempts": 1,
+      "error": null
+    }
+  ],
+  "totals": {
+    "monid_usd": 0.31405,
+    "monid_runs": 8,
+    "monid_runs_billed": 4,
+    "monid_runs_zero_results": 3,
+    "monid_runs_failed": 2,
+    "llm_usd": 0.00536,
+    "llm_calls": {
+      "classify": 3,
+      "tiebreak": 1,
+      "embed": 1,
+      "name_topic": 1,
+      "narrate": 1,
+      "ask": 0
+    },
+    "llm_tokens": 6200,
+    "elevenlabs_usd": 0.0123,
+    "total_usd": 0.31940999999999997
+  },
+  "reconciliation": {
+    "fetched_at": "2026-09-02T09:11:00Z",
+    "n_listed_in_window": 5,
+    "unmatched_remote_run_ids": [],
+    "unreconciled_local_seqs": [
+      8
+    ]
+  },
+  "incumbent": {
+    "name": "Brand24 Team",
+    "price_usd_month": 349,
+    "url": "https://brand24.com/prices",
+    "checked_at": "2026-09-02",
+    "mentions_quota": 10000
+  },
+  "comparison": {
+    "briefs_per_month_assumed": 4,
+    "sonar_usd_month_equiv": 1.2776399999999999,
+    "ratio": 273.15988854450393,
+    "mentions_this_brief": 110
+  },
+  "mentions": {
+    "fetched": 118,
+    "deduped": 110,
+    "labelled": 100,
+    "excluded_with_reason": {
+      "not_about_brand": 6,
+      "irrelevant_label": 2,
+      "refused": 1,
+      "unparseable": 0,
+      "error": 0,
+      "dedup_native_id": 5,
+      "dedup_url": 2,
+      "dedup_text": 1
+    },
+    "by_source": {
+      "reddit": 37,
+      "google_maps": 70,
+      "news": 3
+    },
+    "by_brand": {
+      "Nubank": 85,
+      "Inter": 25
+    }
+  },
+  "audit": {
+    "n_sample": 10,
+    "n_agree": 9,
+    "agreement": 0.9,
+    "tiebreak_calls": 14,
+    "tiebreak_overflow": 2
+  },
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Inter",
+      "source": "reddit",
+      "reason": "empty",
+      "detail": "0 results from /trudax/reddit-scraper-lite"
+    },
+    {
+      "scope": "source",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "reason": "halted",
+      "detail": "Monid 402: breaker stopped the session before the run was accepted"
+    },
+    {
+      "scope": "source",
+      "brand": "Inter",
+      "source": "youtube",
+      "reason": "provider_failed",
+      "detail": "FAILED, provider HTTP 500"
+    }
+  ],
+  "what_could_not_be_checked": [
+    "X/Twitter: no Monid endpoint",
+    "youtube_comment: items lacking a timestamp, excluded from WoW and events",
+    "cluster key fallback: reddit 2"
+  ],
+  "content_digest": "691af1218fdc68cc28c21de2e3a29c29d0a5c4f129312eeb0bb8fb5512adfcc8"
+}
