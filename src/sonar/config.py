@@ -1,9 +1,10 @@
 """Configuration layer: source plan, profiles, LLM ids and rates, thresholds.
 
 Every number the published-claims gate checks lives here as a named constant:
-the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.1.0, frozen
-2026-09-02, amended same day by D012 A1/A2; later amendments bump the patch
-version there, never the values here without a ``DECISIONS.md`` entry), the
+the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.1.2, frozen
+2026-09-02, amended same day by D012 A1/A2, D013 A3 and D014 A4; later
+amendments bump the patch version there, never the values here without a
+``DECISIONS.md`` entry), the
 endpoint reference table of the design document (Monid ids
 and prices verified 2026-09-02) and the OpenAI prices of ``docs/DECISIONS.md``
 D003. Changing a frozen value after that date is a ``docs/DECISIONS.md``
@@ -104,6 +105,7 @@ AUDIT_SAMPLE_FRACTION: Final[float] = 0.10
 RATING_NEGATIVE_MAX: Final[int] = 2
 RATING_POSITIVE_MIN: Final[int] = 4
 RATIONALE_MAX_WORDS: Final[int] = 20
+RATIONALE_MAX_CHARS: Final[int] = 200
 PROMPT_REV: Final[str] = "classify-v1-2026-09-02"
 
 # ---------------------------------------------------------------------------

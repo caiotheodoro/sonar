@@ -1,4 +1,4 @@
-# Portuguese sentiment lexicon (deterministic signal, PRE-REGISTRATION v1.1.1
+# Portuguese sentiment lexicon (deterministic signal, PRE-REGISTRATION v1.1.2
 # §Two-signal labelling policy: "lexicon sign otherwise"). One entry per line:
 # polarity (+ or -), a tab, then the term. Terms are matched on
 # sonar.text.normalize output (NFKC, casefold, whitespace collapsed) at word

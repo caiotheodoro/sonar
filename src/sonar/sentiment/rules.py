@@ -1,4 +1,4 @@
-"""The two-signal labelling policy, exactly as PRE-REGISTRATION v1.1.1 and CONTRACTS §Label state it.
+"""The two-signal labelling policy, exactly as PRE-REGISTRATION v1.1.2 and CONTRACTS §Label state it.
 
 Pure functions over model observations; no model is called here. The model
 supplies observations (``LabelObservation``), code decides. In order:

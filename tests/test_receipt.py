@@ -35,6 +35,7 @@ from sonar.models import (
     BySourceEntry,
     CoverageGap,
     DateRange,
+    Incumbent,
     Label,
     Mention,
     MentionCounts,
@@ -418,6 +419,12 @@ def test_comparison_against_the_incumbent_price() -> None:
     assert cmp.ratio is not None
     assert math.isclose(cmp.ratio, BRAND24_TEAM.price_usd_month / equiv)
     assert cmp.mentions_this_brief == 110
+
+
+def test_incumbent_price_is_not_retyped_in_the_model() -> None:
+    other = Incumbent.model_validate({**BRAND24_TEAM.to_record(), "price_usd_month": 299})
+    assert other.price_usd_month == 299
+    assert Incumbent.model_validate(BRAND24_TEAM.to_record()) == build_golden_receipt().incumbent
 
 
 def test_zero_result_run_is_present_and_billed() -> None:

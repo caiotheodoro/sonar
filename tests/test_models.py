@@ -174,8 +174,11 @@ def receipt(**overrides: Any) -> dict[str, Any]:
             "unreconciled_local_seqs": [],
         },
         "incumbent": {
+            "name": "Brand24 Team",
+            "price_usd_month": 349,
             "url": "https://brand24.com/prices/",
             "checked_at": date(2026, 9, 2),
+            "mentions_quota": 10000,
         },
         "comparison": {
             "sonar_usd_month_equiv": 0.12,
@@ -1044,7 +1047,7 @@ def test_receipt_content_digest_recomputes_over_canonical_json() -> None:
         ({"totals": totals(monid_runs_zero_results=1)}, "n_results = 0"),
         ({"session_id": "bad"}, "pattern"),
         ({"content_digest": "abc"}, "pattern"),
-        ({"incumbent": {"url": "u", "checked_at": "2026-09-02", "price_usd_month": 299}}, "349"),
+        ({"incumbent": {**receipt()["incumbent"], "price_usd_month": 0}}, "greater than 0"),
         (
             {"comparison": {"sonar_usd_month_equiv": 0.0, "ratio": 1.0, "mentions_this_brief": 0}},
             "ratio must be null",

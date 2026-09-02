@@ -684,15 +684,24 @@ class Reconciliation(SonarModel):
 
 
 class Incumbent(SonarModel):
-    name: Literal["Brand24 Team"] = "Brand24 Team"
-    price_usd_month: Literal[349] = 349
+    """CONTRACTS §Receipt ``incumbent``: the values come from ``report/incumbent.py``.
+
+    Plain typed fields, not ``Literal`` retypes of the price: ``BRAND24_TEAM`` is
+    the single source and the published-claims gate holds it equal to the README
+    and ``results/demo/receipt.json``. A D001 reversal then edits one constant.
+    """
+
+    name: str = Field(min_length=1)
+    price_usd_month: int = Field(gt=0)
     url: str = Field(min_length=1)
     checked_at: date
-    mentions_quota: Literal[10000] = 10000
+    mentions_quota: int = Field(gt=0)
 
 
 class Comparison(SonarModel):
-    briefs_per_month_assumed: Literal[4] = 4
+    """CONTRACTS §Receipt ``comparison``; the cadence defaults to ``config.BRIEFS_PER_MONTH_ASSUMED``."""
+
+    briefs_per_month_assumed: int = Field(default=config.BRIEFS_PER_MONTH_ASSUMED, gt=0)
     sonar_usd_month_equiv: Money
     ratio: float | None
     mentions_this_brief: int = Field(ge=0)

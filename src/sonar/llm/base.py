@@ -51,7 +51,8 @@ SchemaT = TypeVar("SchemaT", bound=BaseModel)
 RATES_DATED: date = config.LLM_RATES_CHECKED_AT
 """Date ``config.LLM_RATES`` was last read from OpenAI pricing (D003)."""
 
-RATIONALE_MAX_CHARS = 200
+RATIONALE_MAX_CHARS: int = config.RATIONALE_MAX_CHARS
+"""Character cap under the D004 word cap; a wire-schema guard, not a frozen threshold."""
 RATIONALE_MAX_WORDS: int = config.RATIONALE_MAX_WORDS
 """D004: the classifier's rationale is at most twenty whitespace-separated words."""
 
