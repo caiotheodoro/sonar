@@ -1,0 +1,246 @@
+{
+  "schema_rev": "1.1.2",
+  "fake_dim": 3,
+  "topics": [
+    {
+      "topic_id": "nubank-01",
+      "brand": "Nubank",
+      "name": "Card limit and account access complaints",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.16,
+      "net": 0.6666666666666666,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "0590000af22506c878296c8c",
+        "36afcd7537b45bd410c2460f",
+        "5f8ec95aca625836bed0f654"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-02",
+      "brand": "Nubank",
+      "name": "Card limit and account access complaints",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.16,
+      "net": 0.0,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "8653929891eb5e3b49177be9",
+        "308d0ed3caa5c9a3204ffe8d",
+        "7919a92186af9aafe4e11c57"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-03",
+      "brand": "Nubank",
+      "name": "Card limit and account access complaints",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.16,
+      "net": 0.25,
+      "ci95": [
+        -0.5,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "d9aab856066c485c618c17a8",
+        "72da0d3363c1703406785685",
+        "f6a12d47c5813a08c0f319f2"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-04",
+      "brand": "Nubank",
+      "name": "Card limit and account access complaints",
+      "n": 4,
+      "n_clusters": 4,
+      "share": null,
+      "net": null,
+      "ci95": null,
+      "exemplar_mention_ids": [
+        "729a484eadd43a14bce63018",
+        "53913ab0028434cc594dd5cb",
+        "5473b74782e9952e6ee67be3"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-05",
+      "brand": "Nubank",
+      "name": "Card limit and account access complaints",
+      "n": 3,
+      "n_clusters": 3,
+      "share": null,
+      "net": null,
+      "ci95": null,
+      "exemplar_mention_ids": [
+        "45e4169b4353175debc7d851",
+        "698c674ce4c910797df412fe",
+        "e8b2e1fc5f671545e2502622"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    }
+  ],
+  "assignments": [
+    {
+      "brand": "Nubank",
+      "mention_id": "0590000af22506c878296c8c",
+      "topic_id": "nubank-01"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "308d0ed3caa5c9a3204ffe8d",
+      "topic_id": "nubank-02"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "36afcd7537b45bd410c2460f",
+      "topic_id": "nubank-01"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "43b05eb7d37483dd26e18cb1",
+      "topic_id": "nubank-03"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "45e4169b4353175debc7d851",
+      "topic_id": "nubank-05"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "49254f9f1b4830f7ae283fa5",
+      "topic_id": "nubank-01"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "53913ab0028434cc594dd5cb",
+      "topic_id": "nubank-04"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "5473b74782e9952e6ee67be3",
+      "topic_id": "nubank-04"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "5f8ec95aca625836bed0f654",
+      "topic_id": "nubank-01"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "698c674ce4c910797df412fe",
+      "topic_id": "nubank-05"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "729a484eadd43a14bce63018",
+      "topic_id": "nubank-04"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "72da0d3363c1703406785685",
+      "topic_id": "nubank-03"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "7919a92186af9aafe4e11c57",
+      "topic_id": "nubank-02"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "8653929891eb5e3b49177be9",
+      "topic_id": "nubank-02"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "93dce204e26452115f861232",
+      "topic_id": "nubank-02"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "9b574453063efdbbece085db",
+      "topic_id": "nubank-04"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "d9aab856066c485c618c17a8",
+      "topic_id": "nubank-03"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "e8b2e1fc5f671545e2502622",
+      "topic_id": "nubank-05"
+    },
+    {
+      "brand": "Nubank",
+      "mention_id": "f6a12d47c5813a08c0f319f2",
+      "topic_id": "nubank-03"
+    }
+  ],
+  "abstentions": [
+    {
+      "scope": "topics",
+      "brand": "Inter",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "no cluster met min_size 3 and min_breadth 2 over 8 relevant mentions (largest cluster 2)"
+    },
+    {
+      "scope": "topics",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "nubank-04: 1 labelled mentions over 1 cluster keys; needs at least 3 over 2"
+    },
+    {
+      "scope": "topics",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "nubank-05: 2 labelled mentions over 2 cluster keys; needs at least 3 over 2"
+    }
+  ],
+  "notes": []
+}
