@@ -4,9 +4,9 @@ The real ``RecorderClient`` (a ``MonidClient``) and the real ``Ledger`` run; onl
 HTTP layer is a ``httpx.MockTransport`` serving canned payloads. No network, and the
 API key is a fake set through ``MONID_API_KEY`` so ``~/.sonar/.env`` is never read.
 
-Type-check together with the script and the package sources on the path::
+Type-check together with the script so ``record_fixtures`` resolves from ``scripts/``::
 
-    MYPYPATH=src uv run mypy --strict scripts/record_fixtures.py tests/test_record_script.py
+    uv run mypy --strict scripts/record_fixtures.py tests/test_record_script.py
 """
 
 from __future__ import annotations

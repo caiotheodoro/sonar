@@ -27,9 +27,9 @@ structurally before it is written and every written file is scanned afterwards.
 Exit codes: 0 recorded and reconciled; 2 bad input or missing key; 3 refused on
 budget; 4 a run with an id is still unreconciled or the listing failed.
 
-Type-check with the package sources on the path (``sonar`` ships no ``py.typed``)::
+Type-check together with its test::
 
-    MYPYPATH=src uv run mypy --strict scripts/record_fixtures.py tests/test_record_script.py
+    uv run mypy --strict scripts/record_fixtures.py tests/test_record_script.py
 """
 
 from __future__ import annotations
