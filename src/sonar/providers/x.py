@@ -46,4 +46,4 @@ class _XProvider:
         return _UNAVAILABLE_REASON
 
 
-PROVIDERS["x"] = _XProvider()  # type: ignore[assignment]
+PROVIDERS["x"] = _XProvider()

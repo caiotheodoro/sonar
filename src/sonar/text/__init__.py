@@ -6,9 +6,9 @@ from sonar.text.match import match_terms
 from sonar.text.normalize import TEXT_KEY_LEN, normalize, normalize_url, text_key
 
 __all__ = [
+    "TEXT_KEY_LEN",
     "DedupItem",
     "DedupResult",
-    "TEXT_KEY_LEN",
     "dedup",
     "detect_lang",
     "match_terms",

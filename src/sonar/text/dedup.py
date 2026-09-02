@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
-from sonar.text.normalize import normalize, normalize_url, text_key
+from sonar.text.normalize import normalize_url, text_key
 
 
 @dataclass(frozen=True)

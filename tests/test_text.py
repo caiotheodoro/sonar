@@ -9,7 +9,6 @@ from sonar.text.lang import detect_lang
 from sonar.text.match import match_terms
 from sonar.text.normalize import TEXT_KEY_LEN, normalize, normalize_url, text_key
 
-
 # ---------------------------------------------------------------------------
 # normalize
 # ---------------------------------------------------------------------------

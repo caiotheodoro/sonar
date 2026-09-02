@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import re
-from typing import Sequence
+from collections.abc import Sequence
 
 from sonar.text.normalize import normalize
 
 
-def _build_pattern(terms: Sequence[str]) -> re.Pattern[str]:  # type: ignore[type-arg]
+def _build_pattern(terms: Sequence[str]) -> re.Pattern[str]:
     """Build a compiled regex matching any term at word boundaries."""
     escaped = [re.escape(normalize(t)) for t in terms]
     pattern = r"(?:^|(?<=\s)|(?<=\b))(" + "|".join(escaped) + r")(?:\s|$|(?=\b))"
