@@ -153,13 +153,12 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
   Banco Inter — 42 % of mentions `not_about_brand`, the only Inter topic
   was about a footballer's contract. Need a clean competitor (PicPay,
   Itaú, C6) or `--brand-hint "Banco Inter"` + aliases, then re-measure.
-- **3 adapters mis-handle Apify "no-results" items.** youtube and facebook
-  return `[{error, …}]` when the search finds nothing; `youtube.py` /
-  `facebook.py` read that as a missing required `id` / `text` and raise
-  `AdapterSchemaError` (→ whole-source `schema_drift` abstention) instead
-  of an `empty` abstention. `reddit.py` aborts the whole fetch on one
-  deleted comment with no `body` — should skip-and-count. Fix before W6.1
-  or half the sources abstain.
+- ~~3 adapters mis-handle Apify "no-results" items.~~ **Fixed.**
+  `AdapterEmpty` + `is_error_item()` in `base.py`; youtube / youtube_comments
+  / facebook / reddit skip `{error}` rows and raise `AdapterEmpty`
+  (→ `empty` abstention) when every row is an error. reddit skips a
+  bodyless comment / titleless-and-bodyless post and counts it
+  (`skipped_no_text`). Structural drift still raises. 1371 tests green.
 - **reddit is slow** — Inter's reddit run hit the per-run deadline while
   RUNNING. Consider a longer reddit deadline or a smaller cap.
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
