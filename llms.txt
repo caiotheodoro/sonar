@@ -1,0 +1,28 @@
+# sonar
+
+> Pay-per-call brand and competitor listening CLI. Kills Brand24 Team ($349 per month, brand24.com/prices, checked 2026-09-02). The product is the receipt: every Monid run id with its billed cost, including failed and empty runs, next to the incumbent price.
+
+Zero infrastructure: a Python CLI plus a Claude Code skill. One brief covers a brand and up to three competitors over 14 days across Reddit, YouTube, TikTok, Instagram, Google Maps, Facebook, Trustpilot, G2, and news. Sentiment uses a classifier plus a deterministic signal with a tiebreak on disagreement. Every share and sentiment number carries a cluster bootstrap 95% interval. Verdicts are SIGNIFICANT, SUGGESTIVE, NO_CHANGE_DETECTED, or ABSTAIN.
+
+Not claimed: X coverage (no Monid endpoint), influencer scoring, email alerts.
+
+## Start here
+
+- [README](README.md): the kill, the receipt, scope claimed and not claimed, quickstart, price versus measured cost
+- [AGENTS](AGENTS.md): read order and the rules that bind edits
+- [CONTRACTS](CONTRACTS.md): every record the pipeline emits
+- [PRE-REGISTRATION](docs/PRE-REGISTRATION.md): frozen statistics, hypotheses H1 to H5
+- [DECISIONS](docs/DECISIONS.md): settled choices with reversal clauses
+- [RED-TEAM](docs/RED-TEAM.md): attacks on sonar's own claims
+
+## Evidence
+
+- [Incumbent price](results/incumbent/README.md): Brand24 screenshot and archive URL, dated 2026-09-02
+- [Demo receipt](results/demo/receipt.json): frozen live run, verdict RECONCILED; `sonar verify` checks it
+- [Coverage](docs/COVERAGE.md): each Brand24 source, covered or not, and why
+- [Reproduction](docs/REPRODUCTION.md): commands from a fresh clone
+
+## Run
+
+- `uv run sonar render --from results/demo` replays the frozen demo with no key and no spend
+- `uv run sonar run --profile lite <brand> --vs <competitor>` is a live run, about $0.75 in Monid calls
