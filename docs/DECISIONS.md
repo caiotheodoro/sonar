@@ -567,4 +567,49 @@ frozen text stays.
 
 ---
 
-*End of decisions. Next entry would be D014.*
+## D014 — Relevance by context for comments and reviews; Reddit sampling split
+
+**Decision.** The relevance gate stays `about_brand ∧ matched_terms ≠ ∅`, but
+`matched_terms` is no longer required to come from the item's own text for
+two classes of item. (1) A comment fetched under a post that matched the
+brand inherits the post's `matched_terms` (recorded as `inherited_from:
+<post native_id>` in the Mention's `raw_ref` sidecar and as
+`match_kind = "inherited"`). (2) A review fetched from an entity that the
+adapter resolved to the brand (Google Maps place, Facebook page, Trustpilot
+domain, G2 slug) carries `matched_terms = [brand]` with `match_kind =
+"entity"`. Direct text matches keep `match_kind = "text"`. The model's
+`about_brand` observation is unchanged and still required, so a comment
+about something else in a Nubank thread is still `not_about_brand`. Reddit
+sampling in `config.SOURCE_PLAN` splits the 40-item cap into
+`maxPostCount 15` and `maxComments 2` per post (unit cost unchanged) so a
+run is not 37 comments under 3 posts. CONTRACTS moves to schema_rev 1.1.2
+(new `match_kind` field on Mention, enum `text | inherited | entity`);
+PRE-REGISTRATION v1.1.2 amends the relevance row of the two-signal policy.
+
+**Rationale.** The first live smoke run (W3.7, 2026-09-02, runs
+01M1GPJXYTAMZNGWQNT7Y7KWG0 and 01M1GPP9HXJKQQYJ0V2FFCE0QV) returned 40 Reddit
+items (3 posts, 37 comments) of which only 11 contain the brand string, and
+4 Google Maps reviews of which 0 do. Reviews of a place rarely name the
+place, and replies in a thread rarely repeat the subject. A text-only gate
+silently discards most of what was paid for and biases the sample toward
+posts, which is the wrong unit for the cluster bootstrap.
+
+**Evidence.** `tests/fixtures/apify_reddit-scraper-lite_nubank_2026-09-02T091816Z.json`
+and `tests/fixtures/apify_google-maps-reviews-scraper_nubank_2026-09-02T092007Z.json`;
+counts reproduced by a one-off script during the W3.7 review.
+
+**Alternatives rejected.** Dropping the term gate entirely for all sources
+(loses the homonym defence on search-based sources like TikTok and news);
+asking the model to decide relevance alone (violates deterministic edges
+and makes the receipt's `excluded_with_reason` unverifiable); keeping the
+gate and accepting that reviews abstain everywhere (makes the review
+sources decorative).
+
+**Reverses when.** The H5 hand check or the RED-TEAM homonym attack shows
+inherited or entity matches carry a false-positive rate above 10 % after
+the `about_brand` gate; then inherited matches require the model's
+`about_brand` at confidence ≥ 0.8 instead, logged as a new entry.
+
+---
+
+*End of decisions. Next entry would be D015.*
