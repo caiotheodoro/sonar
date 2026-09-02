@@ -1,0 +1,7 @@
+{
+    "result": {
+        "mp3_url": "https://cdn.monid.ai/audio/sample-abc123.mp3?X-Amz-Signature=fake",
+        "mime": "audio/mpeg",
+        "chars": 45
+    }
+}
