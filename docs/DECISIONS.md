@@ -637,4 +637,62 @@ together in one entry.
 
 ---
 
-*End of decisions. Next entry would be D016.*
+## D016 — Optional direct-to-ElevenLabs voice path; theoretical Monid cost on the receipt
+
+**Decision.** The voice run may be sent straight to the ElevenLabs REST
+API (`POST api.elevenlabs.io/v1/text-to-speech/{voice_id}`, `xi-api-key`
+header) instead of through the Monid `elevenlabs /text-to-speech` proxy.
+It is opt-in: `SONAR_TTS_DIRECT` in `{1,true,yes,on}` **and** an
+`ELEVENLABS_API_KEY` in the process env or `~/.sonar/.env`. Without both,
+the Monid proxy (D011) is used exactly as before — that stays the default
+and the path the demo and submission describe.
+
+A direct run still gets one ledger `RunRecord`, recorded in the shape
+CONTRACTS §RunRecord already defines for a succeeded `$0` call that
+returned no Monid run id (OQ-2, D013 N6): `run_id=null`,
+`status="COMPLETED"` (or `LOCAL_REJECTED_<http>` / `LOCAL_BACKOFF_EXHAUSTED`
+on failure), `cost_source="local"`, `cost_usd=0.0`, not counted in
+`monid_runs_failed` when it succeeded. Its `estimate_usd` carries the
+**theoretical** Monid price for the same characters
+(`chars / 1000 × $0.05`, `eleven_flash_v2_5`), so the receipt still shows
+what the proxy would have billed. `totals.elevenlabs_usd` and
+`totals.monid_usd` are `0.0` for a direct run because no `/v1/runs` cost
+exists; the theoretical figure lives only in `estimate_usd` and in the
+HANDOFF ledger notes, never quoted as a billed number.
+
+No `schema_rev` bump: no field, type, enum or validator changes — the row
+uses an already-valid RunRecord shape. This entry is the record HANDOFF
+requires for any change to spend behaviour.
+
+**Rationale.** The operator holds ~8 000 prepaid ElevenLabs credits while
+the Monid free tier is ~$0.75 and the source fetches (Reddit alone
+$0.248/run) are the real wallet pressure. The voice brief is a
+presentation feature layered on the digest, not part of the social-
+listening workflow being killed, so voicing it outside Monid does not
+weaken the kill claim. The two TTS calls in the plan are the W5.5 unit
+probe (20 chars, ≈ $0.001) and the W7.2 narration (≤ 900 chars,
+≤ $0.045) — together ≤ $0.046 of Monid-equivalent spend.
+
+**Evidence.** Monid's `/text-to-speech` input schema
+(`docs/monid/inspect/elevenlabs_text-to-speech.json`,
+`additionalProperties: false`, keys `text` / `model_id` / `voice_id` /
+`voice_settings`) has no bring-your-own-key field, so the key cannot be
+supplied through Monid. `tests/test_adapter_elevenlabs.py`
+`TestSynthesizeDirect`; `tests/test_voice.py`
+`test_direct_mode_routes_around_monid`,
+`test_direct_flag_without_key_uses_monid`.
+
+**Alternatives rejected.** BYO key inside Monid (not supported by the
+endpoint schema). Fabricating a `run_id` / `SUCCEEDED` Monid status on a
+run that never reached Monid (dishonest artifact). A new `DIRECT_TTS`
+status enum + CONTRACTS amendment + `schema_rev` bump (churns the goldens
+for a row that the OQ-2 shape already covers).
+
+**Reverses when.** The submission or a judge needs every showcased
+endpoint — ElevenLabs included — exercised through Monid on the frozen
+demo; then W6.1 runs with `SONAR_TTS_DIRECT` unset and the receipt
+carries a real `/v1/runs` voice cost.
+
+---
+
+*End of decisions. Next entry would be D017.*

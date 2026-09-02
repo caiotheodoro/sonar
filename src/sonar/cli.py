@@ -106,6 +106,17 @@ def load_openai_key(env: Mapping[str, str] | None = None) -> str | None:
     return key or None
 
 
+def load_elevenlabs_key(env: Mapping[str, str] | None = None) -> str | None:
+    """``ELEVENLABS_API_KEY`` from the process env, else from ``$SONAR_ENV`` / ``~/.sonar/.env``."""
+    source: Mapping[str, str] = os.environ if env is None else env
+    direct = source.get(config.ENV_ELEVENLABS_KEY, "").strip()
+    if direct:
+        return direct
+    env_path = Path(source.get(ENV_PATH_VAR) or DEFAULT_ENV_PATH).expanduser()
+    key = _parse_env_file(env_path).get(config.ENV_ELEVENLABS_KEY, "").strip()
+    return key or None
+
+
 # --------------------------------------------------------------------------- parser
 
 
@@ -391,6 +402,8 @@ def cmd_run(
         llm: LlmBackend = pipeline.fixture_llm(fixtures / "labels.json")
         cache_dir: Path | None = None
         replay = True
+        tts_direct = False
+        tts_api_key: str | None = None
     else:
         try:
             monid_key = load_api_key(dict(env) if env is not None else None)
@@ -405,6 +418,16 @@ def cmd_run(
         llm = llm_factory(openai_key)
         cache_dir = CACHE_DIR
         replay = False
+        tts_direct = config.resolve_tts(dict(env) if env is not None else None).direct
+        tts_api_key = load_elevenlabs_key(env)
+        if tts_direct and tts_api_key is None:
+            print(
+                f"{config.ENV_TTS_DIRECT} set but no {config.ENV_ELEVENLABS_KEY}; "
+                "voicing through Monid",
+                file=out,
+            )
+        elif tts_direct:
+            print("voice: direct to ElevenLabs (D016); Monid-equivalent cost estimated", file=out)
 
     session_id = args.session or pipeline.new_session_id(query.brand, now)
     session_dir: Path = args.out if args.out is not None else DEFAULT_ROOT / session_id
@@ -416,6 +439,8 @@ def cmd_run(
         resamples=args.resamples,
         cache_dir=cache_dir,
         voice_id=args.voice_id,
+        tts_direct=tts_direct,
+        tts_api_key=tts_api_key,
         bounded_reconcile=not replay,
     )
     print(f"session {session_id} -> {session_dir}{' (offline replay)' if replay else ''}", file=out)

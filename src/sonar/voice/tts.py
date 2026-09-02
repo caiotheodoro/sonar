@@ -44,6 +44,15 @@ class TtsAdapter(Protocol):
         voice_id: str | None = None,
     ) -> tuple[RunRecord, TtsResult | None]: ...
 
+    def synthesize_direct(
+        self,
+        text: str,
+        *,
+        ledger: Ledger,
+        api_key: str,
+        voice_id: str | None = None,
+    ) -> tuple[RunRecord, TtsResult | None]: ...
+
 
 @dataclass(frozen=True)
 class TtsOutcome:
@@ -73,11 +82,13 @@ def _run_failure_reason(record: RunRecord) -> AbstainReason:
 def synthesize_narration(
     narration: Narration,
     *,
-    client: MonidClient,
+    client: MonidClient | None,
     ledger: Ledger,
     out_dir: Path,
     adapter: TtsAdapter = ELEVENLABS,
     voice_id: str | None = None,
+    direct: bool = False,
+    api_key: str | None = None,
 ) -> TtsOutcome:
     """Voice a verified narration; return it with ``mp3_path`` and ``local_seq`` set.
 
@@ -85,6 +96,10 @@ def synthesize_narration(
     are written to ``<out_dir>/brief.mp3``. A narration without text is skipped silently; one whose numbers are not
     verified is skipped without spending, and the outcome says so. Failures
     of the run itself are returned as abstentions, never raised.
+
+    With ``direct`` and an ``api_key`` the run goes straight to ElevenLabs
+    (D016): still one ledger row, but ``cost_source="local"`` and no Monid
+    spend. Without a key the flag is inert and the Monid proxy is used.
     """
     if narration.text is None:
         return TtsOutcome(narration=narration, record=None, abstention=None)
@@ -92,10 +107,18 @@ def synthesize_narration(
         log.warning("voice: narration numbers not verified; no audio produced")
         return TtsOutcome(narration=narration, record=None, abstention=None)
 
+    use_direct = direct and bool(api_key)
     try:
-        record, result = adapter.synthesize(
-            narration.text, client=client, ledger=ledger, voice_id=voice_id
-        )
+        if use_direct:
+            assert api_key is not None
+            record, result = adapter.synthesize_direct(
+                narration.text, ledger=ledger, api_key=api_key, voice_id=voice_id
+            )
+        else:
+            assert client is not None, "monid client required unless direct TTS is used"
+            record, result = adapter.synthesize(
+                narration.text, client=client, ledger=ledger, voice_id=voice_id
+            )
     except MonidHalted as exc:
         return TtsOutcome(narration, None, _abstain("halted", str(exc)))
     except AlreadySubmitted as exc:

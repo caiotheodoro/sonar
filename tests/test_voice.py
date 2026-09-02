@@ -132,6 +132,8 @@ class StubAdapter:
     texts: list[str] = field(default_factory=list)
     voice_ids: list[str | None] = field(default_factory=list)
 
+    direct_texts: list[str] = field(default_factory=list)
+
     def synthesize(
         self,
         text: str,
@@ -141,6 +143,20 @@ class StubAdapter:
         voice_id: str | None = None,
     ) -> tuple[RunRecord, TtsResult | None]:
         self.texts.append(text)
+        self.voice_ids.append(voice_id)
+        if self.raises is not None:
+            raise self.raises
+        return self.record, self.result
+
+    def synthesize_direct(
+        self,
+        text: str,
+        *,
+        ledger: Ledger,
+        api_key: str,
+        voice_id: str | None = None,
+    ) -> tuple[RunRecord, TtsResult | None]:
+        self.direct_texts.append(text)
         self.voice_ids.append(voice_id)
         if self.raises is not None:
             raise self.raises
@@ -670,6 +686,40 @@ class TestSynthesizeNarration:
         assert not out.voiced and out.record is None and out.abstention is None
         assert out.narration.text == FOREIGN_TEXT
         assert not (tmp_path / BRIEF_MP3_FILENAME).exists()
+
+    def test_direct_mode_routes_around_monid(
+        self, client: MonidClient, ledger: Ledger, tmp_path: Path
+    ) -> None:
+        stub = StubAdapter()
+        out = synthesize_narration(
+            _script(),
+            client=None,
+            ledger=ledger,
+            out_dir=tmp_path / "d1",
+            adapter=stub,
+            voice_id="v9",
+            direct=True,
+            api_key="xi_key",
+        )
+        assert out.voiced and out.abstention is None
+        assert (tmp_path / "d1" / BRIEF_MP3_FILENAME).read_bytes() == MP3_BYTES
+        assert stub.direct_texts == [VERIFIED_TEXT] and stub.texts == []
+        assert stub.voice_ids == ["v9"]
+
+    def test_direct_flag_without_key_uses_monid(
+        self, client: MonidClient, ledger: Ledger, tmp_path: Path
+    ) -> None:
+        stub = StubAdapter()
+        synthesize_narration(
+            _script(),
+            client=client,
+            ledger=ledger,
+            out_dir=tmp_path / "d2",
+            adapter=stub,
+            direct=True,
+            api_key=None,
+        )
+        assert stub.texts == [VERIFIED_TEXT] and stub.direct_texts == []
 
     def test_no_text_is_skipped(self, client: MonidClient, ledger: Ledger, tmp_path: Path) -> None:
         stub = StubAdapter()

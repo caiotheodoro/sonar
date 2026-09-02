@@ -77,6 +77,27 @@ Recurring operator jobs, all free:
 - Contracts at schema_rev 1.1.2, PRE-REGISTRATION v1.1.2, DECISIONS through D015, `docs-frozen` at `144ccd9`.
 - Wallet: $0.75 of the $1 free credit remains; a top-up is required before W5.5 (lite run ≈ $0.75 plus TTS probe) and W6.1 (full demo ≈ $2.8).
 
+## Theoretical (non-billed) spend — direct ElevenLabs voice path (D016)
+
+When `SONAR_TTS_DIRECT=1` and `ELEVENLABS_API_KEY` are set, the voice run
+goes straight to ElevenLabs (operator's ~8 000 prepaid credits) and costs
+the Monid wallet nothing. The ledger row is `cost_source="local"`,
+`cost_usd=0.0`; its `estimate_usd` holds the Monid-equivalent price
+(`chars / 1000 × $0.05`, `eleven_flash_v2_5`). These figures are
+estimates, never ledger numbers, and are not added to the running totals.
+
+| Task | Chars | Monid-equivalent (theoretical) | Billed to Monid |
+|---|---|---|---|
+| W5.5 TTS unit probe | 20 | $0.00100 | $0.00 |
+| W7.2 narration | ≤ 900 (cap) | ≤ $0.04500 (≈ $0.041 at ~820) | $0.00 |
+| Project total, voice | | ≤ $0.046 | $0.00 |
+
+`/voices` is $0.00 on Monid regardless; a direct run skips it and uses the
+configured `voice_id` (default Rachel `21m00Tcm4TlvDq8ikWAM`).
+
+When a direct run's receipt row is committed, its HANDOFF ledger row notes
+`voice: direct (D016), Monid-equiv $X.XXXXX, not billed`.
+
 ## What not to do
 
 - Do not start a live run while another session is unreconciled.
@@ -88,6 +109,8 @@ Recurring operator jobs, all free:
   Re-run W6.1 and re-freeze through a `docs/DECISIONS.md` entry instead.
 - Do not pass a replay as live. Replays carry `verdict=REPLAY` and stay
   that way in every artifact.
+- Do not quote a direct-TTS run's `estimate_usd` as a billed Monid cost
+  (D016). It is the Monid-equivalent price, not a `/v1/runs` number.
 - Do not call `apify/instagram-search-scraper`; it is entity search, not
   keyword search, and bills for the wrong thing.
 - Do not submit a YouTube or Google Maps run without `maxResults` or

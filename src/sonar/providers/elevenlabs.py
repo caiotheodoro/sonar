@@ -45,6 +45,8 @@ from typing import Any, Protocol, runtime_checkable
 import httpx
 
 from sonar.config import (
+    ELEVENLABS_DIRECT_BASE_URL,
+    ELEVENLABS_DIRECT_OUTPUT_FORMAT,
     ELEVENLABS_ENDPOINT,
     ELEVENLABS_MODEL_ID,
     ELEVENLABS_PROVIDER,
@@ -52,7 +54,15 @@ from sonar.config import (
     ELEVENLABS_VOICES_ENDPOINT,
     NARRATION_MAX_CHARS,
 )
-from sonar.monid import Ledger, MonidClient, RunRecord, RunRequest
+from sonar.monid import (
+    LOCAL_BACKOFF_EXHAUSTED,
+    AlreadySubmitted,
+    Ledger,
+    MonidClient,
+    RunOutcome,
+    RunRecord,
+    RunRequest,
+)
 from sonar.providers.base import AdapterSchemaError
 
 log = logging.getLogger(__name__)
@@ -295,6 +305,133 @@ class ElevenLabsProvider:
             log.warning("elevenlabs: text-to-speech run %s: %s", outcome.status, outcome.error)
             return record, None
         return record, self.parse_tts(run_payload(outcome.body))
+
+    def synthesize_direct(
+        self,
+        text: str,
+        *,
+        ledger: Ledger,
+        api_key: str,
+        voice_id: str | None = None,
+        base_url: str = ELEVENLABS_DIRECT_BASE_URL,
+        transport: httpx.BaseTransport | None = None,
+        timeout: float = 60.0,
+    ) -> tuple[RunRecord, TtsResult | None]:
+        """Voice *text* straight through the ElevenLabs REST API (D016).
+
+        The run still gets a ledger row so it lands on the receipt, but no
+        Monid call is made: the row has ``run_id=null``, ``cost_source="local"``
+        and ``cost_usd=0.0`` (the OQ-2 succeeded-``$0``-no-id shape), and its
+        ``estimate_usd`` carries the *theoretical* Monid ``/text-to-speech``
+        price for the same characters so the receipt still quotes what the
+        proxy would have cost.
+
+        Returns the closed row and the parsed result, or ``None`` for the
+        result when the call did not produce audio (an auth or transport
+        failure is a failed ``LOCAL_*`` row; a 422/validation error is a
+        no-charge provider error, like the proxy path). Raises
+        :class:`~sonar.monid.AlreadySubmitted` when this exact text already
+        holds a row in *ledger*.
+        """
+        payload = self.build_input(text, voice_id)
+        body = payload["body"]
+        capped_text: str = body["text"]
+        resolved_voice: str = body["voice_id"]
+
+        request = RunRequest(ELEVENLABS_PROVIDER, ELEVENLABS_ENDPOINT, payload)
+        for prior in ledger.records:
+            # A failed LOCAL_* attempt may be retried; a row that already
+            # produced (or is producing) audio for this text is not repeated.
+            if prior.input_digest == request.digest and not prior.status.startswith("LOCAL_"):
+                raise AlreadySubmitted(prior)
+
+        record = ledger.open(
+            request,
+            brand=None,
+            source=None,
+            estimate_usd=self.estimate_cost(len(capped_text)),
+        )
+        url = f"{base_url.rstrip('/')}/v1/text-to-speech/{resolved_voice}"
+        try:
+            with httpx.Client(transport=transport, timeout=timeout) as client:
+                resp = client.post(
+                    url,
+                    params={"output_format": ELEVENLABS_DIRECT_OUTPUT_FORMAT},
+                    headers={"xi-api-key": api_key, "accept": "audio/mpeg"},
+                    json={"text": capped_text, "model_id": ELEVENLABS_MODEL_ID},
+                )
+        except httpx.HTTPError as exc:
+            log.warning("elevenlabs: direct call failed: %s", exc)
+            closed = ledger.close(
+                record.local_seq,
+                RunOutcome(
+                    run_id=None,
+                    status=LOCAL_BACKOFF_EXHAUSTED,
+                    http_status=None,
+                    provider_http_status=None,
+                    body=None,
+                    attempts=1,
+                    error=f"{type(exc).__name__}: {exc}"[:ERROR_MAX_CHARS],
+                    completed=False,
+                ),
+                n_results=0,
+            )
+            return closed, None
+
+        if resp.status_code == 200:
+            closed = ledger.close(
+                record.local_seq,
+                RunOutcome(
+                    run_id=None,
+                    status="COMPLETED",
+                    http_status=200,
+                    provider_http_status=200,
+                    body=None,
+                    attempts=1,
+                    error=None,
+                    completed=True,
+                ),
+                n_results=1,
+            )
+            return closed, TtsResult(
+                audio=resp.content, provider_error=None, character_count=len(capped_text)
+            )
+
+        excerpt = resp.text[:ERROR_MAX_CHARS] or f"HTTP {resp.status_code}"
+        if resp.status_code == 422:
+            log.warning("elevenlabs: direct validation error: %s", excerpt)
+            closed = ledger.close(
+                record.local_seq,
+                RunOutcome(
+                    run_id=None,
+                    status="COMPLETED",
+                    http_status=422,
+                    provider_http_status=422,
+                    body=None,
+                    attempts=1,
+                    error=excerpt,
+                    completed=True,
+                ),
+                n_results=0,
+            )
+            return closed, TtsResult(audio=None, provider_error=excerpt, character_count=None)
+
+        log.warning("elevenlabs: direct call rejected %d: %s", resp.status_code, excerpt)
+        closed = ledger.close(
+            record.local_seq,
+            RunOutcome(
+                run_id=None,
+                status=f"LOCAL_REJECTED_{resp.status_code}",
+                http_status=resp.status_code,
+                provider_http_status=None,
+                body=None,
+                attempts=1,
+                error=excerpt,
+                completed=False,
+            ),
+            n_results=0,
+        )
+        return closed, None
 
     # -- voices ---------------------------------------------------------------
 

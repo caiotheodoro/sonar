@@ -188,6 +188,10 @@ class RunOptions:
     seed: int = config.SEED
     cache_dir: Path | None = None
     voice_id: str | None = None
+    tts_direct: bool = False
+    """Voice the brief straight through ElevenLabs (D016); the ledger row is
+    ``local`` with the Monid-equivalent price as its theoretical estimate."""
+    tts_api_key: str | None = None
     bounded_reconcile: bool = True
     """Join the listing only inside ``[started_at, now]``; a replay joins without bounds."""
 
@@ -963,6 +967,8 @@ def run(
             ledger=ledger,
             out_dir=out_dir,
             voice_id=options.voice_id,
+            direct=options.tts_direct,
+            api_key=options.tts_api_key,
         )
         narration, voice_usage, voice_abstentions = voice.narration, voice.usage, voice.abstentions
         if voice.record is not None and voice.record.run_id is not None:

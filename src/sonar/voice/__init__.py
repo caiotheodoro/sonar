@@ -44,12 +44,14 @@ def narrate(
     digest: Digest,
     *,
     backend: LlmBackend,
-    client: MonidClient,
+    client: MonidClient | None,
     ledger: Ledger,
     out_dir: Path,
     model: str | None = None,
     adapter: TtsAdapter = ELEVENLABS,
     voice_id: str | None = None,
+    direct: bool = False,
+    api_key: str | None = None,
 ) -> VoiceResult:
     """Script, gate and voice *digest*; never raises on seam or Monid failure.
 
@@ -80,6 +82,8 @@ def narrate(
         out_dir=out_dir,
         adapter=adapter,
         voice_id=voice_id,
+        direct=direct,
+        api_key=api_key,
     )
     abstentions = (outcome.abstention,) if outcome.abstention is not None else ()
     return VoiceResult(outcome.narration, script.usage, outcome.record, abstentions)

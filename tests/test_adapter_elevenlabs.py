@@ -506,6 +506,140 @@ class TestSynthesize:
         assert ledger.records[0].status == "SUCCEEDED"
 
 
+# -- /text-to-speech straight to ElevenLabs (D016) --------------------------
+
+
+@dataclass
+class DirectScript:
+    """Stub for the ElevenLabs REST call; records the one request it gets."""
+
+    response: httpx.Response
+    request: httpx.Request | None = None
+
+    def __call__(self, request: httpx.Request) -> httpx.Response:
+        self.request = request
+        return self.response
+
+
+def direct_transport(script: DirectScript) -> httpx.MockTransport:
+    return httpx.MockTransport(script)
+
+
+class TestSynthesizeDirect:
+    def test_success_writes_local_row_with_theoretical_cost(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(200, content=MP3_BYTES))
+        record, result = provider.synthesize_direct(
+            "Hello world",
+            ledger=ledger,
+            api_key="xi_key_123",
+            transport=direct_transport(script),
+        )
+        assert result is not None and result.audio == MP3_BYTES
+        assert result.character_count == len("Hello world")
+        assert record.run_id is None
+        assert record.status == "COMPLETED"
+        assert record.cost_source == "local"
+        assert record.cost_usd == 0.0
+        assert record.n_results == 1
+        assert record.provider == "elevenlabs"
+        assert record.endpoint == ELEVENLABS_ENDPOINT
+        assert record.estimate_usd == pytest.approx(provider.estimate_cost(len("Hello world")))
+        assert record.brand is None and record.source is None
+
+    def test_request_carries_key_model_and_voice(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(200, content=MP3_BYTES))
+        provider.synthesize_direct(
+            "Hi",
+            ledger=ledger,
+            api_key="xi_key_123",
+            voice_id="pNInz6obpgDQGcFmaJgB",
+            transport=direct_transport(script),
+        )
+        req = script.request
+        assert req is not None
+        assert req.url.host == "api.elevenlabs.io"
+        assert req.url.path == "/v1/text-to-speech/pNInz6obpgDQGcFmaJgB"
+        assert req.headers["xi-api-key"] == "xi_key_123"
+        body = json.loads(req.content)
+        assert body["text"] == "Hi"
+        assert body["model_id"] == ELEVENLABS_MODEL_ID
+
+    def test_estimate_uses_capped_length(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(200, content=MP3_BYTES))
+        record, _ = provider.synthesize_direct(
+            "w" * (NARRATION_MAX_CHARS + 400),
+            ledger=ledger,
+            api_key="k",
+            transport=direct_transport(script),
+        )
+        assert record.estimate_usd == pytest.approx(provider.estimate_cost(NARRATION_MAX_CHARS))
+        assert json.loads(script.request.content)["text"] == "w" * NARRATION_MAX_CHARS  # type: ignore[union-attr]
+
+    def test_empty_text_refused_before_any_row(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        with pytest.raises(ValueError, match="empty"):
+            provider.synthesize_direct("   ", ledger=ledger, api_key="k")
+        assert ledger.records == []
+
+    def test_auth_failure_is_a_failed_local_row(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(401, json={"detail": "invalid api key"}))
+        record, result = provider.synthesize_direct(
+            "Hello", ledger=ledger, api_key="bad", transport=direct_transport(script)
+        )
+        assert result is None
+        assert record.status == "LOCAL_REJECTED_401"
+        assert record.cost_source == "local"
+        assert record.cost_usd == 0.0
+
+    def test_validation_error_is_provider_error_no_charge(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(422, json={"detail": "voice_id not found"}))
+        record, result = provider.synthesize_direct(
+            "Hello", ledger=ledger, api_key="k", voice_id="nope", transport=direct_transport(script)
+        )
+        assert result is not None
+        assert result.audio is None
+        assert result.provider_error is not None and "voice_id" in result.provider_error
+        assert record.status == "COMPLETED"
+        assert record.n_results == 0
+        assert record.cost_usd == 0.0
+
+    def test_network_error_is_a_failed_local_row(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        def boom(_request: httpx.Request) -> httpx.Response:
+            raise httpx.ConnectError("no route to host")
+
+        record, result = provider.synthesize_direct(
+            "Hello", ledger=ledger, api_key="k", transport=httpx.MockTransport(boom)
+        )
+        assert result is None
+        assert record.status == "LOCAL_BACKOFF_EXHAUSTED"
+        assert record.cost_source == "local"
+
+    def test_second_call_same_text_refused_by_ledger(
+        self, provider: ElevenLabsProvider, ledger: Ledger
+    ) -> None:
+        script = DirectScript(httpx.Response(200, content=MP3_BYTES))
+        provider.synthesize_direct(
+            "Hello", ledger=ledger, api_key="k", transport=direct_transport(script)
+        )
+        with pytest.raises(AlreadySubmitted):
+            provider.synthesize_direct(
+                "Hello", ledger=ledger, api_key="k", transport=direct_transport(script)
+            )
+
+
 # -- sample shapes -------------------------------------------------------------
 
 

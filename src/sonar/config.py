@@ -163,6 +163,44 @@ ELEVENLABS_VOICES_ENDPOINT: Final[str] = "/voices"
 ELEVENLABS_MODEL_ID: Final[str] = "eleven_flash_v2_5"
 ELEVENLABS_USD_PER_1K_CHARS: Final[float] = 0.05
 
+# Direct-to-ElevenLabs voice path (D016). Default is the Monid proxy above;
+# with SONAR_TTS_DIRECT set and a key present the run goes straight to
+# ElevenLabs and the ledger row carries the Monid-equivalent price as its
+# theoretical `estimate_usd` (no Monid spend).
+ELEVENLABS_DIRECT_BASE_URL: Final[str] = "https://api.elevenlabs.io"
+ELEVENLABS_DIRECT_OUTPUT_FORMAT: Final[str] = "mp3_44100_128"
+ENV_TTS_DIRECT: Final[str] = "SONAR_TTS_DIRECT"
+ENV_ELEVENLABS_KEY: Final[str] = "ELEVENLABS_API_KEY"
+
+_TRUTHY_ENV: Final[frozenset[str]] = frozenset({"1", "true", "yes", "on"})
+
+
+@dataclass(frozen=True, slots=True)
+class TtsMode:
+    """Where the voice run spends: Monid proxy (default) or ElevenLabs direct (D016)."""
+
+    direct: bool
+    api_key: str | None
+
+    @property
+    def usable_direct(self) -> bool:
+        """``direct`` was asked for and a key is available to honour it."""
+        return self.direct and bool(self.api_key)
+
+
+def resolve_tts(env: Mapping[str, str] | None = None) -> TtsMode:
+    """The direct-TTS toggle and ElevenLabs key from ``env`` (default ``os.environ``).
+
+    ``SONAR_TTS_DIRECT`` in {1, true, yes, on} routes the voice run straight to
+    ElevenLabs; the theoretical Monid ``/text-to-speech`` cost is still recorded
+    on the ledger row's ``estimate_usd`` (D016). With the toggle off, or no key,
+    the run goes through Monid as before.
+    """
+    source = os.environ if env is None else env
+    direct = source.get(ENV_TTS_DIRECT, "").strip().lower() in _TRUTHY_ENV
+    api_key = source.get(ENV_ELEVENLABS_KEY, "").strip() or None
+    return TtsMode(direct=direct, api_key=api_key)
+
 # ---------------------------------------------------------------------------
 # Source plan
 # ---------------------------------------------------------------------------
