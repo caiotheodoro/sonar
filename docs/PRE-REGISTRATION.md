@@ -12,10 +12,19 @@
 
 ## Estimands
 
-1. **Share of voice (share)**: `n_brand / Σn` over `basis_sources` (sources that
-   contributed ≥ 1 mention to any brand in the brief).
-2. **Net sentiment (net)**: `(pos − neg) / (pos + neg + neu)`.
-3. **Week-over-week (WoW) delta**: split at `now − 7 d`; delta in share and net.
+1. **Share of voice (share)**: `n_brand / Σn` over `basis_sources`, the set
+   of sources that returned (did not abstain) for **every** compared brand.
+   A source that abstained for any one brand is excluded from the share of
+   all brands, so a competitor missing a source cannot inflate the brand.
+   `n` counts mention–brand pairs; a mention matching two brands counts once
+   for each.
+2. **Net sentiment (net)**: `(pos − neg) / (pos + neg + neu)` over relevant
+   mentions (`about_brand ∧ matched_terms`), reported for the full set and
+   for the `confirmed`-only subset.
+3. **Week-over-week (WoW) delta**: split at `now − 7 d` by `published_at`;
+   delta in share and net. Mentions with `published_at = null` count for
+   share but are excluded from WoW and from events, and their source is
+   listed under `what_could_not_be_checked`.
 
 ---
 
@@ -38,7 +47,10 @@ comparison; the design effect quantifies how much clustering matters.
 
 ## Verdict rule
 
-Holm-adjusted α = **0.05** over brands × {net, share}.
+Holm-adjusted α = **0.05** over the family brands × {net WoW, share WoW}.
+The per-test two-sided p-value is the bootstrap `p = 2 · min(P(Δ ≤ 0),
+P(Δ ≥ 0))` over the B shared resamples. Raw and Holm-adjusted p are both
+reported; the adjusted one governs the verdict word.
 
 | Verdict | Condition |
 |---|---|
@@ -83,8 +95,25 @@ n_day ≥ max(5, median + 3·MAD)
 n_clusters_day ≥ 3
 ```
 
-where `n_day` and `n_clusters_day` are computed over the 7-day rolling window
-per brand.
+where `median` and `MAD` are taken over the daily counts of the full
+14-day window per brand, and `n_clusters_day` is the number of distinct
+`cluster_key` values on that day. Both signals are required: volume alone
+(one viral thread) is not an event.
+
+---
+
+## Two-signal labelling policy
+
+The model supplies observations; code decides. Thresholds frozen here:
+
+| Parameter | Value |
+|---|---|
+| Relevance | `about_brand` (model) **and** `matched_terms ≠ ∅` (regex); both required |
+| Deterministic signal | rating bucket for review sources: ≤ 2 negative, 3 neutral, ≥ 4 positive; lexicon sign otherwise |
+| Tiebreak trigger | classifier disagrees with the deterministic signal, **or** no deterministic signal and classifier `confidence < 0.6` |
+| Tiebreak cap | at most **40 %** of a brand's mentions; beyond the cap, mentions stay `model_only` and the overflow count is published in the receipt |
+| Audit sample | a fixed **10 %** of mentions (seed 777) always sent to the tiebreak model, for H3 |
+| `contested` | tiebreak disagrees with classifier; tiebreak label wins; excluded from the confirmed-only subset |
 
 ---
 
@@ -100,12 +129,14 @@ per brand.
 
 ---
 
-## Done-check
+## Threshold index
 
-Every numeric threshold in this file:
+The published-claims test asserts each of these equals the constant in
+`src/sonar/config.py`:
 
-- 95 %, B=2000, B=10000, seed 777
-- α=0.05
-- n_clusters < 5, n < 20
-- n_day ≥ max(5, median + 3·MAD), n_clusters_day ≥ 3
-- H1: < $5; H2: ≥ 1.5; H3: ≥ 0.85; H4: > $0; H5: ≥ 0.85, 50 labels
+- 95 %, B=2000 live, B=10000 frozen demo, seed 777
+- α=0.05 (Holm)
+- abstain at n_clusters < 5 or n < 20 in either week
+- events: n_day ≥ max(5, median + 3·MAD), n_clusters_day ≥ 3, 14-day baseline
+- tiebreak: confidence < 0.6, cap 40 %, audit 10 %
+- H1: < $5; H2: ≥ 1.5; H3: ≥ 0.85; H4: > $0; H5: ≥ 0.85 on 50 labels
