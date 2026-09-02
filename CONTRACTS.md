@@ -1,0 +1,380 @@
+# CONTRACTS — sonar record schemas
+
+`schema_rev: 1.0.0`. Source of truth: `docs/research/2026-09-02-task-graph-and-design.md`,
+Appendix §Contracts, §Pipeline rules, §Statistics, §Error matrix. This file is
+frozen at the Wave 1 gate (`docs-frozen` tag). Any later change goes through a
+`docs/DECISIONS.md` entry by the wave lead, and bumps `schema_rev`.
+
+`src/sonar/models.py` (W2.1) implements every record below as a pydantic v2
+frozen model with `extra="forbid"`. Field names here are the wire names: JSON
+artifacts under `results/`, `runs.jsonl`, `answers.jsonl` and the receipt card
+all use them unchanged.
+
+## Notation
+
+| Written | Meaning |
+|---|---|
+| `str`, `int`, `float`, `bool` | JSON string, integer, number, boolean |
+| `datetime` | ISO 8601 string, UTC, second precision, `Z` suffix |
+| `date` | ISO 8601 calendar date string, UTC |
+| `T \| None` | field always present; JSON `null` allowed |
+| `list[T]` | JSON array; empty array allowed unless a length is stated |
+| `dict[K, V]` | JSON object with keys of type K |
+| `CI95` | two-element array `[lo, hi]` of `float`, percentile 95 % bootstrap |
+| `Literal[a, b]` | closed enum; any other value is a validation error |
+| `= x` | default when the field is omitted on input |
+
+Money is `float` USD with the precision the upstream returns; never rounded
+before the Markdown layer. Hashes are lowercase hex.
+
+## Enumerations
+
+### Source enum
+
+`Source = Literal["reddit", "youtube", "youtube_comment", "tiktok", "instagram", "google_maps", "facebook", "trustpilot", "g2", "news"]`
+
+Exactly ten values. `x` is not a member: X/Twitter has no Monid endpoint
+(verified 2026-09-02), is registered `available=False` in
+`providers/x.py`, and appears only in `Digest.coverage_gaps`. The ElevenLabs
+text-to-speech run is a Monid run, not a source; its `RunRecord.source` is
+`null`.
+
+Review sources (carry a `rating`): `google_maps`, `facebook`, `trustpilot`,
+`g2`. Comment sources (cluster bootstrap expected to show design effect,
+H2): `reddit`, `youtube_comment`, `tiktok`, `instagram`.
+
+### Other closed enums
+
+| Name | Values | Used by |
+|---|---|---|
+| `Profile` | `smoke`, `lite`, `full` | Query |
+| `Lang` | `pt`, `en`, `other`, `unknown` | Mention |
+| `SentimentLabel` | `positive`, `negative`, `neutral`, `irrelevant` | Label |
+| `Polarity` | `positive`, `negative`, `neutral` | Label.signals.deterministic |
+| `Corroboration` | `confirmed`, `model_only`, `contested`, `irrelevant` | Label |
+| `DecidedBy` | `classifier`, `tiebreak` | Label |
+| `LabelStatus` | `ok`, `refused`, `unparseable`, `error`, `cached` | Label, Label.signals.* |
+| `SignalKind` | `rating`, `lexicon`, `none` | Label.signals.deterministic |
+| `CostSource` | `/v1/runs`, `unreconciled` | RunRecord |
+| `Verdict` | `RECONCILED`, `PARTIAL`, `REPLAY` | Receipt |
+| `WowVerdict` | `SIGNIFICANT`, `SUGGESTIVE`, `NO_CHANGE_DETECTED`, `ABSTAIN` | Digest |
+| `AnswerStatus` | `ok`, `unverified`, `refused` | Answer |
+| `LlmKind` | `classify`, `tiebreak`, `embed`, `name_topic`, `narrate`, `ask` | Receipt.totals.llm_calls |
+| `AbstainReason` | see below | Receipt, Digest |
+| `AbstainScope` | `source`, `brand`, `topics`, `voice`, `session` | Receipt, Digest |
+
+`AbstainReason` pre-registered values (PRE-REGISTRATION §Abstain reasons):
+`empty`, `provider_failed`, `rate_limited`, `deadline`, `unavailable`,
+`schema_drift`, `no_timestamps`. Contract-level values added so every row of
+the Error matrix is representable: `below_minimum` (brand-level,
+`n_clusters < 5` or `n < 20` in either week), `halted` (Monid 402 breaker),
+`embedding_failed` (topics abstain; chat falls back to lexical retrieval and
+says so). `docs/PRE-REGISTRATION.md` (W1.2) lists the seven pre-registered
+reasons; the three additions are operational, not statistical, and are
+reviewed together with this file at the Wave 1 gate.
+
+## Query
+
+Input record. Validated in `cli.py` before any client exists; a validation
+error exits 2.
+
+| Field | Type | Rule |
+|---|---|---|
+| `brand` | `str` | 2–64 chars after whitespace trim; not punctuation-only |
+| `brand_aliases` | `list[str] = []` | each 2–64 chars, not punctuation-only, distinct from `brand` and each other (case-insensitive after `text.normalize`) |
+| `brand_hint` | `str \| None = null` | free text for the classifier prompt to resolve homonyms (e.g. "Brazilian digital bank"); ≤ 120 chars |
+| `competitors` | `list[str] = []` | length 0–3; each 2–64 chars, not punctuation-only, distinct from `brand`, aliases, and each other |
+| `window_days` | `int = 14` | 1–31; the fetch window ends at run start |
+| `profile` | `Profile = "full"` | selects caps from `config.SOURCE_PLAN` and `config.PROFILES` |
+| `sources` | `list[Source]` | default = the profile's source list from `config.SOURCE_PLAN`; explicit values must be members of `Source`; distinct; `smoke` allows only `reddit` and `google_maps` |
+
+Validators run in this order: length and punctuation per term, then
+distinctness across `brand`, `brand_aliases`, `competitors`, then
+`competitors` count, then `sources` membership. The first failure is reported;
+`sonar plan` prints the validated Query and the estimate without spending.
+
+## Mention
+
+One fetched item attributed to one brand. Primary key of a row is
+`(mention_id, brand)`: a text that matches both the brand and a competitor
+is stored once per brand with the same `mention_id` (Pipeline rule: "kept
+once per brand; SoV counts mention–brand pairs and says so").
+
+| Field | Type | Rule |
+|---|---|---|
+| `mention_id` | `str` | 24 hex chars; see §mention_id rule |
+| `brand` | `str` | the Query `brand` or one `competitors` entry this row is attributed to (canonical spelling from the Query, not the alias) |
+| `source` | `Source` | |
+| `run_id` | `str` | Monid `runId` of the run that returned this item |
+| `native_id` | `str \| None` | provider's own id (reddit post/comment id, YouTube video id, Maps `reviewId`, …); `null` when the payload has none |
+| `url` | `str \| None` | canonical URL after `text.normalize_url` (scheme lowercased, tracking params stripped, trailing slash removed); `null` when absent |
+| `author_hash` | `str \| None` | first 16 hex of sha256 over `"{source}\n{author handle as returned}"`; the raw handle is never stored; `null` when the payload has no author |
+| `text` | `str` | verbatim, original language; for post-shaped items title and body joined by `"\n\n"`; ≥ 1 char after trim |
+| `lang` | `Lang` | detected in code by PT/EN stop-word ratio; reported as a stratum, never used to filter |
+| `published_at` | `datetime \| None` | from the payload; `null` when the endpoint carries no timestamp (YouTube comments; Instagram hashtag items without one) |
+| `engagement` | `dict[str, int]` | keys ⊂ {`upvotes`, `likes`, `comments`, `shares`, `views`, `replies`, `votes`}; absent keys omitted, never `null` values; `{}` allowed |
+| `rating` | `int \| None` | 1–5, review sources only; `null` for every other source |
+| `cluster_key` | `str` | see §cluster_key rules |
+| `matched_terms` | `list[str]` | normalized brand or alias terms found by word-boundary match in `text`; ≥ 1 entry (a Mention with no match is never emitted) |
+| `raw_ref` | `str` | `"{local_seq}#{index}"`: the ledger row that saved the raw payload and the zero-based item index inside it |
+
+## Label
+
+One sentiment decision per Mention row, produced by the two-signal policy
+(Pipeline rules §Two-signal). Primary key `(mention_id, brand)` matches
+Mention; `brand` is carried in the joined output, not in the Label record.
+
+| Field | Type | Rule |
+|---|---|---|
+| `mention_id` | `str` | foreign key to Mention |
+| `label` | `SentimentLabel` | final label after policy |
+| `about_brand` | `bool` | classifier's relevance judgement; relevance for stats = `about_brand ∧ matched_terms non-empty` |
+| `confidence` | `float` | 0.0–1.0; confidence of the signal named in `decided_by` |
+| `rationale` | `str` | ≤ 20 words, English, from the deciding model call; hidden during the H5 blind hand check |
+| `topic_id` | `str \| None` | assigned by `topics/`; `null` before clustering or when the mention is in no cluster of `min_size` |
+| `signals` | `Signals` | see below |
+| `corroboration` | `Corroboration` | `confirmed`: classifier agrees with deterministic signal, or tiebreak agrees with classifier; `model_only`: no deterministic signal and classifier confidence ≥ 0.6, or tiebreak failed; `contested`: tiebreak disagreed with classifier and won; `irrelevant`: `about_brand=false` or `label=irrelevant` |
+| `decided_by` | `DecidedBy` | `tiebreak` iff the tiebreak call ran and its label was adopted |
+| `prompt_rev` | `str` | `config.PROMPT_REV` used for the classifier call |
+| `status` | `LabelStatus` | `cached` when served from the label cache keyed by `(mention_id, prompt_rev, classifier model)`; `refused`, `unparseable`, `error` after 4 SDK retries exclude the mention with that reason |
+| `usage` | `Usage` | `{tokens: int, cost_usd: float}`; sum over the classifier and tiebreak calls for this mention; `{0, 0.0}` when `cached` |
+
+`Signals`:
+
+| Field | Type | Rule |
+|---|---|---|
+| `classifier` | `ModelSignal` | `{model: str, label: SentimentLabel, confidence: float, status: LabelStatus}` |
+| `tiebreak` | `ModelSignal \| None` | same shape; `null` when the policy did not call the tiebreak model |
+| `deterministic` | `DeterministicSignal` | `{kind: SignalKind, label: Polarity \| None}`; `kind=rating` for review sources (≤ 2 → negative, 3 → neutral, ≥ 4 → positive), `kind=lexicon` otherwise (sign of PT/EN lexicon score; `label=null` when the score is 0), `kind=none` with `label=null` when no rating and no lexicon hit |
+
+Tiebreak is invoked iff (a) classifier disagrees with a non-null
+deterministic label, or (b) deterministic label is `null` and classifier
+confidence < 0.6, or (c) the mention is in the fixed 10 % audit sample
+(seed 777), subject to the cap of 40 % of mentions per brand (audit sample
+first, then cases in `published_at` order). `tests/test_rules.py` enumerates
+this matrix exhaustively.
+
+## RunRecord
+
+One row of the ledger (`runs.jsonl`), written **before** `POST /v1/run`
+and updated in place by `local_seq`. Every Monid call, including the
+ElevenLabs voice run and calls that never received a run id, has a row.
+
+| Field | Type | Rule |
+|---|---|---|
+| `local_seq` | `int` | 1-based, monotonic within a session, assigned before the POST |
+| `run_id` | `str \| None` | Monid `runId`; `null` when the POST was rejected locally or by HTTP before a run id existed |
+| `provider` | `str` | Monid provider id (`apify`, `tinyfish`, `trustpilot`, `g2`, `elevenlabs`) |
+| `endpoint` | `str` | Monid endpoint path exactly as sent (e.g. `/trudax/reddit-scraper-lite`, `/text-to-speech`) |
+| `brand` | `str \| None` | brand the run was fetched for; `null` for the voice run |
+| `source` | `Source \| None` | `null` for the voice run |
+| `input_digest` | `str` | first 24 hex of sha256 over canonical JSON of the request `input` (sorted keys, `,`/`:` separators, UTF-8) |
+| `submitted_at` | `datetime` | just before the POST |
+| `completed_at` | `datetime \| None` | when a terminal status was observed; `null` while pending or after a deadline |
+| `status` | `str` | Monid status string verbatim (observed in the design: `TIMED_OUT`, `FAILED`, `BLOCKED`, `STOPPED`, plus the running and succeeded states), or one of the local statuses `LOCAL_REJECTED_<http>` (e.g. `LOCAL_REJECTED_402`), `LOCAL_BACKOFF_EXHAUSTED`, `LOCAL_DEADLINE`. Local statuses always have `run_id=null` except `LOCAL_DEADLINE`, which keeps the id and is never resubmitted |
+| `provider_http_status` | `int \| None` | `providerResponse.httpStatus` from Monid; `null` when unknown |
+| `n_results` | `int \| None` | number of parsed items; `0` is a value and is billed; `null` only while the run is not terminal |
+| `estimate_usd` | `float` | computed at submit time from the endpoint price table in `config` and the requested caps |
+| `cost_usd` | `float \| None` | billed cost from `GET /v1/runs` `cost.value` only; `null` until reconciled; never copied from the estimate |
+| `billed_units` | `int \| None` | `billedUnits` from `GET /v1/runs`; `null` until reconciled |
+| `cost_source` | `CostSource` | `/v1/runs` once `cost_usd` was filled from the listing; `unreconciled` otherwise, including for `run_id=null` rows |
+| `attempts` | `int` | POST attempts incl. 429 retries; ≥ 1 |
+| `error` | `str \| None` | last error text (HTTP body excerpt ≤ 500 chars, or local reason); `null` on success |
+
+Totals in the Receipt sum `cost_usd` over rows with `cost_source="/v1/runs"`
+only; an `unreconciled` row contributes `0.0` and is listed in
+`Receipt.reconciliation.unreconciled_local_seqs`. Provider errors cost 0
+upstream and reconcile to `cost_usd=0.0` with `cost_source="/v1/runs"`.
+
+## Topic
+
+One embedding cluster of relevant mentions for one brand.
+
+| Field | Type | Rule |
+|---|---|---|
+| `topic_id` | `str` | `"{brand slug}-{index:02d}"`, index by descending `n` |
+| `brand` | `str` | |
+| `name` | `str` | ≤ 6 words, English, produced by the naming model from the medoids |
+| `n` | `int` | mentions in the cluster; ≥ `method.min_size` |
+| `n_clusters` | `int` | distinct `cluster_key` values in the cluster; ≥ `method.min_breadth` |
+| `share` | `float` | `n` / relevant labelled mentions of `brand` |
+| `net` | `float` | `(pos − neg) / (pos + neg + neu)` over the cluster's labels |
+| `ci95` | `CI95` | cluster bootstrap on `net` |
+| `exemplar_mention_ids` | `list[str]` | exactly 3 medoid `mention_id`s, closest to the centroid first |
+| `method` | `TopicMethod` | `{embedding_model: str, linkage: "average", threshold: float, min_size: 3, min_breadth: 2}`; `threshold` is the cosine-distance cut from `config` |
+
+## Receipt
+
+The card. Written to `results/<session>/receipt.json`; `sonar verify <path>`
+recomputes `content_digest`, re-derives `verdict`, and exits nonzero unless
+the verdict is `RECONCILED`.
+
+| Field | Type | Rule |
+|---|---|---|
+| `schema_rev` | `str` | this file's `schema_rev` |
+| `sonar_rev` | `str` | package version plus short git sha, e.g. `0.1.0+82d0ab5` |
+| `session_id` | `str` | `"{YYYYMMDDTHHMMSSZ}-{brand slug}-{6 hex}"` |
+| `timestamps` | `Timestamps` | `{started_at: datetime, finished_at: datetime, reconciled_at: datetime \| None}` |
+| `replay` | `bool` | `true` when rendered with `sonar render --from` instead of a live run |
+| `verdict` | `Verdict` | see §Receipt verdict rule |
+| `query` | `Query` | the validated Query |
+| `runs` | `list[RunRecord]` | every ledger row of the session, including `run_id=null` and `n_results=0`; ordered by `local_seq`; the Markdown table prints zero-result rows |
+| `totals` | `Totals` | see below |
+| `reconciliation` | `Reconciliation` | `{fetched_at: datetime \| None, n_listed_in_window: int, unmatched_remote_run_ids: list[str], unreconciled_local_seqs: list[int]}`; `unmatched_remote_run_ids` are runs `GET /v1/runs` listed inside `[started_at, reconciled_at]` with no ledger row |
+| `incumbent` | `Incumbent` | `{name: "Brand24 Team", price_usd_month: 349, url: str, checked_at: date, mentions_quota: 10000}`; values come from `report/incumbent.py` and the published-claims gate requires them identical to README |
+| `comparison` | `Comparison` | `{briefs_per_month_assumed: 4, sonar_usd_month_equiv: float, ratio: float \| None, mentions_this_brief: int}`; `sonar_usd_month_equiv = totals.total_usd × briefs_per_month_assumed`; `ratio = incumbent.price_usd_month / sonar_usd_month_equiv`, `null` when the divisor is 0 |
+| `mentions` | `MentionCounts` | `{fetched: int, deduped: int, labelled: int, excluded_with_reason: dict[str, int], by_source: dict[Source, int], by_brand: dict[str, int]}`; `excluded_with_reason` keys ⊂ {`not_about_brand`, `no_matched_terms`, `refused`, `unparseable`, `error`}; `deduped` counts rows after §Dedup precedence |
+| `abstentions` | `list[Abstention]` | `{scope: AbstainScope, brand: str \| None, source: Source \| None, reason: AbstainReason, detail: str}` |
+| `what_could_not_be_checked` | `list[str]` | plain sentences, e.g. "X/Twitter: no Monid endpoint", "Instagram: no timestamps, WoW not computed" |
+| `content_digest` | `str` | sha256 hex over canonical JSON of the receipt with `content_digest` set to `""` |
+
+`Totals`:
+
+| Field | Type | Rule |
+|---|---|---|
+| `monid_usd` | `float` | Σ `cost_usd` over runs with `cost_source="/v1/runs"`; includes the ElevenLabs run |
+| `monid_runs` | `int` | count of `runs`, including `run_id=null` |
+| `monid_runs_billed` | `int` | runs with `cost_usd > 0` |
+| `monid_runs_zero_results` | `int` | runs with `n_results = 0` (billed or not) |
+| `monid_runs_failed` | `int` | runs whose `status` is not a success state (Monid failure states and every `LOCAL_*`) |
+| `llm_usd` | `float` | Σ OpenAI cost from `Label.usage`, topic naming, narration, and `Answer.usage` appended by `reconcile` |
+| `llm_calls` | `dict[LlmKind, int]` | call counts by kind; cached labels are not calls |
+| `llm_tokens` | `int` | Σ tokens over the same calls |
+| `elevenlabs_usd` | `float` | the voice run's `cost_usd`; a breakout of `monid_usd`, not additive |
+| `total_usd` | `float` | `monid_usd + llm_usd` |
+
+## Digest
+
+The analysis output (`digest.json`), rendered to Markdown and narrated.
+
+| Field | Type | Rule |
+|---|---|---|
+| `brand` | `str` | |
+| `competitors` | `list[str]` | as validated in Query |
+| `window` | `Window` | `{current: {start: datetime, end: datetime}, previous: {start: datetime, end: datetime}}`; `current` = `[now − 7 d, now)`, `previous` = `[now − window_days, now − 7 d)` |
+| `share_of_voice` | `list[SovEntry]` | one per brand incl. competitors; `{brand: str, n: int, n_clusters: int, share: float, ci95: CI95, basis_sources: list[Source], wow: WowShare}`; `share = n_b / Σ n` over `basis_sources`; `n` counts mention–brand pairs |
+| `sentiment` | `list[SentimentEntry]` | one per brand; `{brand: str, n: int, n_confirmed: int, pos: int, neg: int, neu: int, net: float, ci95: CI95, ci95_iid: CI95, design_effect: float, wow: WowNet}`; `design_effect = (cluster width / iid width)²` |
+| `by_source` | `list[BySourceEntry]` | one per `(brand, source)` in `basis_sources`; `{brand: str, source: Source, n: int, n_clusters: int, pos: int, neg: int, neu: int, net: float \| None}` |
+| `topics` | `list[Topic]` | ordered by brand then `topic_id` |
+| `events` | `list[Event]` | `{brand: str, date: date, n: int, n_clusters: int, baseline_median: float, label: str, exhibit_url: str \| None}`; emitted iff `n ≥ max(5, median + 3·MAD)` and `n_clusters ≥ 3` over the day's mentions; `label` ≤ 6 words is the name of the day's largest topic, else the highest-engagement mention's matched term; `exhibit_url` is that mention's `url` |
+| `top_mentions` | `list[TopMention]` | ≤ 10 per brand by engagement; `{mention_id: str, brand: str, source: Source, url: str \| None, quote: str, lang: Lang, label: SentimentLabel, published_at: datetime \| None}`; `quote` ≤ 240 chars, verbatim, original language |
+| `abstentions` | `list[Abstention]` | same shape as Receipt; an abstained source leaves `basis_sources` for every brand |
+| `coverage_gaps` | `list[CoverageGap]` | `{source: str, reason: AbstainReason, note: str}`; always contains `{source: "x", reason: "unavailable", …}` |
+| `cost` | `CostQuote` | `{verdict: Verdict, totals: Totals}` copied from the Receipt, never recomputed |
+| `narration` | `Narration` | `{text: str \| None, chars: int, numbers_verified: bool, mp3_path: str \| None, local_seq: int \| None}`; `text` ≤ 900 chars English; `numbers_verified=true` iff every number in `text` occurs in this Digest; `local_seq` points at the ElevenLabs RunRecord |
+
+`WowNet` (sentiment): `{delta: float, ci95: CI95, ci95_confirmed_only: CI95, verdict: WowVerdict, p_raw: float \| None, p_holm: float \| None}`.
+`WowShare` (share of voice): `{delta: float, ci95: CI95, verdict: WowVerdict, p_raw: float \| None, p_holm: float \| None}`.
+
+`delta` = current − previous, paired on shared resample indices. Verdict per
+§Statistics: `SIGNIFICANT` iff `ci95` and `ci95_confirmed_only` both exclude
+0 with the same sign; `SUGGESTIVE` iff only `ci95` excludes 0;
+`NO_CHANGE_DETECTED` iff `ci95` includes 0 and the brand meets the minimums
+(`n_clusters ≥ 5` and `n ≥ 20` in both weeks); else `ABSTAIN`. For share
+there is no confirmed-only interval, so `SIGNIFICANT` and `SUGGESTIVE`
+coincide and the entry reports `SUGGESTIVE`. `p_raw` is the two-sided
+bootstrap p-value of `delta`; `p_holm` is Holm-adjusted at α = 0.05 over the
+family brands × {net, share}; both `null` on `ABSTAIN`.
+
+## Answer
+
+One line of `answers.jsonl` per `sonar ask`.
+
+| Field | Type | Rule |
+|---|---|---|
+| `session_id` | `str` | the session whose store was queried |
+| `brand` | `str` | |
+| `question` | `str` | verbatim user text |
+| `answer` | `str` | model text after citation stripping; empty string when `refused` |
+| `citations` | `list[str]` | `mention_id`s that exist in the session store; a cited id not in the store is stripped, the model is re-asked once, and a second miss sets `status=unverified` |
+| `numbers_verified` | `list[str]` | every numeric token in `answer`, each of which occurs in `stats.json`, `topics.json`, or a retrieved mention; an unverifiable number follows the same strip, re-ask once, `unverified` path |
+| `retrieved` | `list[str]` | `mention_id`s of the top-20 by cosine (or lexical fallback when embeddings failed) that were placed in context |
+| `model` | `str` | OpenAI model id used |
+| `usage` | `Usage` | `{tokens: int, cost_usd: float}`; `reconcile --session` appends it to the Receipt totals under `llm_calls.ask` |
+| `status` | `AnswerStatus` | `refused` on model refusal; an empty store makes no LLM call and returns `refused` with `retrieved=[]` |
+
+## Rules
+
+### mention_id rule
+
+`mention_id = sha256(f"{source}\n{key}".encode("utf-8")).hexdigest()[:24]`
+where `key` is the first non-null of, in order: `native_id`, normalized
+`url`, `text_key`. `text_key` = `text.normalize(text)` (NFKC, casefold,
+whitespace collapsed, URLs and `@handles` removed) truncated to 200 chars.
+The same item fetched by two runs, or for two brands, yields the same
+`mention_id`.
+
+### cluster_key rules
+
+`cluster_key` is the bootstrap resampling unit (PRE-REGISTRATION §Cluster
+bootstrap) and the breadth unit for topics and events.
+
+| Source | `cluster_key` |
+|---|---|
+| `reddit` | the post id: a post's own `native_id`; a comment's parent post id |
+| `youtube_comment` | the `videoId` the comment belongs to |
+| `tiktok` | `author_hash` |
+| `instagram` | `author_hash` |
+| `youtube` (videos) | `mention_id` |
+| `google_maps` | `mention_id` |
+| `facebook` | `mention_id` |
+| `trustpilot` | `mention_id` |
+| `g2` | `mention_id` |
+| `news` | `mention_id` |
+
+When the key input is missing (`author_hash=null` on tiktok/instagram, no
+parent id on a reddit comment), the adapter falls back to `mention_id` and
+records it under `Receipt.what_could_not_be_checked` as "cluster key
+fallback: <source> <count>", because a fallback inflates `n_clusters`.
+
+### Dedup precedence
+
+Applied per brand after all runs complete, before labelling
+(`text.dedup`):
+
+1. `(source, native_id)`: two items with the same source and non-null
+   `native_id` are one mention; the first by `raw_ref` order wins.
+2. normalized `url`: among survivors with `native_id=null`, equal normalized
+   URLs are one mention.
+3. `text_key`: among survivors with both `native_id` and `url` null, equal
+   `text_key` is one mention.
+
+Dedup never merges across sources. A mention matching the brand and a
+competitor is kept once per brand (two rows, one `mention_id`);
+`Receipt.mentions.deduped` counts rows, and the Digest states that SoV
+counts mention–brand pairs. Precedence for the `raw_ref` tie-break: lower
+`local_seq`, then lower item index.
+
+### Receipt verdict rule
+
+```
+if receipt.replay:                                   verdict = REPLAY
+elif all(r.cost_source == "/v1/runs" for r in runs)
+     and reconciliation.unmatched_remote_run_ids == []:  verdict = RECONCILED
+else:                                                verdict = PARTIAL
+```
+
+`RECONCILED` iff every run, including `run_id=null` rows, has
+`cost_source="/v1/runs"` and no remote run in the window is unmatched. A
+`run_id=null` row can only reach `/v1/runs` by reconciling to `cost_usd=0.0`
+when the listing confirms no run was created for its `input_digest`
+window; otherwise it stays `unreconciled` and the verdict is `PARTIAL`.
+`GET /v1/runs` failure leaves `reconciliation.fetched_at=null`, verdict
+`PARTIAL`, exit 4; `sonar reconcile --session <id>` reruns and may upgrade
+to `RECONCILED`. `sonar verify` exits 0 only on `RECONCILED`; a `REPLAY`
+receipt renders with the REPLAY banner and never passes `verify`.
+
+## Open questions
+
+Each is resolved by the named trigger; the resolution lands as a
+`docs/DECISIONS.md` entry and, if it changes a field, a `schema_rev` bump.
+
+| Id | Question | Provisional value in this contract | Resolved by |
+|---|---|---|---|
+| OQ-1 | Exact Monid status vocabulary for running and succeeded states | `status` is `str`, not an enum; the four failure states above are the ones the Error matrix names | W3.7 recorded `tests/fixtures/v1_runs_page.json` |
+| OQ-2 | Whether `$0` sync endpoints (`tinyfish /search`, `/fetch`) return a `runId` and appear in `GET /v1/runs` | `Mention.run_id` is `str`; a sync run without an id would force `RunRecord.run_id=null` with `cost_usd=0.0` reconciled by absence | W3.1 news fixture from the first live `sonar record` |
+| OQ-3 | Facebook reviews carry `isRecommended`, not stars | `rating` = 5 when recommended, 1 when not, so the deterministic bucket still applies | W3.4 adapter test on a recorded fixture |
+| OQ-4 | Treatment of `published_at=null` mentions (YouTube comments, some Instagram) in WoW and events | in-window for SoV (the fetch was window-bounded), excluded from `wow` and `events`, source listed in `what_could_not_be_checked` | W4.3 stats implementation and `docs/PRE-REGISTRATION.md` review at the Wave 1 gate |
+| OQ-5 | Trustpilot and G2 native id, rating, timestamp and author field names | Mention fields typed as above; adapter fills `native_id` from whatever unique review id the schema exposes | W0.3 `docs/monid/inspect/*.json` |
+| OQ-6 | ElevenLabs `billedUnits` semantics (characters vs calls) and `voice_id` placement | `RunRecord.billed_units` is `int \| None`; `estimate_usd` uses $0.05 per 1k chars | W5.5 20-char probe with run id in DECISIONS |
+| OQ-7 | `wow` on share-of-voice entries and the `p_raw`/`p_holm` fields are additions to Appendix §Contracts so the Holm family "brands × {net, share}" is representable | included as specified | lead review of W1.1 with W1.2 at the Wave 1 gate |
