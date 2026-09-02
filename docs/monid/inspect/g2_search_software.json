@@ -1,0 +1,50 @@
+{
+  "provider": "g2",
+  "providerName": "G2",
+  "endpoint": "/search_software",
+  "description": "Full-text search over G2's software product catalog. Returns matching products with name, slug, rating, review count, and description. Brand-name queries (e.g. 'slack') return detailed results with descriptions; category-style queries (e.g. 'project management') return products listed in that category. Results are returned in a single page.",
+  "summary": "Full-text search over G2's software product catalog. Returns matching products with name, slug, rating, review count, and description. Brand-name queries (e.g. 'slack') return detailed results with descriptions; category-style queries (e.g. 'project management') return products listed in that category. Results are returned in a single page.",
+  "method": "GET",
+  "input": {
+    "queryParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "query": {
+          "description": "Search keyword or query string (e.g. 'slack', 'hubspot', 'project management')",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0.02,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://parse.bot/marketplace/g2-com-api",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "g2",
+    "software-reviews"
+  ],
+  "metrics": {
+    "status": "stable",
+    "runTimeMs": {
+      "p50": 7261,
+      "p95": 8187
+    }
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p g2 -e /search_software -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'"
+  }
+}

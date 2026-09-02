@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Not found: Endpoint 'text-to-speech' not found for provider 'elevenlabs'"
+  }
+}

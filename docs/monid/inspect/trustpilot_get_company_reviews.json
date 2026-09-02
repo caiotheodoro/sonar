@@ -1,0 +1,66 @@
+{
+  "provider": "trustpilot",
+  "providerName": "Trustpilot",
+  "endpoint": "/get_company_reviews",
+  "description": "Fetch paginated reviews for a company with optional star filtering, sort order, and keyword search.",
+  "summary": "Fetch paginated reviews for a company with optional star filtering, sort order, and keyword search.",
+  "method": "GET",
+  "input": {
+    "queryParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "domain": {
+          "description": "Company domain/identifying name as used on Trustpilot",
+          "type": "string"
+        },
+        "page": {
+          "description": "Page number",
+          "type": "integer"
+        },
+        "sort": {
+          "description": "Sort order for reviews",
+          "type": "string"
+        },
+        "stars": {
+          "description": "Filter by star rating (1-5)",
+          "type": "string"
+        },
+        "keyword": {
+          "description": "Search keyword within reviews",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain"
+      ]
+    }
+  },
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0.03,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://parse.bot/marketplace/trustpilot-com-api",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "company-reviews",
+    "trustpilot"
+  ],
+  "metrics": {
+    "status": "degraded",
+    "runTimeMs": {
+      "p50": 15840,
+      "p95": 75382
+    }
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p trustpilot -e /get_company_reviews -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'"
+  }
+}

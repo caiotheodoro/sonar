@@ -1,0 +1,58 @@
+{
+  "provider": "trustpilot",
+  "providerName": "Trustpilot",
+  "endpoint": "/search_companies",
+  "description": "Search for companies by name or keyword. Returns basic company info including domain, trust score, star rating, and review count.",
+  "summary": "Search for companies by name or keyword. Returns basic company info including domain, trust score, star rating, and review count.",
+  "method": "GET",
+  "input": {
+    "queryParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "query": {
+          "description": "Search keyword or company name",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Results per page (max 20)",
+          "type": "integer"
+        },
+        "page": {
+          "description": "Page number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0.03,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://parse.bot/marketplace/trustpilot-com-api",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "company-reviews",
+    "trustpilot"
+  ],
+  "metrics": {
+    "status": "stable",
+    "runTimeMs": {
+      "p50": 7117,
+      "p95": 12968
+    }
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p trustpilot -e /search_companies -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'"
+  }
+}

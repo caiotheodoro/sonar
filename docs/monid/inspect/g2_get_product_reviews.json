@@ -1,0 +1,58 @@
+{
+  "provider": "g2",
+  "providerName": "G2",
+  "endpoint": "/get_product_reviews",
+  "description": "Retrieve paginated user reviews for a given software product. Each review includes author, designation, segment, date, rating, detailed feedback (likes, dislikes, problems solved), and additional reviewer profile fields: industry (when available), employee_count_range (extracted from segment), company_name, location, and linkedin_url (null when not exposed by G2). Supports filtering by star rating and pagination.",
+  "summary": "Retrieve paginated user reviews for a given software product. Each review includes author, designation, segment, date, rating, detailed feedback (likes, dislikes, problems solved), and additional reviewer profile fields: industry (when available), employee_count_range (extracted from segment), company_name, location, and linkedin_url (null when not exposed by G2). Supports filtering by star rating and pagination.",
+  "method": "GET",
+  "input": {
+    "queryParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "star_rating": {
+          "description": "Filter by star rating (1-5). Omit to return reviews of all ratings.",
+          "type": "integer"
+        },
+        "page": {
+          "description": "Page number for pagination",
+          "type": "integer"
+        },
+        "slug": {
+          "description": "Product slug (e.g. 'slack', 'hubspot-sales-hub')",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug"
+      ]
+    }
+  },
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0.05,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://parse.bot/marketplace/g2-com-api",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "g2",
+    "software-reviews"
+  ],
+  "metrics": {
+    "status": "degraded",
+    "runTimeMs": {
+      "p50": 30040,
+      "p95": 52592
+    }
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p g2 -e /get_product_reviews -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'"
+  }
+}

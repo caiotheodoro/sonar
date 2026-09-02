@@ -1,0 +1,37 @@
+{
+  "provider": "elevenlabs",
+  "providerName": "ElevenLabs",
+  "endpoint": "/voices",
+  "description": "List the ElevenLabs voices available to this account (voice_id, name, category, labels, preview_url).",
+  "summary": "List selectable ElevenLabs text-to-speech voices (the account's My Voices). Use a voice's `voice_id` as the 'voice_id' input of /text-to-speech. Free.",
+  "method": "GET",
+  "input": {},
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://elevenlabs.io/docs/api-reference/voices/search",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "elevenlabs",
+    "speech"
+  ],
+  "metrics": {
+    "status": "stable",
+    "runTimeMs": {
+      "p50": 1790,
+      "p95": 1901
+    }
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p elevenlabs -e /voices -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'",
+    "speak with a voice": "monid run -p elevenlabs -e /text-to-speech -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'  # pass the chosen voice_id in the body"
+  }
+}

@@ -93,3 +93,5 @@ Recurring operator jobs, all free:
   receipt with `totals.llm_usd` is compared against the dashboard for
   the same hour, and the method that matches is written into the rules
   above.
+
+| 2026-09-02 | W0.1 + W0.3 | none | 0.00 | 0.00 | keys stored in ~/.sonar/.env; monid whoami OK, balance $1.00; OpenAI models list OK (gpt-5.6-luna/terra present); 7 inspects saved to docs/monid/inspect/ (all free) |

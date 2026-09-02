@@ -1,0 +1,51 @@
+{
+  "provider": "trustpilot",
+  "providerName": "Trustpilot",
+  "endpoint": "/get_company_review_summary",
+  "description": "Get AI summary, review topics, rating breakdown, and recent review texts for a company. Accepts either a direct company domain or a search query. When 'domain' is provided, returns summary for that single company. When 'query' is provided, searches for matching companies and returns review summaries for each match (up to 'limit' results). The query mode makes 1 search request plus 1-2 requests per matching company.",
+  "summary": "Get AI summary, review topics, rating breakdown, and recent review texts for a company. Accepts either a direct company domain or a search query. When 'domain' is provided, returns summary for that single company. When 'query' is provided, searches for matching companies and returns review summaries for each match (up to 'limit' results). The query mode makes 1 search request plus 1-2 requests per matching company.",
+  "method": "GET",
+  "input": {
+    "queryParams": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "domain": {
+          "description": "Company domain/identifying name as used on Trustpilot (e.g. 'www.nike.com'). Either 'domain' or 'query' must be provided.",
+          "type": "string"
+        },
+        "query": {
+          "description": "Search keyword to find companies (e.g. 'AI Services'). When provided, searches for matching companies and returns their review summaries. Either 'domain' or 'query' must be provided.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Maximum number of company summaries to return when using query mode (max 10). Ignored when domain is provided.",
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "price": {
+    "type": "PER_CALL",
+    "amount": {
+      "value": 0.05,
+      "currency": "USD"
+    }
+  },
+  "docUrl": "https://parse.bot/marketplace/trustpilot-com-api",
+  "notes": [],
+  "tags": [
+    "verified"
+  ],
+  "categories": [
+    "company-reviews",
+    "trustpilot"
+  ],
+  "metrics": {
+    "status": "degraded"
+  },
+  "hints": {
+    "find other endpoints": "monid discover -q '<QUERY>'",
+    "run this endpoint": "monid run -p trustpilot -e /get_company_review_summary -i '<BODY>' --query '<QUERY_PARAMS>' --path '<PATH_PARAMS>'"
+  }
+}
