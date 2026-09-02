@@ -91,7 +91,7 @@ from sonar.monid import (
     count_results,
 )
 from sonar.monid.ledger import ReconcileResult
-from sonar.providers.base import AdapterSchemaError
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError
 from sonar.providers.registry import PROVIDERS
 from sonar.report.digest import NO_NARRATION, build_digest, requote_cost, write_digest_files
 from sonar.report.markdown import render_digest, render_receipt
@@ -443,6 +443,9 @@ def _report_notes(source: SourceName, report: Any) -> list[str]:
     skipped = getattr(report, "skipped_no_match", 0)
     if skipped:
         notes.append(f"{source}: {skipped} result(s) skipped, no brand match")
+    no_text = getattr(report, "skipped_no_text", 0)
+    if no_text:
+        notes.append(f"{source}: {no_text} item(s) skipped, deleted or empty content")
     return notes
 
 
@@ -489,6 +492,11 @@ def _run_source(
                     payload, outcome.run_id, brand, local_seq=record.local_seq, terms=list(terms)
                 )
             )
+    except AdapterEmpty as exc:
+        result.abstention = _source_abstention(
+            brand, source, "empty", f"local_seq {record.local_seq}: {exc.detail}"
+        )
+        return None
     except AdapterSchemaError as exc:
         saved = _save_raw(ctx, record, outcome.body)
         result.abstention = _source_abstention(

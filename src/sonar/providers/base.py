@@ -21,6 +21,48 @@ class AdapterSchemaError(Exception):
         super().__init__(f"{provider} {endpoint}: {detail}")
 
 
+class AdapterEmpty(Exception):
+    """Raised when the provider returned no usable results.
+
+    An empty search or an Apify actor that could not resolve the target is
+    not a schema change: the adapter is fine, the query just had no hits.
+    The pipeline turns this into an ``empty`` abstention for the source,
+    never ``schema_drift``.
+    """
+
+    def __init__(self, provider: str, endpoint: str, detail: str) -> None:
+        self.provider = provider
+        self.endpoint = endpoint
+        self.detail = detail
+        super().__init__(f"{provider} {endpoint}: {detail}")
+
+
+_ERROR_ITEM_KEYS: tuple[str, ...] = ("error", "errorDescription", "errorMessage", "errorMsg")
+
+
+def is_error_item(item: Any) -> bool:
+    """True for an Apify dataset row that reports a failed sub-fetch, not a result.
+
+    Actors that find nothing (no such page, private video, no search hits)
+    emit rows like ``{"error": "...", "url": "..."}`` instead of an empty
+    list. Such a row is not a mention and not schema drift.
+    """
+    if not isinstance(item, dict):
+        return False
+    return any(isinstance(item.get(key), str) and item[key].strip() for key in _ERROR_ITEM_KEYS)
+
+
+def first_error_text(items: Sequence[Any]) -> str:
+    """The first error string among *items*, truncated — for an :class:`AdapterEmpty` detail."""
+    for item in items:
+        if isinstance(item, dict):
+            for key in _ERROR_ITEM_KEYS:
+                value = item.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()[:160]
+    return "no detail"
+
+
 @runtime_checkable
 class Provider(Protocol):
     """Structural contract every adapter must satisfy.

@@ -34,7 +34,7 @@ from urllib.parse import urlparse
 
 from sonar.config import SOURCE_PLAN, SourcePlan
 from sonar.models import Lang, Mention, author_hash_for, mention_id_for
-from sonar.providers.base import AdapterSchemaError
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError, first_error_text, is_error_item
 from sonar.providers.registry import PROVIDERS
 from sonar.text import detect_lang, normalize, normalize_url, text_key
 
@@ -208,9 +208,18 @@ class FacebookProvider:
         del terms
         matched = [normalize(brand) or brand]
         mentions: list[Mention] = []
-        for index, item in enumerate(_items(raw)):
+        all_items = _items(raw)
+        if all_items and all(is_error_item(it) for it in all_items):
+            raise AdapterEmpty(
+                PROVIDER_ID,
+                ENDPOINT,
+                f"{len(all_items)} item(s), all provider errors: {first_error_text(all_items)}",
+            )
+        for index, item in enumerate(all_items):
             if not isinstance(item, dict):
                 raise _drift(f"item {index}: not an object ({type(item).__name__})")
+            if is_error_item(item):
+                continue
             missing = [key for key in REQUIRED_KEYS if key not in item]
             if missing:
                 raise _drift(f"item {index}: missing required keys {missing}")

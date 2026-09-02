@@ -20,7 +20,7 @@ import pytest
 from sonar import models as m
 from sonar.config import SOURCE_PLAN
 from sonar.providers import youtube, youtube_comments
-from sonar.providers.base import AdapterSchemaError, Provider
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError, Provider
 from sonar.providers.registry import PROVIDERS
 from sonar.text import text_key
 
@@ -173,6 +173,24 @@ class TestYouTubeParse:
     def test_empty_payload_is_zero_mentions(self) -> None:
         assert youtube.PROVIDER.parse([], RUN_ID, "Nubank", local_seq=1) == []
         assert youtube.PROVIDER.parse({"items": []}, RUN_ID, "Nubank", local_seq=1) == []
+
+    def test_all_error_items_raise_adapter_empty(self) -> None:
+        raw = [
+            {"error": "no_results", "input": "Nubank", "url": "https://youtube.com"},
+            {"errorDescription": "search returned nothing", "inputUrl": "x"},
+        ]
+        with pytest.raises(AdapterEmpty) as info:
+            youtube.PROVIDER.parse(raw, RUN_ID, "Nubank", local_seq=1)
+        assert info.value.endpoint == "/streamers/youtube-scraper"
+
+    def test_error_items_mixed_with_real_are_skipped(
+        self, videos_raw: list[dict[str, Any]]
+    ) -> None:
+        raw = [{"error": "one url failed", "url": "x"}, *videos_raw]
+        mentions = youtube.PROVIDER.parse(
+            raw, RUN_ID, "Nubank", terms=["Nubank", "Nu"], local_seq=1
+        )
+        assert len(mentions) == 3
 
     def test_mutated_sample_missing_id_raises(self, videos_raw: list[dict[str, Any]]) -> None:
         mutated = copy.deepcopy(videos_raw)

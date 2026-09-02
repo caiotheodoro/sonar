@@ -18,7 +18,7 @@ import pytest
 from sonar import config
 from sonar.models import Mention, Query, author_hash_for, mention_id_for
 from sonar.providers import news, reddit
-from sonar.providers.base import AdapterSchemaError, Provider
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError, Provider
 from sonar.providers.registry import PROVIDERS
 
 SAMPLES = Path(__file__).parent / "fixtures" / "samples"
@@ -309,11 +309,8 @@ class TestRedditParse:
         with pytest.raises(ValueError, match="local_seq"):
             reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=0)
 
-    @pytest.mark.parametrize(
-        ("index", "field"),
-        [(0, "id"), (0, "dataType"), (0, "title"), (1, "body")],
-    )
-    def test_mutated_required_field_raises(
+    @pytest.mark.parametrize(("index", "field"), [(0, "id"), (0, "dataType")])
+    def test_mutated_structural_field_raises(
         self, reddit_raw: dict[str, Any], index: int, field: str
     ) -> None:
         mutated = copy.deepcopy(reddit_raw)
@@ -323,6 +320,32 @@ class TestRedditParse:
         assert info.value.provider == "apify"
         assert info.value.endpoint == "/trudax/reddit-scraper-lite"
         assert field in info.value.detail
+
+    def test_comment_without_body_is_skipped_not_raised(self, reddit_raw: dict[str, Any]) -> None:
+        """A comment with no body is deleted content — drop and count it, do
+        not abstain the whole source."""
+        mutated = copy.deepcopy(reddit_raw)
+        n_before = len(reddit.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1, terms=["Nu"]))
+        del mutated["items"][1]["body"]  # item 1 is a comment
+        report = reddit.PROVIDER.parse_with_report(
+            mutated, RUN_ID, "Nubank", local_seq=1, terms=["Nu"]
+        )
+        assert report.skipped_no_text == 1
+        assert len(report.mentions) == n_before - 1
+
+    def test_post_with_body_but_no_title_still_parses(self, reddit_raw: dict[str, Any]) -> None:
+        mutated = copy.deepcopy(reddit_raw)
+        del mutated["items"][0]["title"]  # item 0 is a post; it keeps its body
+        report = reddit.PROVIDER.parse_with_report(
+            mutated, RUN_ID, "Nubank", local_seq=1, terms=["Nu"]
+        )
+        assert report.skipped_no_text == 0
+        assert any(m.native_id == "t3_1abc123" for m in report.mentions)
+
+    def test_all_error_rows_raise_adapter_empty(self) -> None:
+        raw = {"items": [{"error": "actor could not resolve the subreddit", "url": "x"}]}
+        with pytest.raises(AdapterEmpty):
+            reddit.PROVIDER.parse(raw, RUN_ID, "Nubank", local_seq=1)
 
     def test_unknown_data_type_raises(self, reddit_raw: dict[str, Any]) -> None:
         mutated = copy.deepcopy(reddit_raw)

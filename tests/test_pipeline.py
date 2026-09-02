@@ -276,6 +276,12 @@ class TestReportNotes:
     def test_report_with_neither_field_is_silent(self) -> None:
         assert pipeline._report_notes("tiktok", SimpleNamespace(mentions=[])) == []
 
+    def test_skipped_no_text_is_noted(self) -> None:
+        report = SimpleNamespace(mentions=[], skipped_no_text=2)
+        assert pipeline._report_notes("reddit", report) == [
+            "reddit: 2 item(s) skipped, deleted or empty content"
+        ]
+
 
 # --------------------------------------------------------------------------- offline replay
 

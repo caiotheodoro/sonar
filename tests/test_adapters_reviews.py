@@ -19,7 +19,7 @@ import pytest
 from sonar.config import SOURCE_PLAN
 from sonar.models import Mention, Query, author_hash_for, mention_id_for
 from sonar.providers import facebook, google_maps
-from sonar.providers.base import AdapterSchemaError, Provider
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError, Provider
 from sonar.providers.registry import PROVIDERS
 
 SAMPLES = Path(__file__).parent / "fixtures" / "samples"
@@ -343,6 +343,11 @@ class TestFacebookParse:
         # item 2 has text null and is skipped
         assert [m.raw_ref for m in mentions] == ["7#0", "7#1", "7#3"]
         assert {m.source for m in mentions} == {"facebook"}
+
+    def test_all_error_items_raise_adapter_empty(self) -> None:
+        raw = {"output": [{"error": "PAGE_NOT_FOUND", "errorDescription": "no such page", "inputUrl": "x"}]}
+        with pytest.raises(AdapterEmpty):
+            facebook.PROVIDER.parse(raw, "run_x", "Nubank", local_seq=1)
 
     def test_is_recommended_maps_to_rating_per_oq3(self, fb_raw: dict[str, Any]) -> None:
         mentions = facebook.PROVIDER.parse(fb_raw, "run_x", "Nubank", local_seq=1)

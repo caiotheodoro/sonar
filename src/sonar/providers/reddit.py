@@ -39,7 +39,12 @@ from typing import Any, Final
 
 from sonar import config
 from sonar.models import Lang, MatchKind, Mention, author_hash_for, mention_id_for
-from sonar.providers.base import AdapterSchemaError
+from sonar.providers.base import (
+    AdapterEmpty,
+    AdapterSchemaError,
+    first_error_text,
+    is_error_item,
+)
 from sonar.providers.registry import PROVIDERS
 from sonar.text import detect_lang, match_terms, normalize_url
 
@@ -72,6 +77,8 @@ class ParseReport:
     mentions: list[Mention]
     cluster_key_fallbacks: int
     skipped_no_match: int
+    skipped_no_text: int
+    """Items dropped for a missing/empty ``body`` or ``title`` (deleted content) or a provider error row."""
     inherited_from: dict[str, str]
     """Comment ``native_id`` to the ``native_id`` of the post whose terms it inherited."""
 
@@ -271,17 +278,35 @@ class RedditProvider:
         match_on = _match_terms_for(brand, terms)
         parsed: list[tuple[int, dict[str, Any], str, str, str, list[str]]] = []
         matched_posts: dict[str, list[str]] = {}
-        for index, item in enumerate(_items(raw, endpoint)):
+        all_items = _items(raw, endpoint)
+        if all_items and all(is_error_item(it) for it in all_items):
+            raise AdapterEmpty(
+                _PLAN.provider,
+                endpoint,
+                f"{len(all_items)} item(s), all provider errors: {first_error_text(all_items)}",
+            )
+        no_text = 0
+        for index, item in enumerate(all_items):
             if not isinstance(item, dict):
                 raise AdapterSchemaError(_PLAN.provider, endpoint, f"item {index}: expected object")
+            if is_error_item(item):
+                no_text += 1
+                continue
             data_type = _require_str(item, "dataType", index, endpoint).strip().lower()
             native_id = _require_str(item, "id", index, endpoint).strip()
             if data_type == "post":
-                title = _require_str(item, "title", index, endpoint).strip()
+                title = (_optional_str(item, "title") or "").strip()
                 body = (_optional_str(item, "body") or "").strip()
-                text = f"{title}\n\n{body}" if body else title
+                if not title and not body:
+                    no_text += 1
+                    continue
+                text = f"{title}\n\n{body}" if title and body else (title or body)
             elif data_type == "comment":
-                text = _require_str(item, "body", index, endpoint).strip()
+                body = (_optional_str(item, "body") or "").strip()
+                if not body:
+                    no_text += 1
+                    continue
+                text = body
             else:
                 raise AdapterSchemaError(
                     _PLAN.provider, endpoint, f"item {index}: unknown dataType {data_type!r}"
@@ -341,10 +366,15 @@ class RedditProvider:
                 "raw_ref": f"{local_seq}#{index}",
             }
             mentions.append(Mention.model_validate(row))
+        if all_items and not parsed:
+            raise AdapterEmpty(
+                _PLAN.provider, endpoint, f"{len(all_items)} item(s), none carried usable text"
+            )
         return ParseReport(
             mentions=mentions,
             cluster_key_fallbacks=fallbacks,
             skipped_no_match=no_match,
+            skipped_no_text=no_text,
             inherited_from=inherited_from,
         )
 

@@ -29,7 +29,7 @@ from typing import Any
 
 from sonar.config import SOURCE_PLAN, SourcePlan
 from sonar.models import Mention, author_hash_for, mention_id_for
-from sonar.providers.base import AdapterSchemaError
+from sonar.providers.base import AdapterEmpty, AdapterSchemaError, first_error_text, is_error_item
 from sonar.providers.registry import PROVIDERS
 from sonar.text import detect_lang, match_terms, normalize_url
 
@@ -212,7 +212,16 @@ class YouTubeProvider:
         source = PLAN.source
         match_on = list(terms) if terms else [brand]
         mentions: list[Mention] = []
-        for index, item in enumerate(items_of(raw, self.provider, self.endpoint)):
+        all_items = items_of(raw, self.provider, self.endpoint)
+        if all_items and all(is_error_item(it) for it in all_items):
+            raise AdapterEmpty(
+                self.provider,
+                self.endpoint,
+                f"{len(all_items)} item(s), all provider errors: {first_error_text(all_items)}",
+            )
+        for index, item in enumerate(all_items):
+            if is_error_item(item):
+                continue
             video_id = require(item, "id", index, self.provider, self.endpoint)
             title = optional_str(item, "title")
             description = optional_str(item, "text")
