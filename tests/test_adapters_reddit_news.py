@@ -81,6 +81,50 @@ class TestRegistration:
         assert module_provider.endpoint == config.SOURCE_PLAN[source].endpoint
 
 
+class TestProtocolSignature:
+    """``parse`` must accept the keyword names ``base.Provider`` declares."""
+
+    def test_reddit_parse_with_protocol_keywords(self, reddit_raw: dict[str, Any]) -> None:
+        provider: Provider = reddit.PROVIDER
+        mentions = provider.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1, terms=["Nu"])
+        assert {m.native_id for m in mentions} == {
+            "t3_1abc123",
+            "t1_c0mm3nt1",
+            "t1_c0mm3nt2",
+            "t1_orphan01",
+            "t3_1linkpost",
+        }
+        assert provider.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1, terms=None) == (
+            provider.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1)
+        )
+
+    def test_news_parse_with_protocol_keywords(self, news_raw: dict[str, Any]) -> None:
+        provider: Provider = news.PROVIDER
+        mentions = provider.parse(news_raw, None, "Nubank", local_seq=1, terms=["Nu"])
+        assert len(mentions) == 3
+        assert all(m.run_id is None for m in mentions)
+        assert provider.parse(news_raw, None, "Nubank", local_seq=1, terms=None) == (
+            provider.parse(news_raw, None, "Nubank", local_seq=1)
+        )
+
+    def test_aliases_keyword_is_gone(
+        self, reddit_raw: dict[str, Any], news_raw: dict[str, Any]
+    ) -> None:
+        legacy: dict[str, Any] = {"aliases": ["Nu"]}
+        with pytest.raises(TypeError, match="aliases"):
+            reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1, **legacy)
+        with pytest.raises(TypeError, match="aliases"):
+            news.PROVIDER.parse(news_raw, None, "Nubank", local_seq=1, **legacy)
+
+    def test_brand_is_always_matched_and_terms_deduplicated(self, news_raw: dict[str, Any]) -> None:
+        with_dup = news.PROVIDER.parse(
+            news_raw, None, "Nubank", local_seq=1, terms=["Nubank", "Nu"]
+        )
+        plain = news.PROVIDER.parse(news_raw, None, "Nubank", local_seq=1, terms=["Nu"])
+        assert with_dup == plain
+        assert all("nubank" in m.matched_terms or "nu" in m.matched_terms for m in plain)
+
+
 # ---------------------------------------------------------------------------
 # reddit: build_input
 # ---------------------------------------------------------------------------
@@ -131,7 +175,7 @@ class TestRedditBuildInput:
 class TestRedditParse:
     def test_posts_and_comments_become_mentions(self, reddit_raw: dict[str, Any]) -> None:
         report = reddit.PROVIDER.parse_with_report(
-            reddit_raw, RUN_ID, "Nubank", local_seq=7, aliases=["Nu"]
+            reddit_raw, RUN_ID, "Nubank", local_seq=7, terms=["Nu"]
         )
         by_native = {m.native_id: m for m in report.mentions}
         # 6 items: 5 match Nubank/Nu, the r/personalfinance post does not
@@ -143,14 +187,14 @@ class TestRedditParse:
             "t3_1linkpost",
         }
         assert report.skipped_no_match == 1
-        assert report.skipped_blank_text == 0
+        assert not hasattr(report, "skipped_blank_text")
         assert all(isinstance(m, Mention) for m in report.mentions)
         assert all(m.source == "reddit" and m.brand == "Nubank" for m in report.mentions)
         assert all(m.run_id == RUN_ID and m.rating is None for m in report.mentions)
 
     def test_cluster_key_is_post_id(self, reddit_raw: dict[str, Any]) -> None:
         report = reddit.PROVIDER.parse_with_report(
-            reddit_raw, RUN_ID, "Nubank", local_seq=7, aliases=["Nu"]
+            reddit_raw, RUN_ID, "Nubank", local_seq=7, terms=["Nu"]
         )
         by_native = {m.native_id: m for m in report.mentions}
         post = by_native["t3_1abc123"]
@@ -166,7 +210,7 @@ class TestRedditParse:
         assert reddit.PROVIDER.cluster_key(post) == post.cluster_key
 
     def test_field_mapping(self, reddit_raw: dict[str, Any]) -> None:
-        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=7, aliases=["Nu"])
+        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=7, terms=["Nu"])
         post = mentions[0]
         assert post.mention_id == mention_id_for("reddit", "t3_1abc123")
         assert post.text.startswith("Nubank mudou o limite do cartão sem avisar\n\nAcordei hoje")
@@ -189,14 +233,14 @@ class TestRedditParse:
         assert comment.raw_ref == "7#1"
 
     def test_raw_ref_index_counts_skipped_items(self, reddit_raw: dict[str, Any]) -> None:
-        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=3, aliases=["Nu"])
+        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=3, terms=["Nu"])
         refs = {m.native_id: m.raw_ref for m in mentions}
         # item 3 (r/personalfinance) is skipped; item 4 keeps zero-based index 4
         assert refs["t1_orphan01"] == "3#4"
         assert refs["t3_1linkpost"] == "3#5"
 
     def test_missing_optional_fields_never_raise(self, reddit_raw: dict[str, Any]) -> None:
-        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1, aliases=["Nu"])
+        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1, terms=["Nu"])
         by_native = {m.native_id: m for m in mentions}
         orphan = by_native["t1_orphan01"]
         assert orphan.url is None
@@ -241,7 +285,7 @@ class TestRedditParse:
         mutated = copy.deepcopy(reddit_raw)
         del mutated["items"][index][field]
         with pytest.raises(AdapterSchemaError) as info:
-            reddit.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1, aliases=["Nu"])
+            reddit.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1, terms=["Nu"])
         assert info.value.provider == "apify"
         assert info.value.endpoint == "/trudax/reddit-scraper-lite"
         assert field in info.value.detail
@@ -343,7 +387,7 @@ class TestNewsBuildInput:
 class TestNewsParse:
     def test_results_become_mentions(self, news_raw: dict[str, Any]) -> None:
         report = news.PROVIDER.parse_with_report(
-            news_raw, RUN_ID, "Nubank", local_seq=11, aliases=["Nu"]
+            news_raw, RUN_ID, "Nubank", local_seq=11, terms=["Nu"]
         )
         assert len(report.mentions) == 3
         assert report.skipped_no_match == 1
@@ -352,13 +396,13 @@ class TestNewsParse:
         assert all(m.rating is None and m.engagement == {} for m in report.mentions)
 
     def test_cluster_key_is_mention_id(self, news_raw: dict[str, Any]) -> None:
-        for m in news.PROVIDER.parse(news_raw, RUN_ID, "Nubank", local_seq=1, aliases=["Nu"]):
+        for m in news.PROVIDER.parse(news_raw, RUN_ID, "Nubank", local_seq=1, terms=["Nu"]):
             assert m.cluster_key == m.mention_id
             assert news.PROVIDER.cluster_key(m) == m.mention_id
 
     def test_field_mapping(self, news_raw: dict[str, Any]) -> None:
         first, second, third = news.PROVIDER.parse(
-            news_raw, RUN_ID, "Nubank", local_seq=1, aliases=["Nu"]
+            news_raw, RUN_ID, "Nubank", local_seq=1, terms=["Nu"]
         )
         assert first.url == "https://www.valor.com.br/financas/2026/08/31/nubank-conta-global.ghtml"
         assert first.mention_id == mention_id_for("news", first.url)

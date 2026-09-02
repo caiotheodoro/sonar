@@ -45,6 +45,15 @@ _ENGAGEMENT_FIELDS: tuple[tuple[str, str], ...] = (
 _LANGS: dict[str, Lang] = {"pt": "pt", "en": "en", "other": "other", "unknown": "unknown"}
 
 
+def _match_terms_for(brand: str, terms: Sequence[str] | None) -> list[str]:
+    """Match list for :func:`sonar.text.match_terms`: *brand* first, then *terms* (deduplicated)."""
+    out = [brand]
+    for term in terms or ():
+        if term not in out:
+            out.append(term)
+    return out
+
+
 @dataclass(frozen=True, slots=True)
 class ParseReport:
     """Result of :meth:`RedditProvider.parse_with_report`."""
@@ -52,7 +61,6 @@ class ParseReport:
     mentions: list[Mention]
     cluster_key_fallbacks: int
     skipped_no_match: int
-    skipped_blank_text: int
 
 
 def _terms_for(query: Any, brand: str) -> list[str]:
@@ -217,12 +225,10 @@ class RedditProvider:
         brand: str,
         *,
         local_seq: int | None = None,
-        aliases: Sequence[str] = (),
+        terms: Sequence[str] | None = None,
     ) -> list[Mention]:
-        """Mentions of *brand* (or an alias) in the actor output; see :meth:`parse_with_report`."""
-        return self.parse_with_report(
-            raw, run_id, brand, local_seq=local_seq, aliases=aliases
-        ).mentions
+        """Mentions of *brand* (or one of *terms*) in the actor output; see :meth:`parse_with_report`."""
+        return self.parse_with_report(raw, run_id, brand, local_seq=local_seq, terms=terms).mentions
 
     def parse_with_report(
         self,
@@ -231,24 +237,24 @@ class RedditProvider:
         brand: str,
         *,
         local_seq: int | None = None,
-        aliases: Sequence[str] = (),
+        terms: Sequence[str] | None = None,
     ) -> ParseReport:
         """Parse the ``providerResponse`` body into Mention rows for *brand*.
 
-        *local_seq* is the ledger row that saved *raw* (``raw_ref``). Items
-        whose text matches neither *brand* nor an alias are dropped, never
-        emitted. Missing optional fields degrade to ``null``/``{}``; a missing
-        required field (``id``, ``dataType``, a post ``title``, a comment
-        ``body``) raises :class:`AdapterSchemaError`.
+        *local_seq* is the ledger row that saved *raw* (``raw_ref``). *terms*
+        are extra match terms (the brand aliases); items whose text matches
+        neither *brand* nor one of *terms* are dropped, never emitted.
+        Missing optional fields degrade to ``null``/``{}``; a missing required
+        field (``id``, ``dataType``, a post ``title``, a comment ``body``)
+        raises :class:`AdapterSchemaError`.
         """
         if local_seq is None or local_seq < 1:
             raise ValueError("local_seq (ledger row of the raw payload) is required, >= 1")
         endpoint = self.endpoint
-        terms = [brand, *aliases]
+        match_on = _match_terms_for(brand, terms)
         mentions: list[Mention] = []
         fallbacks = 0
         no_match = 0
-        blank = 0
         for index, item in enumerate(_items(raw, endpoint)):
             if not isinstance(item, dict):
                 raise AdapterSchemaError(_PLAN.provider, endpoint, f"item {index}: expected object")
@@ -264,10 +270,7 @@ class RedditProvider:
                 raise AdapterSchemaError(
                     _PLAN.provider, endpoint, f"item {index}: unknown dataType {data_type!r}"
                 )
-            if not text:
-                blank += 1
-                continue
-            matched = match_terms(text, terms)
+            matched = match_terms(text, match_on)
             if not matched:
                 no_match += 1
                 continue
@@ -311,7 +314,6 @@ class RedditProvider:
             mentions=mentions,
             cluster_key_fallbacks=fallbacks,
             skipped_no_match=no_match,
-            skipped_blank_text=blank,
         )
 
 

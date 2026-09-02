@@ -40,6 +40,16 @@ _PLAN = config.SOURCE_PLAN[_SOURCE]
 _RESULT_KEYS = ("results", "items", "data")
 _LANGS: dict[str, Lang] = {"pt": "pt", "en": "en", "other": "other", "unknown": "unknown"}
 
+
+def _match_terms_for(brand: str, terms: Sequence[str] | None) -> list[str]:
+    """Match list for :func:`sonar.text.match_terms`: *brand* first, then *terms* (deduplicated)."""
+    out = [brand]
+    for term in terms or ():
+        if term not in out:
+            out.append(term)
+    return out
+
+
 MAX_PAGE = 10
 """TinyFish ``/search`` accepts ``page`` 1..10 (design appendix)."""
 
@@ -53,7 +63,6 @@ class ParseReport:
 
     mentions: list[Mention]
     skipped_no_match: int
-    skipped_blank_text: int
 
 
 def _results(raw: Any, endpoint: str) -> list[Any]:
@@ -187,12 +196,10 @@ class NewsProvider:
         brand: str,
         *,
         local_seq: int | None = None,
-        aliases: Sequence[str] = (),
+        terms: Sequence[str] | None = None,
     ) -> list[Mention]:
-        """Mentions of *brand* (or an alias) in the search results; see :meth:`parse_with_report`."""
-        return self.parse_with_report(
-            raw, run_id, brand, local_seq=local_seq, aliases=aliases
-        ).mentions
+        """Mentions of *brand* (or one of *terms*) in the search results; see :meth:`parse_with_report`."""
+        return self.parse_with_report(raw, run_id, brand, local_seq=local_seq, terms=terms).mentions
 
     def parse_with_report(
         self,
@@ -201,12 +208,14 @@ class NewsProvider:
         brand: str,
         *,
         local_seq: int | None = None,
-        aliases: Sequence[str] = (),
+        terms: Sequence[str] | None = None,
     ) -> ParseReport:
         """Parse one page of ``/search`` results into Mention rows for *brand*.
 
-        *local_seq* is the ledger row that saved *raw* (``raw_ref``). Text is
-        ``title`` and ``snippet`` joined by a blank line (post-shaped item).
+        *local_seq* is the ledger row that saved *raw* (``raw_ref``). *terms*
+        are extra match terms (the brand aliases); results matching neither
+        *brand* nor one of *terms* are dropped. Text is ``title`` and
+        ``snippet`` joined by a blank line (post-shaped item).
         Missing ``snippet``, ``date`` or ``site_name`` degrade to their
         null forms; a missing ``url`` or ``title`` raises
         :class:`AdapterSchemaError`.
@@ -214,10 +223,9 @@ class NewsProvider:
         if local_seq is None or local_seq < 1:
             raise ValueError("local_seq (ledger row of the raw payload) is required, >= 1")
         endpoint = self.endpoint
-        terms = [brand, *aliases]
+        match_on = _match_terms_for(brand, terms)
         mentions: list[Mention] = []
         no_match = 0
-        blank = 0
         for index, item in enumerate(_results(raw, endpoint)):
             if not isinstance(item, dict):
                 raise AdapterSchemaError(
@@ -227,10 +235,7 @@ class NewsProvider:
             title = _require_str(item, "title", index, endpoint).strip()
             snippet = (_optional_str(item, "snippet") or "").strip()
             text = f"{title}\n\n{snippet}" if snippet else title
-            if not text:
-                blank += 1
-                continue
-            matched = match_terms(text, terms)
+            matched = match_terms(text, match_on)
             if not matched:
                 no_match += 1
                 continue
@@ -255,7 +260,7 @@ class NewsProvider:
                 "raw_ref": f"{local_seq}#{index}",
             }
             mentions.append(Mention.model_validate(row))
-        return ParseReport(mentions=mentions, skipped_no_match=no_match, skipped_blank_text=blank)
+        return ParseReport(mentions=mentions, skipped_no_match=no_match)
 
 
 PROVIDER = NewsProvider()
