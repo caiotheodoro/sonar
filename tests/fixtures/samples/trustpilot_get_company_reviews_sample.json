@@ -1,0 +1,52 @@
+{
+  "reviews": [
+    {
+      "title": "Great digital bank",
+      "text": "Nubank has changed my life. The credit card is amazing and the app is so easy to use. I recommend it to everyone.",
+      "rating": 5,
+      "date": "2026-08-15T10:30:00Z",
+      "author": {
+        "name": "Maria S.",
+        "location": "São Paulo, Brazil",
+        "numberOfReviews": 3,
+        "numberOfInvitedReviews": 0,
+        "isVerified": true
+      },
+      "reviewId": "tp-review-001",
+      "labels": ["credit-card", "app"],
+      "language": "en",
+      "experienceDate": "2026-08-10T00:00:00Z",
+      "source": {
+        "name": "Trustpilot",
+        "url": "https://www.trustpilot.com/reviews/nubank.com.br"
+      }
+    },
+    {
+      "title": "Terrible customer service",
+      "text": "I have been waiting for 3 weeks to get my account issue resolved. Nobody responds to my emails. Very disappointed with Nubank.",
+      "rating": 1,
+      "date": "2026-08-20T14:00:00Z",
+      "author": {
+        "name": "João P.",
+        "location": "Rio de Janeiro, Brazil",
+        "numberOfReviews": 1,
+        "numberOfInvitedReviews": 0,
+        "isVerified": true
+      },
+      "reviewId": "tp-review-002",
+      "labels": ["customer-service"],
+      "language": "en",
+      "experienceDate": "2026-07-30T00:00:00Z",
+      "source": {
+        "name": "Trustpilot",
+        "url": "https://www.trustpilot.com/reviews/nubank.com.br"
+      }
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 5,
+    "totalResults": 1234,
+    "perPage": 20
+  }
+}

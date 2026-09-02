@@ -1,0 +1,48 @@
+{
+  "reviews": [
+    {
+      "title": "Best digital bank in Brazil",
+      "content": "Nubank offers an incredible digital banking experience. The app is intuitive, fees are transparent, and customer support through the app is responsive. The credit card with no annual fee is a game changer.",
+      "rating": 5,
+      "date": "2026-08-10T09:00:00Z",
+      "author": {
+        "name": "Ana Costa",
+        "title": "Software Engineer",
+        "company": "Tech Corp",
+        "industry": "Technology",
+        "segment": "Mid-Market",
+        "location": "São Paulo, Brazil"
+      },
+      "reviewId": "g2-review-001",
+      "likes": "No annual fee, great app, transparent fees",
+      "dislikes": "Limited international features",
+      "problemsSolved": "Personal finance management",
+      "starRating": 5
+    },
+    {
+      "title": "Good but needs improvement",
+      "content": "The basic banking features are solid but the investment platform is lacking. Customer service can be slow during peak times. Overall a decent option for everyday banking.",
+      "rating": 3,
+      "date": "2026-08-18T16:30:00Z",
+      "author": {
+        "name": "Carlos Lima",
+        "title": "Product Manager",
+        "company": "Startup Inc",
+        "industry": "Finance",
+        "segment": "Small Business",
+        "location": "Belo Horizonte, Brazil"
+      },
+      "reviewId": "g2-review-002",
+      "likes": "Basic features work well",
+      "dislikes": "Limited investment options, slow support",
+      "problemsSolved": "Daily banking",
+      "starRating": 3
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 10,
+    "totalResults": 890,
+    "perPage": 20
+  }
+}

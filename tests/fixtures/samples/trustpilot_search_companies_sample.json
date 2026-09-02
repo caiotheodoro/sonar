@@ -1,0 +1,20 @@
+{
+  "companies": [
+    {
+      "name": "Nubank",
+      "domain": "nubank.com.br",
+      "trustScore": 4.5,
+      "stars": 4.5,
+      "numberOfReviews": 1234,
+      "logoUrl": "https://s3-eu-west-1.amazonaws.com/trustpilot-static-images/..."
+    },
+    {
+      "name": "Nubank Brasil",
+      "domain": "nubank.com",
+      "trustScore": 4.2,
+      "stars": 4.2,
+      "numberOfReviews": 567,
+      "logoUrl": "https://s3-eu-west-1.amazonaws.com/trustpilot-static-images/..."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "products": [
+    {
+      "name": "Nubank",
+      "slug": "nubank",
+      "rating": 4.3,
+      "reviewCount": 890,
+      "description": "Digital banking platform for personal finance management",
+      "url": "https://www.g2.com/products/nubank/reviews",
+      "logoUrl": "https://s3.amazonaws.com/g2-production/..."
+    },
+    {
+      "name": "Nubank Business",
+      "slug": "nubank-business",
+      "rating": 4.1,
+      "reviewCount": 234,
+      "description": "Business banking solution for SMEs",
+      "url": "https://www.g2.com/products/nubank-business/reviews",
+      "logoUrl": "https://s3.amazonaws.com/g2-production/..."
+    }
+  ]
+}
