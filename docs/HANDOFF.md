@@ -1,4 +1,5 @@
 # HANDOFF.md — operator log
+| OQ-H1 | The event rule fired on the first offline replay with `baseline_median = 0` and `baseline_mad = 0`: a window whose earlier days have no fetched mentions makes every day with five mentions an event. Is a minimum number of non-empty baseline days needed (a DECISIONS amendment to the frozen rule), or is this honest for a first brief? | Lead at W5.5, on the first live lite run with two weeks of data |
 
 This is the running log for anyone operating sonar with real credit:
 Caio, a worker session, or a judge reproducing the demo. Every task that
