@@ -1,6 +1,174 @@
 {
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Not found: Endpoint 'text-to-speech' not found for provider 'elevenlabs'"
-  }
+    "provider": "elevenlabs",
+    "providerName": "ElevenLabs",
+    "endpoint": "/text-to-speech",
+    "description": "Convert text to lifelike speech audio (MP3) with an ElevenLabs voice.",
+    "summary": "Generate speech from text with ElevenLabs. Choose a voice via voice_id (from /voices) and a model (eleven_multilingual_v2 for quality, eleven_flash_v2_5 for half price and low latency, eleven_v3 for maximum expressiveness). The generated MP3 is saved on Monid cloud; the run output carries an `audio` object with a fresh signed download_link (plus content_type and the billed character_count). Priced per character.",
+    "method": "POST",
+    "input": {
+        "body": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 5000,
+                    "description": "The text to convert to speech (1\u20135000 characters). Billed per character. Split longer texts into multiple runs.",
+                    "examples": [
+                        "Hello! Your order has shipped and arrives Thursday."
+                    ]
+                },
+                "model_id": {
+                    "default": "eleven_multilingual_v2",
+                    "description": "TTS model: eleven_multilingual_v2 (highest quality), eleven_flash_v2_5 (half price, low latency), or eleven_v3 (most expressive, 70+ languages).",
+                    "type": "string",
+                    "enum": [
+                        "eleven_multilingual_v2",
+                        "eleven_flash_v2_5",
+                        "eleven_v3"
+                    ]
+                },
+                "voice_id": {
+                    "default": "21m00Tcm4TlvDq8ikWAM",
+                    "description": "The ElevenLabs voice to speak with \u2014 pick a voice_id from /voices. An unknown or unauthorized id fails as a provider error (no charge).",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "voice_settings": {
+                    "type": "object",
+                    "properties": {
+                        "stability": {
+                            "description": "Voice stability (0\u20131). Lower = more expressive.",
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        },
+                        "similarity_boost": {
+                            "description": "Adherence to the original voice (0\u20131).",
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        },
+                        "style": {
+                            "description": "Style exaggeration (0\u20131). Non-zero adds latency.",
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                        },
+                        "speed": {
+                            "description": "Speech speed (0.7\u20131.2, 1.0 = normal).",
+                            "type": "number",
+                            "minimum": 0.7,
+                            "maximum": 1.2
+                        },
+                        "use_speaker_boost": {
+                            "description": "Boost similarity to the original speaker.",
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "description": "Optional voice tuning, passed through to ElevenLabs verbatim."
+                }
+            },
+            "required": [
+                "text"
+            ],
+            "additionalProperties": false,
+            "description": "Convert text to speech audio",
+            "~standard": {
+                "vendor": "zod",
+                "version": 1,
+                "jsonSchema": {}
+            }
+        },
+        "bodyType": "json"
+    },
+    "price": {
+        "type": "PER_UNIT_MATRIX",
+        "amount": {
+            "value": 0.05,
+            "currency": "USD"
+        },
+        "selectors": [
+            {
+                "label": "Model",
+                "key": "model_id",
+                "in": "body"
+            }
+        ],
+        "variants": [
+            {
+                "when": {
+                    "model_id": "eleven_multilingual_v2"
+                },
+                "price": {
+                    "type": "PER_UNIT",
+                    "amount": {
+                        "value": 0.1,
+                        "currency": "USD"
+                    },
+                    "per": 1000,
+                    "unit": "character"
+                },
+                "label": "Multilingual v2 \u2014 per 1,000 characters"
+            },
+            {
+                "when": {
+                    "model_id": "eleven_flash_v2_5"
+                },
+                "price": {
+                    "type": "PER_UNIT",
+                    "amount": {
+                        "value": 0.05,
+                        "currency": "USD"
+                    },
+                    "per": 1000,
+                    "unit": "character"
+                },
+                "label": "Flash v2.5 \u2014 per 1,000 characters"
+            },
+            {
+                "when": {
+                    "model_id": "eleven_v3"
+                },
+                "price": {
+                    "type": "PER_UNIT",
+                    "amount": {
+                        "value": 0.1,
+                        "currency": "USD"
+                    },
+                    "per": 1000,
+                    "unit": "character"
+                },
+                "label": "Eleven v3 \u2014 per 1,000 characters"
+            }
+        ]
+    },
+    "docUrl": "https://elevenlabs.io/docs/api-reference/text-to-speech/convert",
+    "notes": [
+        "Generated audio is saved on Monid cloud with a default 7-day retention; the run output carries an `audio` object with a fresh signed download_link (valid ~1h \u2014 re-fetch the run for a new one), content_type and link/file expiries. To keep the file past retention, download it via the link and re-upload with the sfs /put endpoint; after retention the object reads { expired: true }. audio_base64 appears inline only if the save failed.",
+        "Input text is capped at 5000 characters per run \u2014 split longer texts into multiple runs.",
+        "Output audio is MP3 44.1kHz 128kbps.",
+        "An unknown/unauthorized voice_id or an exhausted ElevenLabs quota returns a COMPLETED run with the provider error as data \u2014 no charge."
+    ],
+    "tags": [
+        "verified"
+    ],
+    "categories": [
+        "elevenlabs",
+        "speech"
+    ],
+    "metrics": {
+        "status": "stable",
+        "runTimeMs": {
+            "p50": 3328,
+            "p95": 3606
+        }
+    },
+    "hints": {
+        "find other endpoints": "curl -X POST http://api.monid.ai/v1/discover -H 'Authorization: Bearer <API_KEY>' -H 'Content-Type: application/json' -d '{\"query\":\"<QUERY>\"}'",
+        "run this endpoint": "curl -X POST http://api.monid.ai/v1/run -H 'Authorization: Bearer <API_KEY>' -H 'Content-Type: application/json' -d '{\"provider\":\"elevenlabs\",\"endpoint\":\"/text-to-speech\",\"input\":{\"body\":<BODY>,\"queryParams\":<QUERY_PARAMS>,\"pathParams\":<PATH_PARAMS>}}'",
+        "list available voices": "curl -X POST http://api.monid.ai/v1/run -H 'Authorization: Bearer <API_KEY>' -H 'Content-Type: application/json' -d '{\"provider\":\"elevenlabs\",\"endpoint\":\"/voices\",\"input\":{\"body\":<BODY>,\"queryParams\":<QUERY_PARAMS>,\"pathParams\":<PATH_PARAMS>}}'  # the free voice catalog \u2014 use a voice_id from it here"
+    }
 }
