@@ -21,6 +21,7 @@ import pytest
 from sonar import pipeline
 from sonar.config import SOURCE_PLAN
 from sonar.llm.base import LlmBackend
+from sonar.llm.fake import LabelFixtureEntry
 from sonar.models import Query, Receipt, StatsFile
 from sonar.monid import Breaker, Ledger, MonidClient
 from sonar.pipeline import (
@@ -441,3 +442,37 @@ class TestLivePaths:
         assert receipt.replay is True and receipt.verdict == "REPLAY"
         assert receipt.content_digest == receipt.compute_content_digest()
         assert digest.cost.verdict == "REPLAY" and digest.cost.totals == receipt.totals
+
+
+# --------------------------------------------------------------------------- labeler exclusions
+
+
+class TestLabelerExclusions:
+    def test_excluded_rows_are_counted_under_their_reason(self, tmp_path: Path) -> None:
+        """A refused classifier answer leaves no Label; the receipt still accounts for the row."""
+        first = run_session(
+            tmp_path / "first",
+            smoke_script(),
+            options=RunOptions(voice=False, cache_dir=tmp_path / "cache1"),
+        )
+        assert first.receipt.mentions.excluded_with_reason["refused"] == 0
+        refused_id = first.digest.top_mentions[0].mention_id
+
+        llm = FixtureLlm({refused_id: LabelFixtureEntry(status="refused", rationale="policy")})
+        result = run_session(
+            tmp_path / "second",
+            smoke_script(),
+            llm=llm,
+            options=RunOptions(voice=False, cache_dir=tmp_path / "cache2"),
+        )
+        counts = result.receipt.mentions
+        assert counts.deduped == 3 and counts.labelled == 2
+        assert counts.excluded_with_reason["refused"] == 1
+        failures = sum(counts.excluded_with_reason[k] for k in ("refused", "unparseable", "error"))
+        assert counts.deduped == counts.labelled + failures
+        assert not any(
+            note.startswith("labelling:") for note in result.receipt.what_could_not_be_checked
+        )
+        labels = (result.out_dir / "labels.jsonl").read_text().splitlines()
+        assert len(labels) == 2
+        assert refused_id not in {json.loads(line)["label"]["mention_id"] for line in labels}

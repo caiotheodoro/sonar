@@ -15,6 +15,12 @@ fake, so the whole pipeline runs without a key or a network; the receipt is a
 ``REPLAY``. ``render --from <dir>`` re-renders stored artifacts with the REPLAY
 banner and the verdict ``REPLAY``.
 
+``run --out DIR`` writes the session's artifacts directly into ``DIR``
+(``DIR/receipt.json``); without ``--out`` they land under
+``out/<session-id>/``. ``reconcile``, ``spend`` and ``doctor`` take ``--root``
+(default ``out``) and find sessions as ``<root>/<session-id>/``;
+``reconcile --session`` also accepts a session directory path.
+
 Every entry point takes the client and seam factories as arguments so tests can
 prove that bad input never constructs a client.
 """
@@ -54,7 +60,8 @@ EXIT_UNREACHABLE: Final[int] = 1
 
 OPENAI_KEY_VAR: Final[str] = "OPENAI_API_KEY"
 OPENAI_MODELS_URL: Final[str] = "https://api.openai.com/v1/models"
-DEFAULT_OUT: Final[Path] = Path("out")
+DEFAULT_ROOT: Final[Path] = Path("out")
+"""Where sessions land without ``--out``: ``out/<session-id>/`` (README, CONTRACTS §Receipt)."""
 DEFAULT_MAX_SPEND_USD: Final[float] = config.MONID_RUN_CAP_USD
 RECORD_SCRIPT: Final[Path] = Path(__file__).resolve().parents[2] / "scripts" / "record_fixtures.py"
 
@@ -137,7 +144,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     doctor = sub.add_parser("doctor", parents=[common], help="check keys and reachability")
-    doctor.add_argument("--out", type=Path, default=DEFAULT_OUT, help="session root for spend")
+    doctor.add_argument(
+        "--root", type=Path, default=DEFAULT_ROOT, help="sessions root for the wallet line"
+    )
 
     plan = sub.add_parser("plan", parents=[common], help="validate the query and estimate")
     _add_query_args(plan)
@@ -145,7 +154,11 @@ def build_parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run", parents=[common], help="fetch, analyse, write the artifacts")
     _add_query_args(run)
     run.add_argument(
-        "--out", type=Path, default=DEFAULT_OUT, help="root; artifacts under <session>/"
+        "--out",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help=f"session directory for the artifacts (default {DEFAULT_ROOT}/<session-id>)",
     )
     run.add_argument(
         "--run-deadline",
@@ -171,12 +184,14 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--voice-id", default=None, help="ElevenLabs voice id")
 
     reconcile = sub.add_parser("reconcile", parents=[common], help="rejoin GET /v1/runs")
-    reconcile.add_argument("--session", required=True, help="session id under --out")
-    reconcile.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    reconcile.add_argument(
+        "--session", required=True, help="session id under --root, or a session directory"
+    )
+    reconcile.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="sessions root")
 
     spend = sub.add_parser("spend", parents=[common], help="totals per session and running")
-    spend.add_argument("--session", default=None)
-    spend.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    spend.add_argument("--session", default=None, help="only this session id")
+    spend.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="sessions root")
 
     record = sub.add_parser("record", parents=[common], help="record adapter fixtures (live)")
     record.add_argument("brand")
@@ -225,11 +240,23 @@ def _query_from(args: argparse.Namespace, out: TextIO) -> Query | None:
         return None
 
 
+def _session_dir(session: str, root: Path) -> Path:
+    """``--session`` as a session directory when it is one, else ``<root>/<session-id>``."""
+    given = Path(session)
+    if (given / pipeline.RECEIPT_JSON).is_file():
+        return given
+    return root / session
+
+
 def _receipts_under(root: Path) -> list[tuple[Path, Receipt]]:
+    """Every readable receipt at ``<root>/receipt.json`` or ``<root>/*/receipt.json``."""
     found: list[tuple[Path, Receipt]] = []
     if not root.is_dir():
         return found
-    for path in sorted(root.glob(f"*/{pipeline.RECEIPT_JSON}")):
+    candidates = [root / pipeline.RECEIPT_JSON, *sorted(root.glob(f"*/{pipeline.RECEIPT_JSON}"))]
+    for path in candidates:
+        if not path.is_file():
+            continue
         try:
             found.append(
                 (path.parent, Receipt.model_validate_json(path.read_text(encoding="utf-8")))
@@ -300,11 +327,11 @@ def cmd_doctor(
         else:
             print(f"openai api: UNREACHABLE ({problem})", file=out)
             code = code or EXIT_UNREACHABLE
-    receipts = _receipts_under(args.out)
+    receipts = _receipts_under(args.root)
     live = [r for _, r in receipts if not r.replay]
     spent = sum(r.totals.monid_usd for r in live)
     print(
-        f"wallet: {len(live)} live session(s) under {args.out} spent ${spent:.4f} on Monid; "
+        f"wallet: {len(live)} live session(s) under {args.root} spent ${spent:.4f} on Monid; "
         f"budget cap ${config.MONID_BUDGET_CAP_USD:.2f}, reserve ${config.MONID_RESERVE_USD:.2f} "
         "(balance is on the Monid dashboard or `monid whoami`)",
         file=out,
@@ -378,7 +405,7 @@ def cmd_run(
         replay = False
 
     session_id = args.session or pipeline.new_session_id(query.brand, now)
-    session_dir: Path = args.out / session_id
+    session_dir: Path = args.out if args.out is not None else DEFAULT_ROOT / session_id
     ledger = Ledger(session_dir / pipeline.RUNS_JSONL)
     options = pipeline.RunOptions(
         voice=not args.no_voice,
@@ -417,7 +444,7 @@ def _print_run_summary(result: pipeline.RunResult, out: TextIO) -> None:
         print("HALTED: Monid 402 tripped the breaker; stats are on what was fetched", file=out)
     elif result.exit_code == EXIT_PARTIAL:
         print(
-            f"PARTIAL: run `sonar reconcile --session {result.session_id}` after billing settles",
+            f"PARTIAL: run `sonar reconcile --session {result.out_dir}` after billing settles",
             file=out,
         )
 
@@ -430,7 +457,7 @@ def cmd_reconcile(
     client_factory: ClientFactory,
     now: datetime | None,
 ) -> int:
-    session_dir: Path = args.out / args.session
+    session_dir = _session_dir(args.session, args.root)
     if not (session_dir / pipeline.RECEIPT_JSON).is_file():
         print(f"no receipt under {session_dir}", file=out)
         return EXIT_USAGE
@@ -456,14 +483,14 @@ def cmd_reconcile(
 
 
 def cmd_spend(args: argparse.Namespace, *, out: TextIO) -> int:
-    receipts = _receipts_under(args.out)
+    receipts = _receipts_under(args.root)
     if args.session is not None:
         receipts = [(d, r) for d, r in receipts if r.session_id == args.session]
         if not receipts:
-            print(f"no session {args.session} under {args.out}", file=out)
+            print(f"no session {args.session} under {args.root}", file=out)
             return EXIT_USAGE
     if not receipts:
-        print(f"no receipts under {args.out}", file=out)
+        print(f"no receipts under {args.root}", file=out)
     for line in _spend_lines(receipts):
         print(line, file=out)
     return EXIT_OK

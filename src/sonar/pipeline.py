@@ -95,13 +95,19 @@ from sonar.providers.base import AdapterSchemaError
 from sonar.providers.registry import PROVIDERS
 from sonar.report.digest import NO_NARRATION, build_digest, requote_cost, write_digest_files
 from sonar.report.markdown import render_digest, render_receipt
-from sonar.report.receipt import LlmUsageTotals, build_receipt, count_mentions, write_receipt
+from sonar.report.receipt import (
+    LlmUsageTotals,
+    build_receipt,
+    count_mentions,
+    count_unlabelled,
+    unlabelled_note,
+    write_receipt,
+)
 from sonar.sentiment import LabelCache, LabelRun, label_mentions
 from sonar.stats import StatsResult, compute_stats
 from sonar.text import DedupItem, dedup
 from sonar.topics import CACHE_FILENAME, TopicsResult, assign_topic_ids, brand_slug, build_topics
-from sonar.voice import narrate
-from sonar.voice.script import numbers_gate
+from sonar.voice import narrate, regate
 
 log = logging.getLogger(__name__)
 
@@ -895,6 +901,19 @@ def run(
     mention_counts = count_mentions(
         fetched=len(all_mentions), kept=kept, labels=label_keyed, dedup_dropped=deduped.dropped
     )
+    # Rows the labeler excluded (refused, unparseable, error after the SDK retries) carry no
+    # Label, so ``count_mentions`` cannot see them; they are counted here under their reason.
+    excluded_with_reason = dict(mention_counts.excluded_with_reason)
+    for exclusion in label_run.excluded:
+        excluded_with_reason[exclusion.reason] += 1
+    mention_counts = mention_counts.model_copy(
+        update={"excluded_with_reason": excluded_with_reason}
+    )
+    unlabelled = count_unlabelled(kept, label_keyed) - len(label_run.excluded)
+    if unlabelled > 0:
+        notes.append(
+            unlabelled_note(unlabelled, "the labeler returned neither a label nor a reason")
+        )
 
     def receipt_for(voice_usage: Sequence[SeamUsage], voice_abst: Sequence[Abstention]) -> Receipt:
         return build_receipt(
@@ -955,10 +974,12 @@ def run(
     receipt = receipt_for(voice_usage, voice_abstentions)
     digest = digest_for(receipt, narration)
     if narration.text is not None:
-        verified = numbers_gate(narration.text, digest).verified
-        if verified != narration.numbers_verified:
-            log.warning("voice: numbers_verified %s against the final digest", verified)
-            narration = narration.model_copy(update={"numbers_verified": verified})
+        regated = regate(narration, digest)
+        if regated.numbers_verified != narration.numbers_verified:
+            log.warning(
+                "voice: numbers_verified %s against the final digest", regated.numbers_verified
+            )
+            narration = regated
             digest = digest_for(receipt, narration)
 
     written: list[Path] = [write_receipt(receipt, out_dir / RECEIPT_JSON)]
