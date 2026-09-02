@@ -1,0 +1,4 @@
+{
+  "_comment": "Words per minute measured per scene once the narration has been generated, keyed by scene id. Used only to predict cue times before the audio exists; capture/retime-captions.mjs overwrites predictions with measured values as soon as public/narration.mp3 is on disk. Empty until a voice has been recorded.",
+  "wpm": {}
+}

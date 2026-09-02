@@ -1,0 +1,28 @@
+{
+  "name": "sonar-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hackathon video for sonar. Every on-screen number is imported from ../results/demo/*.json.",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render Sonar out/sonar.mp4",
+    "slice": "remotion render Sonar out/slice.mp4 --frames=0-149",
+    "still": "remotion still Sonar",
+    "lint": "tsc --noEmit",
+    "shots": "node capture/check-shot-reality.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.515",
+    "@remotion/google-fonts": "4.0.515",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.10.1",
+    "remotion": "4.0.515"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "typescript": "^5.7.3"
+  }
+}

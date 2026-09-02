@@ -1,0 +1,4 @@
+{
+  "_comment": "Narration, single source. Filled by the narration task, not by this scaffold: the array stays empty until then. Each cue is {scene, startMs, endMs, text, spoken?}: `scene` names the beat it belongs to (one of the ids in src/manifest.ts), `text` is the caption and the on-screen wording, `spoken` overrides it for the voice only where the two must differ. startMs and endMs are absolute from the start of the video and are written by capture/retime-captions.mjs from the real audio file, never by hand. Every number a cue says must exist in the frozen demo results; the claims gate checks that, so this file carries no digits until the narration does.",
+  "narration": []
+}
