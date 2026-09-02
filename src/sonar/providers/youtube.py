@@ -71,9 +71,7 @@ def items_of(raw: Any, provider: str, endpoint: str) -> list[dict[str, Any]]:
     return out
 
 
-def require(
-    item: dict[str, Any], field: str, index: int, provider: str, endpoint: str
-) -> str:
+def require(item: dict[str, Any], field: str, index: int, provider: str, endpoint: str) -> str:
     """Return a required non-empty string field or raise :class:`AdapterSchemaError`."""
     value = item.get(field)
     if value is None:
@@ -198,17 +196,19 @@ class YouTubeProvider:
         run_id: str | None,
         brand: str,
         *,
-        local_seq: int = 1,
+        local_seq: int | None = None,
         terms: Sequence[str] | None = None,
     ) -> list[Mention]:
         """Turn the provider response into Mention rows for *brand*.
 
         ``local_seq`` is the ledger row that saved *raw* (``raw_ref`` is
-        ``"{local_seq}#{index}"``); the pipeline passes it and the default
-        only satisfies the Provider protocol. ``terms`` are the brand terms
-        to match (default: the brand alone); items without a match are not
-        emitted (CONTRACTS §Mention.matched_terms).
+        ``"{local_seq}#{index}"``); it is required and must be ``>= 1``,
+        ``ValueError`` otherwise, before any item is read. ``terms`` are the
+        brand terms to match (default: the brand alone); items without a
+        match are not emitted (CONTRACTS §Mention.matched_terms).
         """
+        if local_seq is None or local_seq < 1:
+            raise ValueError("local_seq (ledger row of the raw payload) is required, >= 1")
         source = PLAN.source
         match_on = list(terms) if terms else [brand]
         mentions: list[Mention] = []

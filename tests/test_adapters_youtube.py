@@ -128,7 +128,7 @@ class TestYouTubeParse:
         assert first.matched_terms == ["nubank"]
 
     def test_author_is_hashed_never_stored(self, videos_raw: list[dict[str, Any]]) -> None:
-        mentions = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank")
+        mentions = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=1)
         first = mentions[0]
         assert first.author_hash == m.author_hash_for("youtube", "Canal Finanças Simples")
         assert first.author_hash is not None
@@ -140,15 +140,13 @@ class TestYouTubeParse:
     def test_numeric_string_counter_and_short_z_date(
         self, videos_raw: list[dict[str, Any]]
     ) -> None:
-        second = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank")[1]
+        second = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=1)[1]
         assert second.engagement["views"] == 1204555
         assert second.published_at == datetime(2026, 8, 12, 9, 45, 0, tzinfo=UTC)
         assert second.lang == "en"
 
-    def test_missing_optional_fields_do_not_raise(
-        self, videos_raw: list[dict[str, Any]]
-    ) -> None:
-        sparse = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank")[-1]
+    def test_missing_optional_fields_do_not_raise(self, videos_raw: list[dict[str, Any]]) -> None:
+        sparse = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=1)[-1]
         assert sparse.native_id == "mM4nN5bB6vV"
         assert sparse.text == "Nubank"
         assert sparse.url == "https://www.youtube.com/watch?v=mM4nN5bB6vV"
@@ -161,36 +159,37 @@ class TestYouTubeParse:
         only_alias = copy.deepcopy(videos_raw[:1])
         only_alias[0]["title"] = "Cartão roxo do Nu"
         only_alias[0]["text"] = "Só o apelido aparece aqui."
-        assert youtube.PROVIDER.parse(only_alias, RUN_ID, "Nubank") == []
-        assert len(youtube.PROVIDER.parse(only_alias, RUN_ID, "Nubank", terms=["Nu"])) == 1
+        assert youtube.PROVIDER.parse(only_alias, RUN_ID, "Nubank", local_seq=1) == []
+        assert (
+            len(youtube.PROVIDER.parse(only_alias, RUN_ID, "Nubank", terms=["Nu"], local_seq=1))
+            == 1
+        )
 
     def test_wrapped_payload_is_accepted(self, videos_raw: list[dict[str, Any]]) -> None:
         for key in ("items", "data", "results"):
             wrapped = {key: videos_raw}
-            assert len(youtube.PROVIDER.parse(wrapped, RUN_ID, "Nubank")) == 3
+            assert len(youtube.PROVIDER.parse(wrapped, RUN_ID, "Nubank", local_seq=1)) == 3
 
     def test_empty_payload_is_zero_mentions(self) -> None:
-        assert youtube.PROVIDER.parse([], RUN_ID, "Nubank") == []
-        assert youtube.PROVIDER.parse({"items": []}, RUN_ID, "Nubank") == []
+        assert youtube.PROVIDER.parse([], RUN_ID, "Nubank", local_seq=1) == []
+        assert youtube.PROVIDER.parse({"items": []}, RUN_ID, "Nubank", local_seq=1) == []
 
     def test_mutated_sample_missing_id_raises(self, videos_raw: list[dict[str, Any]]) -> None:
         mutated = copy.deepcopy(videos_raw)
         del mutated[1]["id"]
         with pytest.raises(AdapterSchemaError) as info:
-            youtube.PROVIDER.parse(mutated, RUN_ID, "Nubank")
+            youtube.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1)
         assert info.value.provider == "apify"
         assert info.value.endpoint == "/streamers/youtube-scraper"
         assert "item 1" in info.value.detail
         assert "'id'" in info.value.detail
 
-    def test_mutated_sample_renamed_fields_raises(
-        self, videos_raw: list[dict[str, Any]]
-    ) -> None:
+    def test_mutated_sample_renamed_fields_raises(self, videos_raw: list[dict[str, Any]]) -> None:
         mutated = [
             {"videoId": item.get("id"), "description": item.get("text")} for item in videos_raw
         ]
         with pytest.raises(AdapterSchemaError):
-            youtube.PROVIDER.parse(mutated, RUN_ID, "Nubank")
+            youtube.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1)
 
     @pytest.mark.parametrize(
         "raw",
@@ -203,7 +202,19 @@ class TestYouTubeParse:
     )
     def test_wrong_payload_shape_raises(self, raw: Any) -> None:
         with pytest.raises(AdapterSchemaError):
-            youtube.PROVIDER.parse(raw, RUN_ID, "Nubank")
+            youtube.PROVIDER.parse(raw, RUN_ID, "Nubank", local_seq=1)
+
+    def test_local_seq_required(self, videos_raw: list[dict[str, Any]]) -> None:
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank")
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=None)
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=0)
+
+    def test_local_seq_checked_before_payload(self) -> None:
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube.PROVIDER.parse([], RUN_ID, "Nubank", local_seq=0)
 
 
 class TestYouTubeCost:
@@ -221,7 +232,7 @@ class TestYouTubeCommentsBuildInput:
     def test_start_urls_from_video_mentions(
         self, query: m.Query, videos_raw: list[dict[str, Any]]
     ) -> None:
-        videos = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank")
+        videos = youtube.PROVIDER.parse(videos_raw, RUN_ID, "Nubank", local_seq=1)
         payload = youtube_comments.PROVIDER.build_input(query, videos)
         assert payload == {
             "startUrls": [
@@ -285,19 +296,17 @@ class TestYouTubeCommentsParse:
             item["date"] = "2026-08-30T10:00:00Z"
         assert all(
             x.published_at is None
-            for x in youtube_comments.PROVIDER.parse(with_date, RUN_ID, "Nubank")
+            for x in youtube_comments.PROVIDER.parse(with_date, RUN_ID, "Nubank", local_seq=1)
         )
 
     def test_handles_never_stored(self, comments_raw: list[dict[str, Any]]) -> None:
-        mentions = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank")
+        mentions = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank", local_seq=1)
         dumped = json.dumps([x.model_dump(mode="json") for x in mentions], ensure_ascii=False)
         assert "marina.oliveira" not in dumped
         assert "lucas.tm" not in dumped
 
-    def test_missing_optional_fields_do_not_raise(
-        self, comments_raw: list[dict[str, Any]]
-    ) -> None:
-        sparse = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank")[-1]
+    def test_missing_optional_fields_do_not_raise(self, comments_raw: list[dict[str, Any]]) -> None:
+        sparse = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank", local_seq=1)[-1]
         assert sparse.native_id is None
         assert sparse.author_hash is None
         assert sparse.engagement == {"likes": 44}
@@ -305,16 +314,21 @@ class TestYouTubeCommentsParse:
         expected_key = text_key(sparse.text)
         assert sparse.mention_id == m.mention_id_for("youtube_comment", expected_key)
 
-    def test_competitor_batch_matches_competitor(
-        self, comments_raw: list[dict[str, Any]]
-    ) -> None:
-        mentions = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Inter")
+    def test_competitor_batch_matches_competitor(self, comments_raw: list[dict[str, Any]]) -> None:
+        mentions = youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Inter", local_seq=1)
         assert [x.raw_ref for x in mentions] == ["1#1"]
         assert mentions[0].brand == "Inter"
         assert mentions[0].matched_terms == ["inter"]
 
     def test_wrapped_payload_is_accepted(self, comments_raw: list[dict[str, Any]]) -> None:
-        assert len(youtube_comments.PROVIDER.parse({"items": comments_raw}, RUN_ID, "Nubank")) == 3
+        assert (
+            len(
+                youtube_comments.PROVIDER.parse(
+                    {"items": comments_raw}, RUN_ID, "Nubank", local_seq=1
+                )
+            )
+            == 3
+        )
 
     def test_mutated_sample_missing_video_id_raises(
         self, comments_raw: list[dict[str, Any]]
@@ -322,7 +336,7 @@ class TestYouTubeCommentsParse:
         mutated = copy.deepcopy(comments_raw)
         del mutated[2]["videoId"]
         with pytest.raises(AdapterSchemaError) as info:
-            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank")
+            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1)
         assert info.value.endpoint == "/streamers/youtube-comments-scraper"
         assert "item 2" in info.value.detail
         assert "'videoId'" in info.value.detail
@@ -333,13 +347,25 @@ class TestYouTubeCommentsParse:
         mutated = copy.deepcopy(comments_raw)
         mutated[0]["comment"] = None
         with pytest.raises(AdapterSchemaError):
-            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank")
+            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1)
 
     def test_blank_comment_raises(self, comments_raw: list[dict[str, Any]]) -> None:
         mutated = copy.deepcopy(comments_raw)
         mutated[0]["comment"] = "   "
         with pytest.raises(AdapterSchemaError):
-            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank")
+            youtube_comments.PROVIDER.parse(mutated, RUN_ID, "Nubank", local_seq=1)
+
+    def test_local_seq_required(self, comments_raw: list[dict[str, Any]]) -> None:
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank")
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank", local_seq=None)
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube_comments.PROVIDER.parse(comments_raw, RUN_ID, "Nubank", local_seq=0)
+
+    def test_local_seq_checked_before_payload(self) -> None:
+        with pytest.raises(ValueError, match="local_seq"):
+            youtube_comments.PROVIDER.parse([], RUN_ID, "Nubank", local_seq=0)
 
 
 class TestYouTubeCommentsCost:
