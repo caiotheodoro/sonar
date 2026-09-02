@@ -22,9 +22,13 @@ import numpy as np
 import pytest
 from pydantic import BaseModel, ValidationError
 
+from sonar import config
 from sonar.llm import base
 from sonar.llm.base import (
+    RATIONALE_MAX_CHARS,
+    RATIONALE_MAX_WORDS,
     ClassifyBatch,
+    LabelAnswer,
     LabelObservation,
     LlmRateError,
     LlmRefusal,
@@ -32,6 +36,7 @@ from sonar.llm.base import (
     MentionText,
     Rate,
     Usage,
+    clip_rationale,
     coerce_rates,
 )
 from sonar.llm.fake import FakeBackend, LabelFixtureEntry, load_labels_fixture
@@ -49,6 +54,19 @@ RATES: dict[str, Rate] = {
     TIEBREAK: Rate(input_usd_per_mtok=2.00, output_usd_per_mtok=12.00),
     EMBEDDING: Rate(input_usd_per_mtok=0.02, output_usd_per_mtok=0.0),
 }
+# Same table, but the classifier states a cached-input price (one tenth of input).
+CACHED_RATES: dict[str, Rate] = {
+    **RATES,
+    CLASSIFIER: Rate(
+        input_usd_per_mtok=0.20, output_usd_per_mtok=1.20, cached_input_usd_per_mtok=0.02
+    ),
+}
+# The stub's usage block: 120 prompt tokens, 40 completion tokens, cached count per test.
+STUB_PROMPT_TOKENS = 120
+STUB_COMPLETION_TOKENS = 40
+
+TWENTY_WORDS = " ".join(f"w{i}" for i in range(RATIONALE_MAX_WORDS))
+TWENTY_ONE_WORDS = " ".join(f"w{i}" for i in range(RATIONALE_MAX_WORDS + 1))
 
 SYSTEM = "You label brand mentions. Answer only in the JSON schema."
 IDS = [f"aaaaaaaaaaaaaaaaaaaaaaa{i}" for i in range(1, 6)]
@@ -76,21 +94,31 @@ class StubState:
     refuse_batch: bool = False
     garbage_json: bool = False
     fail_http: int | None = None
+    cached_tokens: int | None = None
     requests: list[httpx2.Request] = field(default_factory=list)
     calls: dict[str, int] = field(default_factory=dict)
 
 
-def _chat_response(model: str, content: str | None, refusal: str | None) -> dict[str, Any]:
+def _chat_response(
+    model: str, content: str | None, refusal: str | None, cached_tokens: int | None = None
+) -> dict[str, Any]:
     message: dict[str, Any] = {"role": "assistant", "content": content}
     if refusal is not None:
         message["refusal"] = refusal
+    usage: dict[str, Any] = {
+        "prompt_tokens": STUB_PROMPT_TOKENS,
+        "completion_tokens": STUB_COMPLETION_TOKENS,
+        "total_tokens": STUB_PROMPT_TOKENS + STUB_COMPLETION_TOKENS,
+    }
+    if cached_tokens is not None:
+        usage["prompt_tokens_details"] = {"cached_tokens": cached_tokens}
     return {
         "id": "chatcmpl-stub",
         "object": "chat.completion",
         "created": 1,
         "model": model,
         "choices": [{"index": 0, "finish_reason": "stop", "message": message}],
-        "usage": {"prompt_tokens": 120, "completion_tokens": 40, "total_tokens": 160},
+        "usage": usage,
     }
 
 
@@ -161,7 +189,10 @@ def make_handler(state: StubState) -> Callable[[httpx2.Request], httpx2.Response
                 }
             )
         return httpx2.Response(
-            200, json=_chat_response(model, json.dumps({"labels": labels}), None)
+            200,
+            json=_chat_response(
+                model, json.dumps({"labels": labels}), None, cached_tokens=state.cached_tokens
+            ),
         )
 
     return handler
@@ -188,6 +219,14 @@ class Harness:
         else:
             assert self.stub is not None
             self.stub.drop_ids.add(mention_id)
+
+    def set_rationale(self, mention_id: str, rationale: str) -> None:
+        labels = self.fake._labels if self.fake is not None else self._stub_labels()
+        labels[mention_id] = labels[mention_id].model_copy(update={"rationale": rationale})
+
+    def _stub_labels(self) -> dict[str, LabelFixtureEntry]:
+        assert self.stub is not None
+        return self.stub.labels
 
 
 def _fixture_labels() -> dict[str, LabelFixtureEntry]:
@@ -394,6 +433,150 @@ def test_usage_price_arithmetic() -> None:
     usage = Usage.price(TIEBREAK, 1_000_000, 500_000, RATES)
     assert usage.cost_usd == pytest.approx(2.00 + 6.00)
     assert usage.tokens == 1_500_000
+    assert usage.cached_input_tokens == 0
+
+
+def test_usage_price_bills_cached_prompt_tokens_at_cached_rate() -> None:
+    # 1M prompt tokens of which 600k cached, 100k completion, at 0.20/0.02/1.20 per MTok:
+    # 400k * 0.20 + 600k * 0.02 + 100k * 1.20 = 0.08 + 0.012 + 0.12 = 0.212 USD.
+    usage = Usage.price(CLASSIFIER, 1_000_000, 100_000, CACHED_RATES, cached_input_tokens=600_000)
+    assert usage.cost_usd == pytest.approx(0.212)
+    assert usage.input_tokens == 1_000_000
+    assert usage.cached_input_tokens == 600_000
+    assert usage.tokens == 1_100_000
+    full = Usage.price(CLASSIFIER, 1_000_000, 100_000, CACHED_RATES)
+    assert full.cost_usd == pytest.approx(0.32)
+    assert usage.cost_usd < full.cost_usd
+
+
+def test_usage_price_without_cached_rate_bills_cached_tokens_at_input_rate() -> None:
+    # RATES states no cached price, so cached tokens cost the full 0.20: never under-reported.
+    usage = Usage.price(CLASSIFIER, 1_000_000, 100_000, RATES, cached_input_tokens=600_000)
+    assert usage.cost_usd == pytest.approx(0.32)
+    assert usage.cached_input_tokens == 600_000
+
+
+def test_usage_rejects_more_cached_than_input_tokens() -> None:
+    with pytest.raises(ValueError):
+        Usage.price(CLASSIFIER, 10, 0, CACHED_RATES, cached_input_tokens=11)
+    with pytest.raises(ValidationError):
+        Usage(
+            model=CLASSIFIER,
+            input_tokens=10,
+            output_tokens=0,
+            cached_input_tokens=11,
+            tokens=10,
+            cost_usd=0.0,
+        )
+
+
+def test_rate_cached_price_must_not_exceed_input_price() -> None:
+    with pytest.raises(ValidationError):
+        Rate(input_usd_per_mtok=0.20, output_usd_per_mtok=1.20, cached_input_usd_per_mtok=0.25)
+    stated = Rate(input_usd_per_mtok=0.20, output_usd_per_mtok=1.20, cached_input_usd_per_mtok=0.2)
+    assert stated.effective_cached_input_usd_per_mtok == 0.2
+    unstated = Rate(input_usd_per_mtok=0.20, output_usd_per_mtok=1.20)
+    assert unstated.cached_input_usd_per_mtok is None
+    assert unstated.effective_cached_input_usd_per_mtok == 0.20
+
+
+def _stub_backend(state: StubState, rates: dict[str, Rate]) -> tuple[OpenAIBackend, httpx2.Client]:
+    client = httpx2.Client(transport=httpx2.MockTransport(make_handler(state)))
+    return OpenAIBackend("sk-stub", rates=rates, http_client=client, max_retries=0), client
+
+
+def test_backend_prices_cached_prompt_tokens_from_usage_block() -> None:
+    # Stub usage: 120 prompt tokens (80 cached), 40 completion, at 0.20/0.02/1.20 per MTok:
+    # 40 * 0.20 + 80 * 0.02 + 40 * 1.20 = 8 + 1.6 + 48 = 57.6 micro-USD.
+    state = StubState(labels=_fixture_labels(), cached_tokens=80)
+    backend, client = _stub_backend(state, CACHED_RATES)
+    with client:
+        usage = backend.classify(batch_of(IDS[:3]), CLASSIFIER).usage
+    assert usage.input_tokens == 120
+    assert usage.cached_input_tokens == 80
+    assert usage.output_tokens == 40
+    assert usage.cost_usd == pytest.approx(57.6e-6)
+
+
+def test_backend_without_cached_rate_still_records_cached_tokens() -> None:
+    # 120 * 0.20 + 40 * 1.20 = 24 + 48 = 72 micro-USD; the cached count is kept for the receipt.
+    state = StubState(labels=_fixture_labels(), cached_tokens=80)
+    backend, client = _stub_backend(state, RATES)
+    with client:
+        usage = backend.classify(batch_of(IDS[:3]), CLASSIFIER).usage
+    assert usage.cached_input_tokens == 80
+    assert usage.cost_usd == pytest.approx(72e-6)
+
+
+def test_backend_without_prompt_token_details_prices_all_input_at_full_rate() -> None:
+    state = StubState(labels=_fixture_labels(), cached_tokens=None)
+    backend, client = _stub_backend(state, CACHED_RATES)
+    with client:
+        usage = backend.classify(batch_of(IDS[:3]), CLASSIFIER).usage
+    assert usage.cached_input_tokens == 0
+    assert usage.cost_usd == pytest.approx(72e-6)
+
+
+def test_backend_clamps_cached_tokens_to_prompt_tokens() -> None:
+    # A malformed usage block claiming more cached than prompt tokens must not raise or
+    # under-price: cached is clamped to the prompt, so 120 * 0.02 + 40 * 1.20 = 50.4 micro-USD.
+    state = StubState(labels=_fixture_labels(), cached_tokens=999)
+    backend, client = _stub_backend(state, CACHED_RATES)
+    with client:
+        usage = backend.classify(batch_of(IDS[:3]), CLASSIFIER).usage
+    assert usage.cached_input_tokens == 120
+    assert usage.cost_usd == pytest.approx(50.4e-6)
+
+
+# --- rationale caps (CONTRACTS §Label: at most twenty words) ----------------------
+
+
+def test_rationale_word_cap_matches_config() -> None:
+    assert RATIONALE_MAX_WORDS == config.RATIONALE_MAX_WORDS == 20
+    assert len(TWENTY_ONE_WORDS) < RATIONALE_MAX_CHARS, "the probe must fail on words, not chars"
+
+
+def test_answer_rejects_rationale_over_word_cap() -> None:
+    LabelAnswer(
+        mention_id=IDS[0],
+        label="positive",
+        about_brand=True,
+        confidence=0.9,
+        rationale=TWENTY_WORDS,
+    )
+    with pytest.raises(ValidationError, match="words"):
+        LabelAnswer(
+            mention_id=IDS[0],
+            label="positive",
+            about_brand=True,
+            confidence=0.9,
+            rationale=TWENTY_ONE_WORDS,
+        )
+
+
+def test_observation_rejects_rationale_over_word_cap() -> None:
+    LabelObservation(mention_id=IDS[0], status="unparseable", rationale=TWENTY_WORDS)
+    with pytest.raises(ValidationError, match="words"):
+        LabelObservation(mention_id=IDS[0], status="unparseable", rationale=TWENTY_ONE_WORDS)
+
+
+def test_failed_observation_clips_long_reason_to_both_caps() -> None:
+    obs = LabelObservation.failed(IDS[0], "error", TWENTY_ONE_WORDS)
+    assert obs.rationale == TWENTY_WORDS
+    long_word = "x" * (RATIONALE_MAX_CHARS + 50)
+    assert (
+        LabelObservation.failed(IDS[0], "error", long_word).rationale == "x" * RATIONALE_MAX_CHARS
+    )
+    assert clip_rationale(TWENTY_WORDS) == TWENTY_WORDS, "under both caps: verbatim"
+    assert LabelObservation.failed(IDS[0], "error", None).rationale is None
+
+
+def test_over_cap_rationale_from_model_marks_batch_unparseable(harness: Harness) -> None:
+    harness.set_rationale(IDS[1], TWENTY_ONE_WORDS)
+    result = harness.backend.classify(batch_of(IDS[:3]), CLASSIFIER)
+    assert [o.mention_id for o in result.observations] == IDS[:3]
+    assert all(o.status == "unparseable" for o in result.observations)
+    assert all(o.label is None for o in result.observations)
 
 
 # --- complete_json ---------------------------------------------------------------
@@ -519,15 +702,60 @@ def test_coerce_rates_accepts_config_shapes() -> None:
     assert rates["b"].input_usd_per_mtok == 3.0
     assert rates["c"].output_usd_per_mtok == 6.0
     assert rates["d"].input_usd_per_mtok == 7.0
+    assert all(rate.cached_input_usd_per_mtok is None for rate in rates.values())
     with pytest.raises(LlmRateError):
         coerce_rates({"e": {"price": 1.0}})
+    with pytest.raises(LlmRateError):
+        coerce_rates({"f": {"input": 1.0}})
+
+
+def test_coerce_rates_carries_cached_input_price() -> None:
+    @dataclass(frozen=True)
+    class WithCached:
+        input_usd_per_mtok: float
+        output_usd_per_mtok: float
+        cached_input_usd_per_mtok: float
+
+    rates = coerce_rates(
+        {
+            "a": {"input": 1.0, "output": 2.0, "cached": 0.1},
+            "b": {
+                "input_usd_per_mtok": 3.0,
+                "output_usd_per_mtok": 4.0,
+                "cached_input_usd_per_mtok": 0.3,
+            },
+            "c": (5.0, 6.0, 0.5),
+            "d": WithCached(7.0, 8.0, 0.7),
+            "e": config.LlmRate(input_usd_per_mtok=9.0, output_usd_per_mtok=10.0),
+        }
+    )
+    assert rates["a"].cached_input_usd_per_mtok == 0.1
+    assert rates["b"].cached_input_usd_per_mtok == 0.3
+    assert rates["c"].cached_input_usd_per_mtok == 0.5
+    assert rates["d"].cached_input_usd_per_mtok == 0.7
+    assert rates["e"].cached_input_usd_per_mtok is None
+    assert rates["e"].effective_cached_input_usd_per_mtok == 9.0
 
 
 def test_load_rates_prices_the_design_models() -> None:
     rates = base.load_rates()
     for model in (CLASSIFIER, TIEBREAK):
-        assert model in rates, f"{model} must be priced (config.LLM_RATES or fallback)"
+        assert model in rates, f"{model} must be priced in config.LLM_RATES"
         assert rates[model].input_usd_per_mtok > 0.0
+
+
+def test_rates_have_one_source_of_truth() -> None:
+    # D003: config.LLM_RATES is the only price table; the seam carries no copy that can drift.
+    assert not hasattr(base, "FALLBACK_RATES")
+    assert base.load_rates() == coerce_rates(config.LLM_RATES)
+    assert base.RATES_DATED == config.LLM_RATES_CHECKED_AT
+    for model, rate in base.load_rates().items():
+        assert rate.dated == config.LLM_RATES_CHECKED_AT
+        assert rate.input_usd_per_mtok == config.LLM_RATES[model].input_usd_per_mtok
+        assert rate.output_usd_per_mtok == config.LLM_RATES[model].output_usd_per_mtok
+        # Same number config.llm_cost_usd reports when nothing is cached.
+        priced = Usage.price(model, 1_000_000, 1_000_000, base.load_rates())
+        assert priced.cost_usd == pytest.approx(config.llm_cost_usd(model, 1_000_000, 1_000_000))
 
 
 def _imported_modules(path: Path) -> set[str]:

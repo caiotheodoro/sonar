@@ -2,7 +2,8 @@
 
 Structured output: ``chat.completions.parse`` with the pydantic schema as
 ``response_format`` so the model is constrained to the schema. Usage is
-priced from the rate table at call time. SDK retries default to 4 (Error
+priced from the rate table at call time, with cached prompt tokens
+(``usage.prompt_tokens_details.cached_tokens``) at the cached input rate. SDK retries default to 4 (Error
 matrix: "SDK retries ×4, then excluded with reason").
 """
 
@@ -69,8 +70,16 @@ class OpenAIBackend:
     def rates(self) -> Mapping[str, Rate]:
         return self._rates
 
-    def _usage(self, model: str, input_tokens: int, output_tokens: int) -> Usage:
-        return Usage.price(model, input_tokens, output_tokens, self._rates)
+    def _usage(
+        self, model: str, input_tokens: int, output_tokens: int, cached_input_tokens: int = 0
+    ) -> Usage:
+        return Usage.price(
+            model,
+            input_tokens,
+            output_tokens,
+            self._rates,
+            cached_input_tokens=cached_input_tokens,
+        )
 
     def classify(self, batch: ClassifyBatch, model: str) -> ClassifyResult:
         # Price the batch even on failure: an unknown model must fail loudly before any call.
@@ -154,9 +163,18 @@ class OpenAIBackend:
         return EmbedResult(vectors=vectors, usage=usage)
 
     def _usage_of(self, usage: openai.types.CompletionUsage | None, model: str) -> Usage:
+        """Price a completion's usage block; cached prompt tokens go at the cached rate.
+
+        ``prompt_tokens`` is the whole prompt; ``prompt_tokens_details.cached_tokens``
+        (absent on some responses) is the part of it served from OpenAI's prompt
+        cache and billed at ``Rate.cached_input_usd_per_mtok``.
+        """
         if usage is None:
             return self._usage(model, 0, 0)
-        return self._usage(model, usage.prompt_tokens, usage.completion_tokens)
+        details = usage.prompt_tokens_details
+        cached = 0 if details is None or details.cached_tokens is None else details.cached_tokens
+        cached = min(cached, usage.prompt_tokens)
+        return self._usage(model, usage.prompt_tokens, usage.completion_tokens, cached)
 
 
 __all__ = ["DEFAULT_MAX_RETRIES", "OpenAIBackend"]

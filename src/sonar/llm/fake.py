@@ -124,6 +124,9 @@ class FakeBackend:
         Usage.price(model, 0, 0, self._rates)
         self._record("classify", model)
         self.batches.append((model, batch.ids))
+        input_tokens = word_tokens(batch.system, render_classify_user_message(batch))
+        output_tokens = 12 * len(batch.items)
+        usage = Usage.price(model, input_tokens, output_tokens, self._rates)
         answers: list[LabelAnswer] = []
         failures: dict[str, LabelObservation] = {}
         for item in batch.items:
@@ -137,24 +140,30 @@ class FakeBackend:
                 continue
             if entry.label is None or entry.about_brand is None or entry.confidence is None:
                 raise ValueError(f"fixture entry {item.mention_id!r} is status=ok but incomplete")
-            answers.append(
-                LabelAnswer(
-                    mention_id=item.mention_id,
-                    label=entry.label,
-                    about_brand=entry.about_brand,
-                    confidence=entry.confidence,
-                    rationale=entry.rationale,
+            try:
+                answers.append(
+                    LabelAnswer(
+                        mention_id=item.mention_id,
+                        label=entry.label,
+                        about_brand=entry.about_brand,
+                        confidence=entry.confidence,
+                        rationale=entry.rationale,
+                    )
                 )
-            )
+            except ValidationError as exc:
+                # Same rule as the backend: an answer that breaks the wire schema
+                # (e.g. a rationale over the word cap) makes the whole batch unparseable.
+                reason = f"schema validation failed: {str(exc)[:200]}"
+                return ClassifyResult(
+                    observations=[
+                        LabelObservation.failed(i, "unparseable", reason) for i in batch.ids
+                    ],
+                    usage=usage,
+                )
         observations = [
             failures.get(obs.mention_id, obs) for obs in align_observations(batch, answers)
         ]
-        input_tokens = word_tokens(batch.system, render_classify_user_message(batch))
-        output_tokens = 12 * len(batch.items)
-        return ClassifyResult(
-            observations=observations,
-            usage=Usage.price(model, input_tokens, output_tokens, self._rates),
-        )
+        return ClassifyResult(observations=observations, usage=usage)
 
     def complete_json(
         self, system: str, user: str, schema: type[SchemaT], model: str
