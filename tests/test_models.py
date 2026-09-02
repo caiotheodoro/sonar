@@ -396,7 +396,7 @@ def test_records_dict_names_every_contract_record() -> None:
         "StatsFile",
         "Answer",
     }
-    assert m.SCHEMA_REV == "1.1.0"
+    assert m.SCHEMA_REV == "1.1.1"
 
 
 def test_datetimes_serialize_as_utc_second_precision_z() -> None:
@@ -709,6 +709,48 @@ def test_label_overflow_keeps_classifier_label_as_model_only() -> None:
         label(signals={**no_det, "overflow": True}, about_brand=False, corroboration="irrelevant")
     )
     assert irrelevant.corroboration == "irrelevant"
+
+
+def test_label_model_only_rule_for_null_signal_and_failed_tiebreak() -> None:
+    """D013 N5 / A2: no tiebreak adopted and not confirmed is ``model_only``."""
+    no_det = {**label()["signals"], "deterministic": {"kind": "none", "label": None}}
+    with pytest.raises(ValidationError, match="model_only"):
+        m.Label.model_validate(label(signals=no_det))
+    audit_only = m.Label.model_validate(label(signals=no_det, corroboration="model_only"))
+    assert audit_only.decided_by == "classifier"
+    tb_ok = {"model": "gpt-5.6-terra", "label": "positive", "confidence": 0.8, "status": "ok"}
+    audit_agrees = m.Label.model_validate(
+        label(signals={**no_det, "tiebreak": tb_ok}, corroboration="model_only")
+    )
+    assert audit_agrees.signals.tiebreak is not None
+    with pytest.raises(ValidationError, match="requires corroboration contested"):
+        m.Label.model_validate(
+            label(
+                signals={**no_det, "tiebreak": tb_ok},
+                corroboration="model_only",
+                decided_by="tiebreak",
+            )
+        )
+    tb_failed = {**tb_ok, "label": "negative", "status": "error"}
+    with pytest.raises(ValidationError, match="model_only"):
+        m.Label.model_validate(
+            label(
+                label="negative",
+                signals={**no_det, "tiebreak": tb_failed},
+                corroboration="contested",
+                decided_by="tiebreak",
+            )
+        )
+    failed_call = m.Label.model_validate(
+        label(signals={**no_det, "tiebreak": tb_failed}, corroboration="model_only")
+    )
+    assert failed_call.corroboration == "model_only"
+    with pytest.raises(ValidationError, match="contested means a tiebreak"):
+        m.Label.model_validate(label(corroboration="contested"))
+    with pytest.raises(ValidationError, match="requires corroboration contested"):
+        m.Label.model_validate(
+            label(signals={**label()["signals"], "tiebreak": tb_ok}, decided_by="tiebreak")
+        )
 
 
 def test_label_rejects_long_rationale_and_bad_signal_shapes() -> None:
@@ -1036,7 +1078,7 @@ def test_receipt_requires_audit_and_counts_local_rows_as_failed() -> None:
         cost_source="local",
         error="insufficient credit",
     )
-    with pytest.raises(ValidationError, match="monid_runs_failed counts every run_id=null"):
+    with pytest.raises(ValidationError, match="monid_runs_failed counts every LOCAL_"):
         m.Receipt.model_validate(receipt(runs=[run(), local_row], totals=totals(monid_runs=2)))
     card = m.Receipt.model_validate(
         receipt(
@@ -1046,6 +1088,53 @@ def test_receipt_requires_audit_and_counts_local_rows_as_failed() -> None:
     )
     assert card.derived_verdict == "RECONCILED"
     assert card.reconciliation.unreconciled_local_seqs == []
+
+
+def test_receipt_succeeded_sync_run_without_id_is_local_and_not_failed() -> None:
+    """D013 N6: a succeeded ``run_id=null`` sync run is ``local``, ``$0`` and not failed."""
+    sync_row = run(
+        local_seq=2,
+        run_id=None,
+        provider="tinyfish",
+        endpoint="/search",
+        source="news",
+        status="SUCCEEDED",
+        n_results=12,
+        estimate_usd=0.0,
+        cost_usd=0.0,
+        billed_units=None,
+        cost_source="local",
+    )
+    card = m.Receipt.model_validate(
+        receipt(runs=[run(), sync_row], totals=totals(monid_runs=2, monid_runs_failed=0))
+    )
+    assert card.runs[1].is_local_status is False
+    assert card.totals.monid_runs_failed == 0
+    assert card.derived_verdict == "RECONCILED"
+    deadline = run(
+        local_seq=2,
+        run_id="run_02",
+        status="LOCAL_DEADLINE",
+        completed_at=None,
+        n_results=None,
+        cost_usd=None,
+        billed_units=None,
+        cost_source="unreconciled",
+        error="deadline",
+    )
+    with pytest.raises(ValidationError, match="monid_runs_failed counts every LOCAL_"):
+        m.Receipt.model_validate(
+            receipt(
+                runs=[run(), deadline],
+                totals=totals(monid_runs=2, monid_runs_failed=0),
+                reconciliation={
+                    "fetched_at": T0 + timedelta(minutes=5),
+                    "n_listed_in_window": 1,
+                    "unmatched_remote_run_ids": [],
+                    "unreconciled_local_seqs": [2],
+                },
+            )
+        )
 
 
 @pytest.mark.parametrize(
@@ -1167,8 +1256,7 @@ NULL_WOW_SHARE: dict[str, Any] = {
         (-0.2, (-0.3, -0.1), (0.05, 0.3), 0.4, 0.8, "ABSTAIN"),
         (-0.2, (-0.3, -0.1), (-0.3, -0.05), 0.001, 0.004, "SIGNIFICANT"),
         (0.0, (-0.1, 0.1), (-0.1, 0.1), 0.01, 0.04, "SUGGESTIVE"),
-        (0.2, (0.1, 0.3), None, 0.001, 0.004, "SIGNIFICANT"),
-        (0.2, (-0.1, 0.3), None, 0.001, 0.004, "SIGNIFICANT"),
+        (0.2, (0.1, 0.3), None, 0.001, 0.004, "SUGGESTIVE"),
         (0.2, (0.1, 0.3), None, 0.03, 0.06, "SUGGESTIVE"),
         (0.2, (0.1, 0.3), None, 0.05, 0.1, "NO_CHANGE_DETECTED"),
     ],
@@ -1184,6 +1272,21 @@ def test_derive_wow_verdict_follows_the_holm_rule(
     assert m.derive_wow_verdict(delta, ci95, confirmed, p_raw, p_holm) == expected
 
 
+@pytest.mark.parametrize(
+    ("ci95", "p_raw", "p_holm", "expected"),
+    [
+        ((0.1, 0.3), 0.001, 0.004, "SIGNIFICANT"),
+        ((-0.1, 0.3), 0.001, 0.004, "SIGNIFICANT"),
+        ((0.1, 0.3), 0.03, 0.06, "SUGGESTIVE"),
+        ((0.1, 0.3), 0.05, 0.1, "NO_CHANGE_DETECTED"),
+    ],
+)
+def test_derive_wow_verdict_for_share_needs_only_p_holm(
+    ci95: tuple[float, float], p_raw: float, p_holm: float, expected: str
+) -> None:
+    assert m.derive_wow_verdict(0.2, ci95, None, p_raw, p_holm, share=True) == expected
+
+
 def test_wow_net_below_minimum_is_all_null_and_conflict_keeps_values() -> None:
     below = m.WowNet.model_validate(NULL_WOW_NET)
     assert below.is_below_minimum
@@ -1192,7 +1295,14 @@ def test_wow_net_below_minimum_is_all_null_and_conflict_keeps_values() -> None:
     with pytest.raises(ValidationError, match="all null .* or all reported"):
         m.WowNet.model_validate({**NULL_WOW_NET, "p_raw": 0.5})
     with pytest.raises(ValidationError, match="all null .* or all reported"):
-        m.WowNet.model_validate(wow_net(ci95_confirmed_only=None))
+        m.WowNet.model_validate(wow_net(ci95=None))
+    no_confirmed_rows = m.WowNet.model_validate(wow_net(ci95_confirmed_only=None))
+    assert no_confirmed_rows.verdict == "SUGGESTIVE"
+    assert not no_confirmed_rows.is_below_minimum
+    with pytest.raises(ValidationError, match="expected SUGGESTIVE"):
+        m.WowNet.model_validate(
+            wow_net(ci95_confirmed_only=None, verdict="SIGNIFICANT", p_raw=0.001, p_holm=0.004)
+        )
     conflict = m.WowNet.model_validate(
         wow_net(
             delta=0.2,
@@ -1332,6 +1442,33 @@ def test_sentiment_entry_null_rules_and_design_effect_formula() -> None:
     assert degenerate.design_effect is None
     with pytest.raises(ValidationError, match="null when the iid width is 0"):
         m.SentimentEntry.model_validate({**sent, "ci95_iid": [0.4, 0.4]})
+    assert degenerate.has_degenerate_design_effect
+    assert not m.SentimentEntry.model_validate(sent).has_degenerate_design_effect
+
+
+def test_sentiment_entry_without_confirmed_rows_has_null_confirmed_interval() -> None:
+    """D013 N4: ``n_confirmed = 0`` forces ``wow.ci95_confirmed_only`` null (degenerate)."""
+    sent = digest()["sentiment"][0]
+    with pytest.raises(ValidationError, match="ci95_confirmed_only is null when n_confirmed"):
+        m.SentimentEntry.model_validate({**sent, "n_confirmed": 0})
+    none_confirmed = m.SentimentEntry.model_validate(
+        {**sent, "n_confirmed": 0, "wow": wow_net(ci95_confirmed_only=None)}
+    )
+    assert none_confirmed.wow.has_degenerate_confirmed_interval
+    assert not m.WowNet.model_validate(NULL_WOW_NET).has_degenerate_confirmed_interval
+    assert not m.WowNet.model_validate(wow_net()).has_degenerate_confirmed_interval
+    below = m.SentimentEntry.model_validate(
+        {
+            **sent,
+            "n_confirmed": 0,
+            "net": None,
+            "ci95": None,
+            "ci95_iid": None,
+            "design_effect": None,
+            "wow": NULL_WOW_NET,
+        }
+    )
+    assert below.wow.is_below_minimum
 
 
 def test_by_source_entry_gains_intervals_design_effect_and_wow_scope() -> None:
@@ -1359,6 +1496,14 @@ def test_by_source_entry_gains_intervals_design_effect_and_wow_scope() -> None:
     )
     assert author_clustered.h2_scored is False
     assert m.H2_SCORED_SOURCES == {"reddit", "youtube_comment"}
+    thin = m.BySourceEntry.model_validate({**digest()["by_source"][0], "n_clusters": 4})
+    assert thin.meets_h2_minimums is False
+    assert thin.h2_scored is False
+    small = m.BySourceEntry.model_validate(
+        {**digest()["by_source"][0], "n": 19, "pos": 10, "neg": 4, "neu": 5, "n_clusters": 5}
+    )
+    assert small.meets_h2_minimums is False
+    assert (m.MIN_CLUSTERS, m.MIN_N) == (5, 20)
 
 
 def test_event_threshold_rule() -> None:
@@ -1490,6 +1635,42 @@ def test_digest_pairs_every_null_estimate_with_an_abstention() -> None:
         m.Digest.model_validate(digest(topics=[topic_null], abstentions=[abstention()]))
 
 
+def test_digest_pairs_degenerate_nulls_with_a_degenerate_row() -> None:
+    """D013 N4: null ``design_effect`` or ``ci95_confirmed_only`` needs reason ``degenerate``."""
+    degenerate_row = abstention(reason="degenerate", detail="iid width 0")
+    flat = {**digest()["sentiment"][0], "ci95_iid": [0.4, 0.4], "design_effect": None}
+    with pytest.raises(ValidationError, match="sentiment.design_effect Nubank"):
+        m.Digest.model_validate(digest(sentiment=[flat]))
+    with pytest.raises(ValidationError, match="sentiment.design_effect Nubank"):
+        m.Digest.model_validate(digest(sentiment=[flat], abstentions=[abstention()]))
+    assert m.Digest.model_validate(digest(sentiment=[flat], abstentions=[degenerate_row]))
+
+    no_confirmed = {
+        **digest()["sentiment"][0],
+        "n_confirmed": 0,
+        "wow": wow_net(ci95_confirmed_only=None),
+    }
+    with pytest.raises(ValidationError, match="sentiment.wow.ci95_confirmed_only Nubank"):
+        m.Digest.model_validate(digest(sentiment=[no_confirmed]))
+    with pytest.raises(ValidationError, match="sentiment.wow.ci95_confirmed_only Nubank"):
+        m.Digest.model_validate(
+            digest(sentiment=[no_confirmed], abstentions=[abstention(reason="signals_conflict")])
+        )
+    assert m.Digest.model_validate(digest(sentiment=[no_confirmed], abstentions=[degenerate_row]))
+
+    flat_source = {**digest()["by_source"][0], "ci95_iid": [0.4, 0.4], "design_effect": None}
+    with pytest.raises(ValidationError, match="by_source.design_effect Nubank/reddit"):
+        m.Digest.model_validate(digest(by_source=[flat_source]))
+    with pytest.raises(ValidationError, match="by_source.design_effect Nubank/reddit"):
+        m.Digest.model_validate(digest(by_source=[flat_source], abstentions=[degenerate_row]))
+    per_source = abstention(reason="degenerate", source="reddit", detail="iid width 0")
+    assert m.Digest.model_validate(digest(by_source=[flat_source], abstentions=[per_source]))
+    with pytest.raises(ValidationError, match="by_source.design_effect Nubank/reddit"):
+        m.Digest.model_validate(
+            digest(by_source=[flat_source], abstentions=[abstention(source="reddit")])
+        )
+
+
 def test_topic_estimates_are_nullable_and_threshold_is_fixed() -> None:
     null_topic = m.Topic.model_validate(topic(share=None, net=None, ci95=None))
     assert null_topic.has_null_estimate
@@ -1535,6 +1716,12 @@ def test_abstention_accepts_pre_registered_and_contract_reasons() -> None:
     assert topics.reason == "embedding_failed"
     conflict = m.Abstention.model_validate(abstention(reason="signals_conflict"))
     assert conflict.reason == "signals_conflict"
+    degenerate = m.Abstention.model_validate(abstention(reason="degenerate", source="reddit"))
+    assert degenerate.reason == "degenerate"
+    with pytest.raises(ValidationError, match="scope must be brand and brand"):
+        m.Abstention.model_validate(abstention(scope="source", reason="degenerate"))
+    with pytest.raises(ValidationError, match="scope must be brand and brand"):
+        m.Abstention.model_validate(abstention(brand=None, reason="degenerate"))
     with pytest.raises(ValidationError, match="topics-only"):
         m.Abstention.model_validate(abstention(reason="embedding_failed"))
     with pytest.raises(ValidationError, match="scope must be brand"):

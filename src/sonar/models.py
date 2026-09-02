@@ -1,11 +1,11 @@
-"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.1.0).
+"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.1.1).
 
 Every model is frozen with ``extra="forbid"``; field names are the wire names.
 Closed enums are ``Literal`` aliases so an unknown value is a validation error.
 Rules that CONTRACTS states in prose (cluster_key per source, Query validator
 order, receipt verdict, WoW verdict, null-estimate pairing, canonical JSON
 digests) are validators or helpers here. Changes since 1.0.0 follow
-`docs/DECISIONS.md` D012; the finding ids are cited inline.
+`docs/DECISIONS.md` D012 (1.1.0) and D013 (1.1.1); the item ids are cited inline.
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from pydantic import (
     model_validator,
 )
 
-SCHEMA_REV = "1.1.0"
+SCHEMA_REV = "1.1.1"
 
 # --------------------------------------------------------------------------- enums
 
@@ -70,6 +70,7 @@ AbstainReason = Literal[
     "halted",
     "embedding_failed",
     "signals_conflict",
+    "degenerate",
 ]
 AbstainScope = Literal["source", "brand", "topics", "voice", "session"]
 
@@ -104,6 +105,11 @@ WINDOW_DAYS: Final[int] = 14
 PERIOD_DAYS: Final[int] = WINDOW_DAYS // 2
 TOPIC_DISTANCE_THRESHOLD: Final[float] = 0.35
 """Average-linkage cosine-distance cut, chosen before any demo data (D012 F16)."""
+MIN_CLUSTERS: Final[int] = 5
+MIN_N: Final[int] = 20
+"""Brand minimums: `n_clusters >= 5` and `n >= 20` per period gate every WoW verdict
+(`below_minimum`); the same pair over the full window is the H2 minimum on a
+`BySourceEntry` (D013 N3)."""
 EVENT_MIN_N: Final[int] = 5
 EVENT_MAD_MULTIPLIER: Final[float] = 3.0
 ALPHA: Final[float] = 0.05
@@ -476,6 +482,27 @@ class Label(SonarModel):
                 raise ValueError("overflow means the tiebreak was never called; tiebreak is null")
             if self.corroboration not in ("model_only", "irrelevant"):
                 raise ValueError("an overflow row is model_only (or irrelevant), never confirmed")
+        if self.corroboration == "contested":
+            if self.signals.tiebreak is None or self.decided_by != "tiebreak":
+                raise ValueError(
+                    "contested means a tiebreak disagreed and won: decided_by=tiebreak"
+                )
+        elif self.decided_by == "tiebreak":
+            raise ValueError(
+                f"decided_by=tiebreak requires corroboration contested, not {self.corroboration}"
+            )
+        tiebreak = self.signals.tiebreak
+        if tiebreak is not None and tiebreak.status != "ok" and self.corroboration == "contested":
+            raise ValueError("a failed tiebreak call is never adopted: model_only (D013 N5)")
+        if (
+            not irrelevant
+            and self.signals.deterministic.label is None
+            and (tiebreak is None or tiebreak.status != "ok")
+            and self.corroboration != "model_only"
+        ):
+            raise ValueError(
+                "a null deterministic signal with no successful tiebreak is model_only (D013 N5)"
+            )
         return self
 
 
@@ -506,6 +533,7 @@ class RunRecord(SonarModel):
 
     @property
     def is_local_status(self) -> bool:
+        """``status`` starts with ``LOCAL_``; the row counts in ``monid_runs_failed`` (D013 N6)."""
         return self.status.startswith("LOCAL_")
 
     @model_validator(mode="after")
@@ -735,6 +763,11 @@ class Abstention(SonarModel):
             raise ValueError("embedding_failed is a topics-only abstention")
         if self.reason == "signals_conflict" and self.scope != "brand":
             raise ValueError("signals_conflict abstains a brand's WoW verdict; scope must be brand")
+        if self.reason == "degenerate" and (self.scope != "brand" or self.brand is None):
+            raise ValueError(
+                "degenerate pairs a brand's null design_effect or ci95_confirmed_only; "
+                "scope must be brand and brand must be named (D013 N4)"
+            )
         return self
 
 
@@ -793,9 +826,12 @@ class Receipt(SonarModel):
             raise ValueError(
                 "reconciliation.unreconciled_local_seqs must list every unreconciled run"
             )
-        local_rows = sum(1 for r in self.runs if r.cost_source == "local")
-        if self.totals.monid_runs_failed < local_rows:
-            raise ValueError("totals.monid_runs_failed counts every run_id=null (local) row")
+        local_failures = sum(1 for r in self.runs if r.is_local_status)
+        if self.totals.monid_runs_failed < local_failures:
+            raise ValueError(
+                "totals.monid_runs_failed counts every LOCAL_* row; a succeeded run_id=null "
+                "sync run is not failed (D013 N6)"
+            )
         listed = sum(r.cost_usd or 0.0 for r in self.runs if r.cost_source == "/v1/runs")
         if not math.isclose(self.totals.monid_usd, listed, rel_tol=1e-9, abs_tol=1e-9):
             raise ValueError(
@@ -878,24 +914,33 @@ def derive_wow_verdict(
     ci95_confirmed_only: CI95 | None,
     p_raw: float,
     p_holm: float,
+    *,
+    share: bool = False,
 ) -> WowVerdict:
     """CONTRACTS §Digest WoW verdict rule for a brand that meets the minimums (D012 F1/F7/F8).
 
-    ``p_holm`` governs; the intervals are display, except that (a) for net,
+    Rules are evaluated in the order ``ABSTAIN``, ``SIGNIFICANT``, ``SUGGESTIVE``,
+    ``NO_CHANGE_DETECTED`` (D013 N1). ``p_holm`` governs; the intervals are display, except that (a) for net,
     ``SIGNIFICANT`` also needs the confirmed-only interval to exclude 0 with the sign of
     ``delta`` and (b) opposite-sign intervals abstain with ``signals_conflict``. Share
-    passes ``ci95_confirmed_only=None``. A brand below the minimums abstains before this
-    rule runs and carries null estimates.
+    (``share=True``) has no confirmed-only interval and is ``SIGNIFICANT`` iff
+    ``p_holm < 0.05``. A net WoW with ``ci95_confirmed_only=None`` (no confirmed rows)
+    can never be ``SIGNIFICANT``. A brand below the minimums abstains before this rule
+    runs and carries null estimates.
     """
     if ci95_confirmed_only is not None:
         full, confirmed = _ci_sign(ci95), _ci_sign(ci95_confirmed_only)
         if full != 0 and confirmed != 0 and full != confirmed:
             return "ABSTAIN"
     if p_holm < ALPHA:
-        if ci95_confirmed_only is None:
+        if share:
             return "SIGNIFICANT"
         delta_sign = 1 if delta > 0 else -1 if delta < 0 else 0
-        if delta_sign != 0 and _ci_sign(ci95_confirmed_only) == delta_sign:
+        if (
+            ci95_confirmed_only is not None
+            and delta_sign != 0
+            and _ci_sign(ci95_confirmed_only) == delta_sign
+        ):
             return "SIGNIFICANT"
     if p_raw < ALPHA:
         return "SUGGESTIVE"
@@ -925,7 +970,9 @@ class WowShare(SonarModel):
             return self
         if self.delta is None or self.ci95 is None or self.p_raw is None or self.p_holm is None:
             raise ValueError("delta, ci95, p_raw and p_holm are reported unless ABSTAIN")
-        expected = derive_wow_verdict(self.delta, self.ci95, None, self.p_raw, self.p_holm)
+        expected = derive_wow_verdict(
+            self.delta, self.ci95, None, self.p_raw, self.p_holm, share=True
+        )
         if self.verdict != expected:
             raise ValueError(
                 f"verdict {self.verdict} contradicts the p-values; expected {expected}"
@@ -938,6 +985,9 @@ class WowNet(SonarModel):
 
     On ``ABSTAIN`` for ``below_minimum`` every field but ``verdict`` is null; on
     ``signals_conflict`` the intervals and p-values are kept and only the word abstains.
+    ``ci95_confirmed_only`` alone is null when the brand has no confirmed rows
+    (``n_confirmed = 0``), paired with an ``Abstention`` of reason ``degenerate``
+    (D013 N4); such a WoW can be ``SUGGESTIVE`` but never ``SIGNIFICANT``.
     """
 
     delta: float | None
@@ -951,6 +1001,11 @@ class WowNet(SonarModel):
     def is_below_minimum(self) -> bool:
         return self.verdict == "ABSTAIN" and self.delta is None
 
+    @property
+    def has_degenerate_confirmed_interval(self) -> bool:
+        """Estimates reported but ``ci95_confirmed_only`` null (``n_confirmed = 0``)."""
+        return self.delta is not None and self.ci95_confirmed_only is None
+
     @model_validator(mode="after")
     def _verdict_rule(self) -> Self:
         fields = (self.delta, self.ci95, self.ci95_confirmed_only, self.p_raw, self.p_holm)
@@ -958,14 +1013,11 @@ class WowNet(SonarModel):
             if self.verdict != "ABSTAIN":
                 raise ValueError("null estimates require verdict ABSTAIN (below_minimum)")
             return self
-        if (
-            self.delta is None
-            or self.ci95 is None
-            or self.ci95_confirmed_only is None
-            or self.p_raw is None
-            or self.p_holm is None
-        ):
-            raise ValueError("estimates are all null (below_minimum) or all reported")
+        if self.delta is None or self.ci95 is None or self.p_raw is None or self.p_holm is None:
+            raise ValueError(
+                "estimates are all null (below_minimum) or all reported "
+                "(ci95_confirmed_only alone may be null when n_confirmed is 0)"
+            )
         expected = derive_wow_verdict(
             self.delta, self.ci95, self.ci95_confirmed_only, self.p_raw, self.p_holm
         )
@@ -989,7 +1041,8 @@ def _estimate_rules(
 
     ``net`` is null when ``pos + neg + neu = 0`` or the brand abstains; the intervals
     are null iff ``net`` is; ``design_effect = (cluster width / iid width)^2`` and is
-    null when the iid width is 0.
+    null when the iid width is 0, paired with an ``Abstention`` of reason ``degenerate``
+    (D013 N4).
     """
     if labelled == 0 and net is not None:
         raise ValueError(f"{what}: net must be null when pos + neg + neu is 0")
@@ -1060,6 +1113,11 @@ class SentimentEntry(SonarModel):
     def has_null_estimate(self) -> bool:
         return self.net is None
 
+    @property
+    def has_degenerate_design_effect(self) -> bool:
+        """``net`` reported but ``design_effect`` null: the iid width is 0 (D013 N4)."""
+        return self.net is not None and self.design_effect is None
+
     @model_validator(mode="after")
     def _counts(self) -> Self:
         if self.n_confirmed > self.n:
@@ -1069,12 +1127,25 @@ class SentimentEntry(SonarModel):
         _estimate_rules(
             "sentiment", self.labelled, self.net, self.ci95, self.ci95_iid, self.design_effect
         )
+        if (
+            self.n_confirmed == 0
+            and self.wow.delta is not None
+            and self.wow.ci95_confirmed_only is not None
+        ):
+            raise ValueError(
+                "wow.ci95_confirmed_only is null when n_confirmed is 0 (degenerate, D013 N4)"
+            )
         return self
 
 
 class BySourceEntry(SonarModel):
-    """Per ``(brand, source)`` sentiment; ``wow_scope=false`` marks a source without
-    timestamps that counts for share but is excluded from ``wow`` and ``events`` (D012 F2)."""
+    """Per ``(brand, source)`` sentiment.
+
+    ``wow_scope=false`` iff every item of the source for the brand lacks ``published_at``:
+    the source counts for share but is excluded from ``wow`` and ``events`` (D012 F2). A
+    source with mixed timestamps keeps ``wow_scope=true`` and drops the null items one by
+    one (D013 A1). H2 reads ``design_effect`` where :attr:`h2_scored` (D012 F3, D013 N3).
+    """
 
     brand: str = Field(min_length=1)
     source: Source
@@ -1098,8 +1169,19 @@ class BySourceEntry(SonarModel):
         return self.net is None
 
     @property
+    def has_degenerate_design_effect(self) -> bool:
+        """``net`` reported but ``design_effect`` null: the iid width is 0 (D013 N4)."""
+        return self.net is not None and self.design_effect is None
+
+    @property
+    def meets_h2_minimums(self) -> bool:
+        """``n_clusters >= 5`` and ``n >= 20`` over the full window (D013 N3)."""
+        return self.n_clusters >= MIN_CLUSTERS and self.n >= MIN_N
+
+    @property
     def h2_scored(self) -> bool:
-        return self.source in H2_SCORED_SOURCES
+        """A thread-clustered comment source whose entry meets the H2 minimums."""
+        return self.source in H2_SCORED_SOURCES and self.meets_h2_minimums
 
     @model_validator(mode="after")
     def _net_null_when_empty(self) -> Self:
@@ -1239,7 +1321,12 @@ class Digest(SonarModel):
 
     @model_validator(mode="after")
     def _nulls_paired_with_abstentions(self) -> Self:
-        """Every null estimate is paired with an Abstention naming brand and source (F5)."""
+        """Every null estimate is paired with an Abstention naming brand and source (F5).
+
+        A null ``design_effect`` (zero iid width) or ``ci95_confirmed_only``
+        (``n_confirmed = 0``) next to reported estimates needs a row of reason
+        ``degenerate`` (D013 N4).
+        """
         missing: list[str] = []
         for sov in self.share_of_voice:
             if sov.has_null_estimate and not self._abstained(sov.brand, None):
@@ -1251,9 +1338,17 @@ class Digest(SonarModel):
                 missing.append(f"sentiment {sent.brand}")
             if sent.wow.verdict == "ABSTAIN" and not self._abstained(sent.brand, None):
                 missing.append(f"sentiment.wow {sent.brand}")
+            if sent.has_degenerate_design_effect and not self._degenerate(sent.brand, None):
+                missing.append(f"sentiment.design_effect {sent.brand}")
+            if sent.wow.has_degenerate_confirmed_interval and not self._degenerate(
+                sent.brand, None
+            ):
+                missing.append(f"sentiment.wow.ci95_confirmed_only {sent.brand}")
         for row in self.by_source:
             if row.has_null_estimate and not self._abstained(row.brand, row.source):
                 missing.append(f"by_source {row.brand}/{row.source}")
+            if row.has_degenerate_design_effect and not self._degenerate(row.brand, row.source):
+                missing.append(f"by_source.design_effect {row.brand}/{row.source}")
         for t in self.topics:
             if t.has_null_estimate and not any(
                 a.scope == "topics" and a.brand == t.brand for a in self.abstentions
@@ -1266,6 +1361,12 @@ class Digest(SonarModel):
     def _abstained(self, brand: str, source: Source | None) -> bool:
         return any(
             a.brand == brand and (a.source is None or a.source == source) for a in self.abstentions
+        )
+
+    def _degenerate(self, brand: str, source: Source | None) -> bool:
+        return any(
+            a.reason == "degenerate" and a.brand == brand and a.source == source
+            for a in self.abstentions
         )
 
 
@@ -1339,6 +1440,8 @@ __all__ = [
     "H2_SCORED_SOURCES",
     "MAX_COMPETITORS_BY_PROFILE",
     "MENTION_ID_CLUSTER_SOURCES",
+    "MIN_CLUSTERS",
+    "MIN_N",
     "PERIOD_DAYS",
     "PROFILE_SOURCES",
     "RECORDS",
