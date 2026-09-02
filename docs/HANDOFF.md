@@ -24,6 +24,7 @@ committed.
 | Date | Task | Run ids | Monid USD | OpenAI USD | Notes |
 |---|---|---|---|---|---|
 | 2026-09-02 | W3.7 smoke | 01M1GPJXYTAMZNGWQNT7Y7KWG0, 01M1GPP9HXJKQQYJ0V2FFCE0QV | 0.25 | 0.00 | smoke Nubank via scripts/record_fixtures.py: reddit 40 results $0.2480, google_maps 4 results $0.0027 (estimate $0.0338); reconciled, no unmatched; wallet $1.00 → $0.75 |
+| 2026-09-02 | W5.5 solo (key 2, adapters fixed) | session 20260902T210914Z-nubank-43ee7e, `out/w5.5-solo/` — 01M1HZ8RA6J5TRJP7TWM3JGPJT +10 more | 0.2415 | 0.0375 | `sonar run --profile lite Nubank --no-voice`, backgrounded, key 2. **verdict RECONCILED, `sonar verify` ok.** 74 mentions, all 74 labelled, 14 not_about_brand (19%). **Adapter fixes confirmed live** — reddit "1 item skipped, deleted or empty content" note, no spurious schema_drift; abstentions are honest (youtube_comment HTTP 400, trustpilot/g2 `empty`). Real topic ("Nubank Stock Analysis", n=3), **2 events detected** (09-01 n=9, 09-02 n=21, baseline_median 2). Sentiment counts computed (pos 19 / neg 14 / neu 27, n_confirmed 28) but **net + WoW ABSTAIN** — pre-reg rule: `n < 20` in the previous 7-day period (14-day window → 7+7 split, previous half too thin). This is OQ-HO-3. Key 2 wallet ≈ $0.29. |
 | 2026-09-02 | W5.5 real (key 2) | session 20260902T194057Z-nubank-57d7a9, `out/w5.5-real/` (21 run ids in its runs.jsonl) | 0.4733 | 0.0454 | `sonar run --profile lite Nubank --vs Inter --no-voice`, backgrounded, on **key 2**. **verdict RECONCILED, `sonar verify` passes.** 133 mentions, **all 133 labelled, 0 errors** — the classifier fix holds on real data. But: (a) 56/133 `not_about_brand` — "Inter" collides with Inter Milan (football topic "Lautaro Chooses to Stay at Inter" clustered); (b) sentiment + SoV **abstained** for both brands (too few relevant after the homonym filter); (c) 3 adapters hit `schema_drift` on Apify "no-results" error-items — youtube/facebook return `{error,…}` items the adapter reads as a missing `id`/`text`; reddit skipped on one deleted comment with no `body`; Inter reddit hit the RUNNING deadline. Real digest/receipt in `out/w5.5-real/`. Key 2 wallet ≈ $0.53. |
 | 2026-09-02 | W5.5 attempt 3 (killed) | session `out/w5.5-attempt3` — orphan reddit 01M1HT1AR6C3NSMXWKSGEYKY28 (billed, not in local ledger by id), youtube 01M1HT1ARNJJQ7J8WAYVNB5HE5, instagram 01M1HT1AR53RTERJ2Z61EKGXNS, tiktok 01M1HT1ARVFD0KQYJSRV4SC38D, gmaps 01M1HT1ARQXVQE3S5P9RSEEG71, facebook 01M1HT1ARS3X87HSX3R4NRVYM7, trustpilot 01M1HT1FMDDB38CR8N01RD5GCQ, g2 01M1HT1R5ARG6DW2KT9E31FAE0, news 01M1HT1V9TMZ5EK9VF5J7R931V + 01M1HT1XW5NZRMFCNKB56MQ0GG, yt-comments 01M1HT3E0JVSKKKKD8SJ85J6P6 (BLOCKED) | ~0.2408 | 0.00 | `sonar run --profile lite Nubank --no-voice` on the **old** key. Killed by a 120 s foreground timeout while polling — must background live runs. Monid ran every fetch anyway: reddit $0.134, youtube $0.0225, instagram $0.00345, tiktok $0.009, gmaps $0.01485/22, facebook $0.007, trustpilot $0.03 (0), g2 $0.02 (0), news $0, yt-comments BLOCKED $0. No receipt, no mentions saved. Old key wallet ≈ $0.05 — effectively spent, per operator instruction switch to the second key here. |
 | 2026-09-02 | W5.5 attempt 2 | session 20260902T192411Z-nubank-f69c73 — 01M1HS8D4W77SMAG0BAJT21H5E, 01M1HS8D5H28HVJ3WWTW1P683F, 01M1HS8P8HW8AXWVCQCMP077Q4, 01M1HS8YQ030M5CRQ8RF125AJH, 01M1HS90D9ESQ39XTH5N95GAMS, 01M1HS8YS69JD24SF84NJ1J8PV, 01M1HS8D3AMMT0SW77T9MB09KM, 01M1HS8D41WS3KTJJDFV1EPGCC, 01M1HS9J5ZR8S5NV324MFDN9NH, 01M1HS8D3FCWAMA7RS8FQ7VJW4, 01M1HS8D6MM6EXC4HQS8WMAANW | 0.2320 | ~0.0000 | `sonar run --profile lite Nubank --no-voice` after the pipeline fix. **verdict RECONCILED**, 11 runs, 0 failed, no unmatched. 67 mentions fetched (reddit 15, tiktok 19, instagram 15, gmaps 9, youtube 5, facebook 2, news 2). trustpilot/g2 lookups found no entity (abstained, reviews skipped); yt-comments HTTP 400. **All 67 labelled `error`** — second bug: `gpt-5.6-luna` rejects `temperature=0.0` (400), so every classify batch failed, `llm_usd $0`, empty topics. Fixed `ec789de` (drop the param; verified live). Real mentions saved; not re-analysed (no offline re-label path, single brand). Wallet ~$0.52 → ~$0.29. |
@@ -32,7 +33,7 @@ committed.
 | 2026-09-02 | W0.1 + W0.3 | none | 0.00 | 0.00 | keys stored in ~/.sonar/.env; monid whoami OK, balance $1.00; OpenAI models list OK (gpt-5.6-luna/terra present); 7 inspects saved to docs/monid/inspect/ (all free) |
 | 2026-09-02 | W0.1 setup wizard (`scripts/setup-wizard.sh`) | none | 0.00 | 0.00 | Wizard writes `~/.sonar/.env` (mode 600) with Monid key, budget, run cap, OpenAI key, X handle. Verification calls are unbilled (`monid whoami`, `monid discover`, OpenAI `models.list`). No Monid spend has occurred yet. |
 
-Running totals — **key 1** (`monid_live_VI12…`): $0.9494 of the $1 free credit spent (0.25 W3.7 + 0.2266 attempt-1 + 0.2320 attempt-2 + 0.2408 attempt-3); ≈ $0.05 left, exhausted. **Key 2** (`monid_live_DJVq…`, in `~/.sonar/.env` since 2026-09-02, old value at `~/.sonar/.env.bak-*`): $0.4733 spent on the W5.5 real run, ≈ $0.53 left. OpenAI $0.0454 total. Reserve 1.50 not yet funded. A real top-up is still needed for W6.1 (full, 4 brands, $2.8).
+Running totals — **key 1** (`monid_live_VI12…`): $0.9494 of $1, exhausted. **Key 2** (`monid_live_DJVq…`, in `~/.sonar/.env`, old value at `~/.sonar/.env.bak-*`): $0.4733 (Inter run) + $0.2415 (solo run, adapters fixed) = **$0.7148**, ≈ $0.29 left. Two 2-brand attempts were REFUSED pre-flight (`--max-spend` vs the $0.8587 estimate) — key 2 can't cover a 2-brand lite. OpenAI ≈ $0.083 total. **A real top-up is required for the 2-brand W5.5 and for W6.1 (full, 4 brands, $2.8).**
 
 Row format: one row per session id. `Run ids` lists every Monid run id
 the receipt contains, including `run_id=null` rows written as
@@ -162,8 +163,23 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
 - **reddit is slow** — Inter's reddit run hit the per-run deadline while
   RUNNING. Consider a longer reddit deadline or a smaller cap.
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
-  mentions per brand to clear the pre-registered thresholds. Should
-  clear with a real competitor and cleaner adapters.
+  mentions per brand to clear the pre-registered thresholds.
+
+### 2026-09-02 — W5.5 solo run: pipeline validated end-to-end, OQ-HO-3 now actionable
+
+The adapter-fixed solo Nubank run is clean: RECONCILED, `sonar verify` ok,
+74/74 labelled, honest abstentions, real topics + events. Two decisions
+the operator must make before W6.1:
+
+- **OQ-HO-3 / window length.** `net` and WoW abstain because the 14-day
+  fetch window splits 7 + 7 and the previous 7 days hold `< 20` relevant
+  mentions (pre-reg `## Abstention thresholds`). To get a non-abstaining
+  `net`, fetch a **28-day** window (2× the Monid cost) so each period has
+  ≥ 20, **or** accept that a first brief reports current-period pos/neg/neu
+  counts + topics + events and abstains on net/WoW, and document that in
+  COVERAGE. Needs a DECISIONS entry either way.
+- **Top-up.** Key 2 is down to ~$0.29. A 2-brand lite is $0.86 est; W6.1
+  full is $2.8. No more real runs until the wallet is funded.
 
 ### 2026-09-02 — W5.5 attempt 1: real run, real bug
 
