@@ -168,6 +168,7 @@ class TestGoogleMapsParse:
         assert first.text == item["text"]
         assert first.lang == "pt"
         assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
         assert first.url is not None
         assert "utm_source" not in first.url
 
@@ -197,28 +198,40 @@ class TestGoogleMapsParse:
         assert last.url is None
         assert last.rating == 3
 
-    def test_place_title_carries_brand_when_text_does_not(self, gmaps_raw: dict[str, Any]) -> None:
+    def test_review_is_entity_match_when_text_does_not_name_brand(
+        self, gmaps_raw: dict[str, Any]
+    ) -> None:
         second = google_maps.PROVIDER.parse(gmaps_raw, "run_x", "Nubank", local_seq=1)[1]
         assert "nubank" not in second.text.lower()
         assert second.matched_terms == ["nubank"]
+        assert second.match_kind == "entity"
         assert second.lang == "en"
 
-    def test_item_matching_neither_text_nor_title_is_dropped(
+    def test_place_title_is_not_consulted_every_review_is_kept(
         self, gmaps_raw: dict[str, Any]
     ) -> None:
+        # D014: the place was resolved to the brand; the title no longer gates anything
         raw = copy.deepcopy(gmaps_raw)
         for item in raw["output"]:
             item["title"] = "Some Other Place"
         mentions = google_maps.PROVIDER.parse(raw, "run_x", "Nubank", local_seq=1)
-        assert [m.raw_ref for m in mentions] == ["1#0"]
+        assert [m.raw_ref for m in mentions] == ["1#0", "1#1", "1#3"]
+        assert {m.match_kind for m in mentions} == {"entity"}
 
-    def test_aliases_extend_matched_terms(self, gmaps_raw: dict[str, Any]) -> None:
+    def test_aliases_do_not_change_entity_terms(self, gmaps_raw: dict[str, Any]) -> None:
         raw = copy.deepcopy(gmaps_raw)
         raw["output"][0]["text"] = "O roxinho resolveu tudo em um minuto."
         first = google_maps.PROVIDER.parse(
             raw, "run_x", "Nubank", local_seq=1, terms=["Nubank", "roxinho"]
         )[0]
-        assert first.matched_terms == ["roxinho"]
+        assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
+
+    def test_competitor_brand_is_the_entity_term(self, gmaps_raw: dict[str, Any]) -> None:
+        first = google_maps.PROVIDER.parse(gmaps_raw, "run_x", "C6 Bank", local_seq=1)[0]
+        assert first.brand == "C6 Bank"
+        assert first.matched_terms == ["c6 bank"]
+        assert first.match_kind == "entity"
 
     def test_accepts_bare_item_list(self, gmaps_raw: dict[str, Any]) -> None:
         bare: list[dict[str, Any]] = gmaps_raw["output"]
@@ -374,18 +387,24 @@ class TestFacebookParse:
         assert last.published_at is None
         assert last.mention_id == mention_id_for("facebook", "cartão chegou em três dias.")
 
-    def test_page_name_carries_brand_when_text_does_not(self, fb_raw: dict[str, Any]) -> None:
+    def test_review_is_entity_match_when_text_does_not_name_brand(
+        self, fb_raw: dict[str, Any]
+    ) -> None:
         second = facebook.PROVIDER.parse(fb_raw, "run_x", "Nubank", local_seq=1)[1]
         assert "nubank" not in second.text.lower()
         assert second.matched_terms == ["nubank"]
+        assert second.match_kind == "entity"
         assert second.lang == "en"
 
-    def test_item_matching_neither_text_nor_page_is_dropped(self, fb_raw: dict[str, Any]) -> None:
+    def test_page_name_is_not_consulted_every_review_is_kept(self, fb_raw: dict[str, Any]) -> None:
+        # D014: the page was resolved to the brand; pageName no longer gates anything
         raw = copy.deepcopy(fb_raw)
         for item in raw["output"]:
             item["pageName"] = "Another Page"
+        before = facebook.PROVIDER.parse(fb_raw, "run_x", "Nubank", local_seq=1)
         mentions = facebook.PROVIDER.parse(raw, "run_x", "Nubank", local_seq=1)
-        assert [m.raw_ref for m in mentions] == ["1#0"]
+        assert [m.raw_ref for m in mentions] == [m.raw_ref for m in before]
+        assert {m.match_kind for m in mentions} == {"entity"}
 
 
 class TestFacebookSchemaDrift:

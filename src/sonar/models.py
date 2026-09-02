@@ -1,11 +1,12 @@
-"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.1.1).
+"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.1.2).
 
 Every model is frozen with ``extra="forbid"``; field names are the wire names.
 Closed enums are ``Literal`` aliases so an unknown value is a validation error.
 Rules that CONTRACTS states in prose (cluster_key per source, Query validator
 order, receipt verdict, WoW verdict, null-estimate pairing, canonical JSON
 digests) are validators or helpers here. Changes since 1.0.0 follow
-`docs/DECISIONS.md` D012 (1.1.0) and D013 (1.1.1); the item ids are cited inline.
+`docs/DECISIONS.md` D012 (1.1.0), D013 (1.1.1) and D014 (1.1.2); the item ids are
+cited inline.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from pydantic import (
     model_validator,
 )
 
-SCHEMA_REV = "1.1.1"
+SCHEMA_REV = "1.1.2"
 
 # --------------------------------------------------------------------------- enums
 
@@ -48,6 +49,7 @@ Source = Literal[
 ]
 Profile = Literal["smoke", "lite", "full"]
 Lang = Literal["pt", "en", "other", "unknown"]
+MatchKind = Literal["text", "inherited", "entity"]
 SentimentLabel = Literal["positive", "negative", "neutral", "irrelevant"]
 Polarity = Literal["positive", "negative", "neutral"]
 Corroboration = Literal["confirmed", "model_only", "contested", "irrelevant"]
@@ -326,6 +328,7 @@ class Mention(SonarModel):
     rating: int | None
     cluster_key: str = Field(min_length=1)
     matched_terms: list[str] = Field(min_length=1)
+    match_kind: MatchKind = "text"
     raw_ref: str = Field(pattern=_RAW_REF.pattern)
 
     @field_validator("text")
@@ -1472,6 +1475,7 @@ __all__ = [
     "LabelStatus",
     "Lang",
     "LlmKind",
+    "MatchKind",
     "Mention",
     "MentionCounts",
     "ModelSignal",

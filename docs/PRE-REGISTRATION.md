@@ -1,8 +1,8 @@
 # PRE-REGISTRATION — sonar statistics plan
 
-**Version**: 1.1.1
+**Version**: 1.1.2
 **Frozen**: 2026-09-02 (design reference: `docs/research/2026-09-02-task-graph-and-design.md`)
-**Amended**: 2026-09-02, A1, A2 and A3 (see §Amendments; `docs/DECISIONS.md` D012, D013)
+**Amended**: 2026-09-02, A1, A2, A3 and A4 (see §Amendments; `docs/DECISIONS.md` D012, D013, D014)
 
 > **FROZEN TEXT.** Any change to the thresholds, rules, or hypotheses below
 > after the freeze date goes through a **DECISIONS.md entry** stating the
@@ -153,7 +153,7 @@ The model supplies observations; code decides. Thresholds frozen here:
 
 | Parameter | Value |
 |---|---|
-| Relevance | `about_brand` (model) **and** `matched_terms ≠ ∅` (regex); both required |
+| Relevance | `about_brand` (model) **and** `matched_terms ≠ ∅`; both required. `matched_terms` comes from the item's own text (`match_kind = text`), from the parent post for a comment whose text matched nothing when that post is in the same payload and matched (`inherited`), or from the resolved entity for a review source, Google Maps place, Facebook page, Trustpilot domain or G2 slug (`entity`); `about_brand` is required in every kind (A4, D014) |
 | Deterministic signal | rating bucket for review sources: ≤ 2 negative, 3 neutral, ≥ 4 positive; lexicon sign otherwise |
 | Tiebreak trigger | classifier disagrees with the deterministic signal, **or** no deterministic signal and classifier `confidence < 0.6` |
 | Tiebreak cap | at most **40 %** of a brand's rows; beyond the cap, mentions keep the classifier label as `model_only` with `overflow = true`, are excluded from the confirmed-only subset, and the overflow count is published in `receipt.audit.tiebreak_overflow` |
@@ -317,3 +317,24 @@ brackets):
   for every finding.
 - N6 changes CONTRACTS only (ledger and receipt rules); no statistics text
   here is affected.
+
+### A4 — D014, relevance by context (v1.1.2, 2026-09-02)
+
+Applies `docs/DECISIONS.md` D014 after the first live smoke run (W3.7, runs
+`01M1GPJXYTAMZNGWQNT7Y7KWG0` and `01M1GPP9HXJKQQYJ0V2FFCE0QV`): 40 Reddit
+items of which 11 name the brand in their own text, 4 Google Maps reviews of
+which 0 do.
+
+- Relevance row: prior "`about_brand` (model) **and** `matched_terms ≠ ∅`
+  (regex); both required", where `matched_terms` was a word-boundary match
+  in the item's own text only; new `matched_terms` may also be inherited
+  from the matched parent post (reddit comments) or set to the brand for a
+  review of the resolved entity, recorded as `match_kind` on the Mention
+  (CONTRACTS 1.1.2). `about_brand` stays required, so the gate is not
+  loosened on the model side. Reversal clause per D014: inherited and
+  entity matches showing a false-positive rate above 10 % after the
+  `about_brand` gate in the H5 hand check or the RED-TEAM homonym attack.
+- Reddit sampling: prior single cap of 40 items (`maxItems`, `maxPostCount`,
+  `maxComments` all 40); new `maxPostCount 15` and `maxComments 2` per post
+  with `maxItems` at the profile cap and the unit cost unchanged. The
+  denominators and thresholds in this file are not affected.

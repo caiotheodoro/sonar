@@ -115,6 +115,7 @@ class TestTrustpilotReviews:
         assert first.cluster_key == first.mention_id
         assert first.published_at == datetime(2026, 8, 15, 10, 30, tzinfo=UTC)
         assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
         assert first.engagement == {}
         assert first.lang == "en"
         assert first.url == "https://www.trustpilot.com/reviews/nubank.com.br"
@@ -142,18 +143,21 @@ class TestTrustpilotReviews:
         first = TrustpilotProvider().parse(tp_reviews, None, "Nubank", local_seq=1)[0]
         assert first.run_id is None
 
-    def test_terms_match_aliases(self, tp_reviews: dict[str, Any]) -> None:
+    def test_aliases_do_not_change_entity_terms(self, tp_reviews: dict[str, Any]) -> None:
         tp_reviews["reviews"][0]["text"] = "Roxinho is the best card."
         first = TrustpilotProvider().parse(
             tp_reviews, "run-001", "Nubank", local_seq=1, terms=["Nubank", "roxinho"]
         )[0]
-        assert first.matched_terms == ["roxinho"]
+        assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
 
-    def test_unmatched_text_falls_back_to_brand(self, tp_reviews: dict[str, Any]) -> None:
+    def test_unmatched_text_is_still_an_entity_match(self, tp_reviews: dict[str, Any]) -> None:
+        # D014: the reviews call is scoped to the resolved domain
         tp_reviews["reviews"][0]["title"] = "Fine"
         tp_reviews["reviews"][0]["text"] = "Card arrived in two days."
         first = TrustpilotProvider().parse(tp_reviews, "run-001", "Nubank", local_seq=1)[0]
         assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
 
     def test_parse_requires_local_seq(self, tp_reviews: dict[str, Any]) -> None:
         with pytest.raises(ValueError, match="local_seq"):
@@ -303,6 +307,7 @@ class TestG2Reviews:
         assert first.cluster_key == first.mention_id
         assert first.published_at == datetime(2026, 8, 10, 9, 0, tzinfo=UTC)
         assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
         assert first.engagement == {}
         assert first.lang == "en"
         assert first.url is None
@@ -332,11 +337,13 @@ class TestG2Reviews:
         first = G2Provider().parse(g2_reviews, None, "Nubank", local_seq=1)[0]
         assert first.run_id is None
 
-    def test_unmatched_text_falls_back_to_brand(self, g2_reviews: dict[str, Any]) -> None:
+    def test_unmatched_text_is_still_an_entity_match(self, g2_reviews: dict[str, Any]) -> None:
+        # D014: the reviews call is scoped to the resolved slug
         g2_reviews["reviews"][0]["title"] = "Fine"
         g2_reviews["reviews"][0]["content"] = "Onboarding took a week."
         first = G2Provider().parse(g2_reviews, "run-002", "Nubank", local_seq=1)[0]
         assert first.matched_terms == ["nubank"]
+        assert first.match_kind == "entity"
 
     def test_parse_requires_local_seq(self, g2_reviews: dict[str, Any]) -> None:
         with pytest.raises(ValueError, match="local_seq"):

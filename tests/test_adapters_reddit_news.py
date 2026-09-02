@@ -137,8 +137,8 @@ class TestRedditBuildInput:
             "sort": "new",
             "time": "week",
             "maxItems": 40,
-            "maxPostCount": 40,
-            "maxComments": 40,
+            "maxPostCount": 15,
+            "maxComments": 2,
             "postDateLimit": "2026-08-19",
             "includeMediaLinks": True,
         }
@@ -155,8 +155,11 @@ class TestRedditBuildInput:
     def test_caps_follow_config(self, profile: Any, cap: int) -> None:
         q = Query(brand="Nubank", profile=profile, sources=["reddit"])
         built = reddit.PROVIDER.build_input(q, now=NOW)
-        assert (built["maxItems"], built["maxPostCount"], built["maxComments"]) == (cap,) * 3
-        assert cap == config.SOURCE_PLAN["reddit"].caps[profile]
+        plan = config.SOURCE_PLAN["reddit"]
+        assert cap == plan.caps[profile]
+        assert (plan.max_posts, plan.max_comments_per_post) == (15, 2)
+        # D014: the item cap follows the profile; the post/comment split is fixed
+        assert (built["maxItems"], built["maxPostCount"], built["maxComments"]) == (cap, 15, 2)
 
     def test_unit_cost_matches_config(self) -> None:
         plan = config.SOURCE_PLAN["reddit"]
@@ -187,6 +190,8 @@ class TestRedditParse:
             "t3_1linkpost",
         }
         assert report.skipped_no_match == 1
+        assert report.inherited_from == {}
+        assert {m.match_kind for m in report.mentions} == {"text"}
         assert not hasattr(report, "skipped_blank_text")
         assert all(isinstance(m, Mention) for m in report.mentions)
         assert all(m.source == "reddit" and m.brand == "Nubank" for m in report.mentions)
@@ -255,16 +260,45 @@ class TestRedditParse:
 
     def test_accepts_bare_list_payload(self, reddit_raw: dict[str, Any]) -> None:
         as_list = reddit_raw["items"]
-        assert len(reddit.PROVIDER.parse(as_list, RUN_ID, "Nubank", local_seq=1)) == 4
+        assert len(reddit.PROVIDER.parse(as_list, RUN_ID, "Nubank", local_seq=1)) == 5
 
-    def test_brand_without_alias_matches_less(self, reddit_raw: dict[str, Any]) -> None:
-        mentions = reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Nubank", local_seq=1)
-        assert {m.native_id for m in mentions} == {
+    def test_comment_without_alias_inherits_its_matched_post(
+        self, reddit_raw: dict[str, Any]
+    ) -> None:
+        # D014: "Mesmo problema aqui com o Nu" matches nothing without the alias,
+        # but its parent t3_1abc123 is a text match in the same payload.
+        report = reddit.PROVIDER.parse_with_report(reddit_raw, RUN_ID, "Nubank", local_seq=1)
+        by_native = {m.native_id: m for m in report.mentions}
+        assert set(by_native) == {
             "t3_1abc123",
+            "t1_c0mm3nt1",
             "t1_c0mm3nt2",
             "t1_orphan01",
             "t3_1linkpost",
         }
+        comment = by_native["t1_c0mm3nt1"]
+        assert comment.match_kind == "inherited"
+        assert comment.matched_terms == by_native["t3_1abc123"].matched_terms == ["nubank"]
+        assert comment.cluster_key == "t3_1abc123"
+        assert report.inherited_from == {"t1_c0mm3nt1": "t3_1abc123"}
+        assert {by_native[n].match_kind for n in by_native if n != "t1_c0mm3nt1"} == {"text"}
+        assert report.skipped_no_match == 1
+
+    def test_comment_under_absent_or_unmatched_post_is_dropped(
+        self, reddit_raw: dict[str, Any]
+    ) -> None:
+        raw = copy.deepcopy(reddit_raw)
+        for item in raw["items"]:
+            if item["id"] == "t1_c0mm3nt1":
+                item["postId"] = "t3_notinpayload"
+                item["url"] = None
+            if item["id"] == "t3_1abc123":
+                item["title"] = "Unrelated"
+                item["body"] = "Nothing about the bank."
+        report = reddit.PROVIDER.parse_with_report(raw, RUN_ID, "Nubank", local_seq=1)
+        assert "t1_c0mm3nt1" not in {m.native_id for m in report.mentions}
+        assert report.inherited_from == {}
+        assert report.skipped_no_match == 3
 
     def test_competitor_gets_no_rows_when_absent(self, reddit_raw: dict[str, Any]) -> None:
         assert reddit.PROVIDER.parse(reddit_raw, RUN_ID, "Inter", local_seq=1) == []

@@ -176,6 +176,9 @@ class SourcePlan:
     or ``pages`` make ``cap`` calls; sources capped in ``results`` make one.
     ``lookup_endpoint`` is the id-resolution call some providers need first
     (Trustpilot company search, G2 software search), billed at ``lookup_usd``.
+    ``max_posts`` and ``max_comments_per_post`` split a ``results`` cap between
+    posts and the comments fetched under each post (reddit, D014); ``None``
+    means the source has no such split and the cap alone applies.
     """
 
     source: SourceName
@@ -190,6 +193,8 @@ class SourcePlan:
     has_timestamps: bool = True
     lookup_endpoint: str | None = None
     lookup_usd: float = 0.0
+    max_posts: int | None = None
+    max_comments_per_post: int | None = None
 
     def n_calls(self, profile: ProfileName) -> int:
         cap = self.caps[profile]
@@ -222,6 +227,8 @@ SOURCE_PLAN: Final[Mapping[SourceName, SourcePlan]] = {
         per_call_usd=0.02,
         cluster_rule="post_id",
         has_rating=False,
+        max_posts=15,
+        max_comments_per_post=2,
     ),
     "youtube": SourcePlan(
         source="youtube",

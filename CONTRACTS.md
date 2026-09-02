@@ -1,10 +1,11 @@
 # CONTRACTS — sonar record schemas
 
-`schema_rev: 1.1.1`. Source of truth: `docs/research/2026-09-02-task-graph-and-design.md`,
+`schema_rev: 1.1.2`. Source of truth: `docs/research/2026-09-02-task-graph-and-design.md`,
 Appendix §Contracts, §Pipeline rules, §Statistics, §Error matrix, as amended
 by `docs/DECISIONS.md` D012 (review
-`docs/research/reviews/2026-09-02-contracts-review.md`) and D013 (review
-`docs/research/reviews/2026-09-02-contracts-review-2.md`). This file is frozen
+`docs/research/reviews/2026-09-02-contracts-review.md`), D013 (review
+`docs/research/reviews/2026-09-02-contracts-review-2.md`) and D014 (relevance
+by context, first live smoke run). This file is frozen
 at the Wave 1 gate (`docs-frozen` tag). Any later change goes through a
 `docs/DECISIONS.md` entry by the wave lead, bumps `schema_rev`, and is listed
 in §Changelog.
@@ -58,6 +59,7 @@ reported, not scored (D012 F3).
 |---|---|---|
 | `Profile` | `smoke`, `lite`, `full` | Query |
 | `Lang` | `pt`, `en`, `other`, `unknown` | Mention |
+| `MatchKind` | `text`, `inherited`, `entity` | Mention |
 | `SentimentLabel` | `positive`, `negative`, `neutral`, `irrelevant` | Label |
 | `Polarity` | `positive`, `negative`, `neutral` | Label.signals.deterministic |
 | `Corroboration` | `confirmed`, `model_only`, `contested`, `irrelevant` | Label |
@@ -132,7 +134,8 @@ once per brand; SoV counts mention–brand pairs and says so").
 | `engagement` | `dict[str, int]` | keys ⊂ {`upvotes`, `likes`, `comments`, `shares`, `views`, `replies`, `votes`}; absent keys omitted, never `null` values; `{}` allowed |
 | `rating` | `int \| None` | 1–5, review sources only; `null` for every other source |
 | `cluster_key` | `str` | see §cluster_key rules |
-| `matched_terms` | `list[str]` | normalized brand or alias terms found by word-boundary match in `text`; ≥ 1 entry (a Mention with no match is never emitted) |
+| `matched_terms` | `list[str]` | normalized brand or alias terms the item is attributed by; ≥ 1 entry (a Mention with no match is never emitted). How they were found is `match_kind` (D014) |
+| `match_kind` | `MatchKind` | `text`: terms found by word-boundary match in `text`; `inherited`: a comment whose text matched nothing carries its parent post's `matched_terms`, the post being in the same payload and itself a `text` match, and the post's `native_id` is the comment's `cluster_key`; `entity`: a review fetched from an entity the adapter resolved to the brand (Google Maps place, Facebook page, Trustpilot domain, G2 slug) carries `[normalized brand]` whether or not the text names it. Default `text`. `about_brand` stays required for relevance in every kind (D014) |
 | `raw_ref` | `str` | `"{local_seq}#{index}"`: the ledger row that saved the raw payload and the zero-based item index inside it |
 
 ## Label
@@ -469,6 +472,10 @@ Each is resolved by the named trigger; the resolution lands as a
 | OQ-7 | `wow` on share-of-voice entries and the `p_raw`/`p_holm` fields are additions to Appendix §Contracts so the Holm family "brands × {net, share}" is representable | included as specified | Resolved: D012 F1/F8, share WoW confirmed as part of the design |
 
 ## Changelog
+
+### 1.1.2 — 2026-09-02, D014
+
+- Mention gains `match_kind` (`MatchKind` enum `text | inherited | entity`); `matched_terms` may come from the parent post (reddit comments) or the resolved entity (review sources) instead of the item's own text; relevance still requires `about_brand`.
 
 ### 1.1.1 — 2026-09-02, D013
 

@@ -396,7 +396,7 @@ def test_records_dict_names_every_contract_record() -> None:
         "StatsFile",
         "Answer",
     }
-    assert m.SCHEMA_REV == "1.1.1"
+    assert m.SCHEMA_REV == "1.1.2"
 
 
 def test_datetimes_serialize_as_utc_second_precision_z() -> None:

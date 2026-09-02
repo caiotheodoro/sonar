@@ -14,10 +14,11 @@ fallbacks so the first recorded fixture is a schema finding, not a crash;
 W3.7 is the resolver.  G2's schema exposes no ``sort`` parameter, so the
 reviews call carries none.
 
-Review-source rule for ``matched_terms``: the reviews call is scoped to the
-resolved product slug, so every review on the page is about the brand even
-when the text never names it.  Terms are matched in the review text first;
-when nothing matches, the normalised brand term is used.
+Review-source rule for ``matched_terms`` (``docs/DECISIONS.md`` D014): the
+reviews call is scoped to the resolved product slug, so every review carries
+``matched_terms = [normalized brand]`` with ``match_kind = "entity"`` whether
+or not the text names the brand; the model's ``about_brand`` gate is still
+required downstream.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from sonar.config import SOURCE_PLAN, SourcePlan
 from sonar.models import Lang, Mention, author_hash_for, mention_id_for
 from sonar.providers.base import AdapterSchemaError
 from sonar.providers.registry import PROVIDERS
-from sonar.text import detect_lang, match_terms, normalize, normalize_url
+from sonar.text import detect_lang, normalize, normalize_url
 
 SOURCE: Final = "g2"
 PLAN: SourcePlan = SOURCE_PLAN[SOURCE]
@@ -204,8 +205,9 @@ class G2Provider:
         """Turn a ``/get_product_reviews`` body into Mention rows for *brand*.
 
         *local_seq* is the ledger row that saved *raw* (``raw_ref`` =
-        ``"{local_seq}#{index}"``); omitting it is a caller error.  *terms* are
-        the brand and alias terms to match, defaulting to the brand alone.
+        ``"{local_seq}#{index}"``); omitting it is a caller error.  *terms* is
+        accepted for the protocol and unused: every review of the resolved
+        entity is an entity match on *brand* (D014).
         Raises ``AdapterSchemaError`` on unexpected payload shape.
         """
         if local_seq is None or local_seq < 1:
@@ -213,7 +215,8 @@ class G2Provider:
         reviews = raw.get("reviews")
         if not isinstance(reviews, list):
             raise _drift("expected 'reviews' key containing a list")
-        search_terms: Sequence[str] = terms if terms else (brand,)
+        del terms
+        matched = [normalize(brand) or brand]
         mentions: list[Mention] = []
         for index, review in enumerate(reviews):
             if not isinstance(review, dict):
@@ -229,7 +232,6 @@ class G2Provider:
             if not text_parts:
                 continue
             text = "\n\n".join(text_parts)
-            matched = match_terms(text, search_terms) or [normalize(brand)]
             handle = _author(review)
             mention_id = _mention_id(native_id)
             mentions.append(
@@ -247,7 +249,8 @@ class G2Provider:
                     engagement={},
                     rating=_rating(_first(review, RATING_KEYS), index),
                     cluster_key=mention_id,
-                    matched_terms=matched,
+                    matched_terms=list(matched),
+                    match_kind="entity",
                     raw_ref=f"{local_seq}#{index}",
                 )
             )

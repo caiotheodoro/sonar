@@ -16,6 +16,17 @@ Posts and comments both become :class:`~sonar.models.Mention` rows. The
 ``url``, else the ``mention_id`` fallback, which is counted so the pipeline
 can write "cluster key fallback: reddit <count>" into
 ``Receipt.what_could_not_be_checked``.
+
+Relevance by context (``docs/DECISIONS.md`` D014): a post matches on its own
+text (``match_kind = "text"``). A comment whose text names no term inherits
+the ``matched_terms`` of its parent post when that post is in the same
+payload and matched (``match_kind = "inherited"``); the post's ``native_id``
+is the comment's ``cluster_key`` and is listed in
+``ParseReport.inherited_from``. A comment whose parent is absent or
+unmatched is dropped as before. Sampling (D014): ``maxItems`` is the
+profile cap, ``maxPostCount`` and ``maxComments`` (per post) come from
+``config.SOURCE_PLAN`` so a run is not a handful of posts and their whole
+comment trees.
 """
 
 from __future__ import annotations
@@ -27,7 +38,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Final
 
 from sonar import config
-from sonar.models import Lang, Mention, author_hash_for, mention_id_for
+from sonar.models import Lang, MatchKind, Mention, author_hash_for, mention_id_for
 from sonar.providers.base import AdapterSchemaError
 from sonar.providers.registry import PROVIDERS
 from sonar.text import detect_lang, match_terms, normalize_url
@@ -61,6 +72,8 @@ class ParseReport:
     mentions: list[Mention]
     cluster_key_fallbacks: int
     skipped_no_match: int
+    inherited_from: dict[str, str]
+    """Comment ``native_id`` to the ``native_id`` of the post whose terms it inherited."""
 
 
 def _terms_for(query: Any, brand: str) -> list[str]:
@@ -196,13 +209,15 @@ class RedditProvider:
         if cap <= 0:
             raise ValueError(f"reddit is not fetched in profile {query.profile!r}")
         start = (now or datetime.now(UTC)).astimezone(UTC) - timedelta(days=query.window_days)
+        max_posts = cap if _PLAN.max_posts is None else min(cap, _PLAN.max_posts)
+        max_comments = cap if _PLAN.max_comments_per_post is None else _PLAN.max_comments_per_post
         return {
             "searches": _terms_for(query, target),
             "sort": "new",
             "time": "week",
             "maxItems": cap,
-            "maxPostCount": cap,
-            "maxComments": cap,
+            "maxPostCount": max_posts,
+            "maxComments": max_comments,
             "postDateLimit": start.date().isoformat(),
             "includeMediaLinks": True,
         }
@@ -242,19 +257,20 @@ class RedditProvider:
         """Parse the ``providerResponse`` body into Mention rows for *brand*.
 
         *local_seq* is the ledger row that saved *raw* (``raw_ref``). *terms*
-        are extra match terms (the brand aliases); items whose text matches
-        neither *brand* nor one of *terms* are dropped, never emitted.
-        Missing optional fields degrade to ``null``/``{}``; a missing required
-        field (``id``, ``dataType``, a post ``title``, a comment ``body``)
-        raises :class:`AdapterSchemaError`.
+        are extra match terms (the brand aliases). A post whose text matches
+        neither *brand* nor one of *terms* is dropped; a comment with no text
+        match inherits the ``matched_terms`` of its parent post when that post
+        is in *raw* and matched (D014, ``match_kind = "inherited"``), else it is
+        dropped too. Missing optional fields degrade to ``null``/``{}``; a
+        missing required field (``id``, ``dataType``, a post ``title``, a
+        comment ``body``) raises :class:`AdapterSchemaError`.
         """
         if local_seq is None or local_seq < 1:
             raise ValueError("local_seq (ledger row of the raw payload) is required, >= 1")
         endpoint = self.endpoint
         match_on = _match_terms_for(brand, terms)
-        mentions: list[Mention] = []
-        fallbacks = 0
-        no_match = 0
+        parsed: list[tuple[int, dict[str, Any], str, str, str, list[str]]] = []
+        matched_posts: dict[str, list[str]] = {}
         for index, item in enumerate(_items(raw, endpoint)):
             if not isinstance(item, dict):
                 raise AdapterSchemaError(_PLAN.provider, endpoint, f"item {index}: expected object")
@@ -271,22 +287,36 @@ class RedditProvider:
                     _PLAN.provider, endpoint, f"item {index}: unknown dataType {data_type!r}"
                 )
             matched = match_terms(text, match_on)
-            if not matched:
-                no_match += 1
-                continue
-            mention_id = mention_id_for(_SOURCE, native_id)
+            if data_type == "post" and matched:
+                matched_posts[native_id] = matched
+            parsed.append((index, item, data_type, native_id, text, matched))
+        mentions: list[Mention] = []
+        fallbacks = 0
+        no_match = 0
+        inherited_from: dict[str, str] = {}
+        for index, item, data_type, native_id, text, matched in parsed:
             raw_url = _optional_str(item, "url")
-            url = normalize_url(raw_url) if raw_url is not None else None
-            handle = _optional_str(item, "username")
+            match_kind: MatchKind = "text"
             if data_type == "post":
+                parent = None
                 cluster_key = native_id
             else:
                 parent = _optional_str(item, "postId") or _post_id_from_url(raw_url)
-                if parent is None:
-                    fallbacks += 1
-                    cluster_key = mention_id
-                else:
-                    cluster_key = parent.strip()
+                parent = parent.strip() if parent is not None else None
+                cluster_key = parent if parent is not None else ""
+            if not matched:
+                if parent is None or parent not in matched_posts:
+                    no_match += 1
+                    continue
+                matched = list(matched_posts[parent])
+                match_kind = "inherited"
+                inherited_from[native_id] = parent
+            mention_id = mention_id_for(_SOURCE, native_id)
+            url = normalize_url(raw_url) if raw_url is not None else None
+            handle = _optional_str(item, "username")
+            if data_type == "comment" and parent is None:
+                fallbacks += 1
+                cluster_key = mention_id
             engagement: dict[str, int] = {}
             for field, key in _ENGAGEMENT_FIELDS:
                 value = _optional_int(item, field)
@@ -307,6 +337,7 @@ class RedditProvider:
                 "rating": None,
                 "cluster_key": cluster_key,
                 "matched_terms": matched,
+                "match_kind": match_kind,
                 "raw_ref": f"{local_seq}#{index}",
             }
             mentions.append(Mention.model_validate(row))
@@ -314,6 +345,7 @@ class RedditProvider:
             mentions=mentions,
             cluster_key_fallbacks=fallbacks,
             skipped_no_match=no_match,
+            inherited_from=inherited_from,
         )
 
 

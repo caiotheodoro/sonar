@@ -21,11 +21,12 @@ Output items carry ``reviewId``, ``text``, ``stars``, ``publishedAtDate``,
 are required and their absence is schema drift (``AdapterSchemaError``); every
 other key is optional and a missing or ``null`` value never raises.
 
-Review-source rule for ``matched_terms``: a review sits on the brand's own
-place page, so the brand name is often absent from the review text. Terms are
-matched in ``text`` first and, when nothing matches there, in the place
-``title``. An item matching neither is dropped. Rating-only reviews
-(``text`` null) are skipped: a Mention needs text.
+Review-source rule for ``matched_terms`` (``docs/DECISIONS.md`` D014): a
+review sits on the place the adapter resolved to the brand, so every review
+carries ``matched_terms = [normalized brand]`` with ``match_kind = "entity"``
+whether or not the text names the brand; the model's ``about_brand`` gate is
+still required downstream. Rating-only reviews (``text`` null) are skipped:
+a Mention needs text.
 """
 
 from __future__ import annotations
@@ -39,7 +40,7 @@ from sonar.config import SOURCE_PLAN, SourcePlan
 from sonar.models import Lang, Mention, author_hash_for, mention_id_for
 from sonar.providers.base import AdapterSchemaError
 from sonar.providers.registry import PROVIDERS
-from sonar.text import detect_lang, match_terms, normalize_url
+from sonar.text import detect_lang, normalize, normalize_url
 
 SOURCE: Final = "google_maps"
 PLAN: SourcePlan = SOURCE_PLAN[SOURCE]
@@ -194,12 +195,14 @@ class GoogleMapsProvider:
         is the ledger row that saved *raw* (``raw_ref`` = ``"{local_seq}#{index}"``)
         and is keyword-only with a ``None`` default so the signature stays
         compatible with :class:`~sonar.providers.base.Provider`; omitting it is
-        a caller error, never a silent reference. *terms* are the brand and
-        alias terms to match, defaulting to the brand alone.
+        a caller error, never a silent reference. *terms* is accepted for the
+        protocol and unused: every review of the resolved place is an entity
+        match on *brand* (D014).
         """
         if local_seq is None or local_seq < 1:
             raise ValueError("parse() needs the ledger local_seq (>= 1) to build raw_ref")
-        search_terms: Sequence[str] = terms if terms else (brand,)
+        del terms
+        matched = [normalize(brand) or brand]
         mentions: list[Mention] = []
         for index, item in enumerate(_items(raw)):
             if not isinstance(item, dict):
@@ -216,13 +219,6 @@ class GoogleMapsProvider:
             if not isinstance(text, str):
                 raise _drift(f"item {index}: text is not a string ({type(text).__name__})")
             if not text.strip():
-                continue
-            matched = match_terms(text, search_terms)
-            if not matched:
-                title = item.get("title")
-                if isinstance(title, str):
-                    matched = match_terms(title, search_terms)
-            if not matched:
                 continue
             review_url = item.get("reviewUrl")
             url = normalize_url(review_url) if isinstance(review_url, str) and review_url else None
@@ -247,7 +243,8 @@ class GoogleMapsProvider:
                     engagement=engagement,
                     rating=_rating(item["stars"], index),
                     cluster_key=mention_id,
-                    matched_terms=matched,
+                    matched_terms=list(matched),
+                    match_kind="entity",
                     raw_ref=f"{local_seq}#{index}",
                 )
             )
