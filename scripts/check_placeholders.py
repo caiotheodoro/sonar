@@ -15,7 +15,9 @@ def tracked_files() -> list[str]:
 
 def main() -> int:
     self_path = "scripts/check_placeholders.py"
-    exclude_prefixes = ("docs/research/",)
+    # Recorded provider payloads are third-party text, and the claims gate
+    # must spell the needles it searches for; neither is a placeholder.
+    exclude_prefixes = ("docs/research/", "tests/fixtures/", "tests/test_published_claims.py")
     violations: list[str] = []
     for path in tracked_files():
         if path == self_path or any(path.startswith(p) for p in exclude_prefixes):
