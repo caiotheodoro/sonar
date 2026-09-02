@@ -1,9 +1,11 @@
-"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.0.0).
+"""Pydantic v2 encoding of every record in CONTRACTS.md (`schema_rev` 1.1.0).
 
 Every model is frozen with ``extra="forbid"``; field names are the wire names.
 Closed enums are ``Literal`` aliases so an unknown value is a validation error.
 Rules that CONTRACTS states in prose (cluster_key per source, Query validator
-order, receipt verdict, canonical JSON digests) are validators or helpers here.
+order, receipt verdict, WoW verdict, null-estimate pairing, canonical JSON
+digests) are validators or helpers here. Changes since 1.0.0 follow
+`docs/DECISIONS.md` D012; the finding ids are cited inline.
 """
 
 from __future__ import annotations
@@ -14,9 +16,9 @@ import math
 import re
 import unicodedata
 from collections import Counter
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from itertools import pairwise
-from typing import Annotated, Any, Literal, Self, get_args
+from typing import Annotated, Any, Final, Literal, Self, get_args
 
 from pydantic import (
     AfterValidator,
@@ -28,7 +30,7 @@ from pydantic import (
     model_validator,
 )
 
-SCHEMA_REV = "1.0.0"
+SCHEMA_REV = "1.1.0"
 
 # --------------------------------------------------------------------------- enums
 
@@ -52,7 +54,7 @@ Corroboration = Literal["confirmed", "model_only", "contested", "irrelevant"]
 DecidedBy = Literal["classifier", "tiebreak"]
 LabelStatus = Literal["ok", "refused", "unparseable", "error", "cached"]
 SignalKind = Literal["rating", "lexicon", "none"]
-CostSource = Literal["/v1/runs", "unreconciled"]
+CostSource = Literal["/v1/runs", "unreconciled", "local"]
 Verdict = Literal["RECONCILED", "PARTIAL", "REPLAY"]
 WowVerdict = Literal["SIGNIFICANT", "SUGGESTIVE", "NO_CHANGE_DETECTED", "ABSTAIN"]
 AnswerStatus = Literal["ok", "unverified", "refused"]
@@ -64,10 +66,10 @@ AbstainReason = Literal[
     "deadline",
     "unavailable",
     "schema_drift",
-    "no_timestamps",
     "below_minimum",
     "halted",
     "embedding_failed",
+    "signals_conflict",
 ]
 AbstainScope = Literal["source", "brand", "topics", "voice", "session"]
 
@@ -82,8 +84,29 @@ ENGAGEMENT_KEYS: frozenset[str] = frozenset(
     {"upvotes", "likes", "comments", "shares", "views", "replies", "votes"}
 )
 EXCLUSION_REASONS: frozenset[str] = frozenset(
-    {"not_about_brand", "no_matched_terms", "refused", "unparseable", "error"}
+    {
+        "not_about_brand",
+        "irrelevant_label",
+        "refused",
+        "unparseable",
+        "error",
+        "dedup_native_id",
+        "dedup_url",
+        "dedup_text",
+    }
 )
+"""The eight `MentionCounts.excluded_with_reason` keys, every one present (D012 F22)."""
+H2_SCORED_SOURCES: frozenset[Source] = frozenset({"reddit", "youtube_comment"})
+"""Thread-clustered comment sources whose `BySourceEntry.design_effect` scores H2 (D012 F3)."""
+
+WINDOW_DAYS: Final[int] = 14
+"""`Query.window_days` is fixed in v1 (D012 F6); the window splits into two 7-day periods."""
+PERIOD_DAYS: Final[int] = WINDOW_DAYS // 2
+TOPIC_DISTANCE_THRESHOLD: Final[float] = 0.35
+"""Average-linkage cosine-distance cut, chosen before any demo data (D012 F16)."""
+EVENT_MIN_N: Final[int] = 5
+EVENT_MAD_MULTIPLIER: Final[float] = 3.0
+ALPHA: Final[float] = 0.05
 
 # Default `Query.sources` per profile. CONTRACTS names `config.SOURCE_PLAN` (W2.2)
 # as the cap table; the profile source lists there must equal these
@@ -93,6 +116,9 @@ PROFILE_SOURCES: dict[Profile, tuple[Source, ...]] = {
     "lite": SOURCES,
     "full": SOURCES,
 }
+# Competitor cap per profile (CONTRACTS §Query: 0-3, `lite` 0-1 per D012 F14; `smoke`
+# is one brand per the design). Must equal `config.PROFILES[*].max_competitors`.
+MAX_COMPETITORS_BY_PROFILE: dict[Profile, int] = {"smoke": 0, "lite": 1, "full": 3}
 
 # --------------------------------------------------------------------------- scalars
 
@@ -198,9 +224,16 @@ class Query(SonarModel):
     brand_aliases: list[str] = Field(default_factory=list)
     brand_hint: str | None = Field(default=None, max_length=120)
     competitors: list[str] = Field(default_factory=list)
-    window_days: int = Field(default=14, ge=1, le=31)
+    window_days: int = WINDOW_DAYS
     profile: Profile = "full"
     sources: list[Source] = Field(default_factory=lambda: list(PROFILE_SOURCES["full"]))
+
+    @field_validator("window_days")
+    @classmethod
+    def _window_fixed(cls, value: int) -> int:
+        if value != WINDOW_DAYS:
+            raise ValueError(f"window_days is fixed at {WINDOW_DAYS} in v1, got {value}")
+        return value
 
     @model_validator(mode="before")
     @classmethod
@@ -208,8 +241,9 @@ class Query(SonarModel):
         """Run the CONTRACTS validator order so the first failure is the one reported.
 
         Order: length and punctuation per term; distinctness across brand, aliases and
-        competitors; competitor count; sources membership, distinctness and profile rule.
-        Non-string inputs are left for the field type checks.
+        competitors; competitor count (profile-aware, D012 F14); ``window_days == 14``
+        (D012 F6); sources membership, distinctness and profile rule. Non-string inputs
+        are left for the field type checks.
         """
         if not isinstance(data, dict):
             return data
@@ -237,9 +271,17 @@ class Query(SonarModel):
                 if key in seen:
                     raise ValueError(f"{what} entry {term!r} duplicates {seen[key]} term")
                 seen[key] = what
-            if len(out["competitors"]) > 3:
-                raise ValueError(f"competitors must have at most 3 entries, got {len(competitors)}")
         profile = out.get("profile", "full")
+        if isinstance(competitors, list) and profile in MAX_COMPETITORS_BY_PROFILE:
+            cap = MAX_COMPETITORS_BY_PROFILE[profile]
+            if len(competitors) > cap:
+                raise ValueError(
+                    f"competitors must have at most {cap} entries under profile {profile}, "
+                    f"got {len(competitors)}"
+                )
+        window_days = out.get("window_days", WINDOW_DAYS)
+        if isinstance(window_days, int) and window_days != WINDOW_DAYS:
+            raise ValueError(f"window_days is fixed at {WINDOW_DAYS} in v1, got {window_days}")
         sources = out.get("sources")
         if sources is None and profile in PROFILE_SOURCES:
             out["sources"] = list(PROFILE_SOURCES[profile])
@@ -267,7 +309,7 @@ class Mention(SonarModel):
     mention_id: Hex24
     brand: str = Field(min_length=1)
     source: Source
-    run_id: str = Field(min_length=1)
+    run_id: str | None
     native_id: str | None
     url: str | None
     author_hash: Hex16 | None
@@ -287,7 +329,7 @@ class Mention(SonarModel):
             raise ValueError("text must have at least one non-whitespace character")
         return value
 
-    @field_validator("native_id", "url")
+    @field_validator("run_id", "native_id", "url")
     @classmethod
     def _optional_nonblank(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
@@ -309,6 +351,16 @@ class Mention(SonarModel):
             raise ValueError("matched_terms entries must be non-empty")
         return value
 
+    @property
+    def local_seq(self) -> int:
+        """The ledger row that saved this item's raw payload (``raw_ref`` before ``#``)."""
+        return int(self.raw_ref.split("#", 1)[0])
+
+    @property
+    def engagement_score(self) -> int:
+        """Sum of the numeric values of ``engagement``; ``0`` for ``{}`` (D012 F23)."""
+        return engagement_score_for(self.engagement)
+
     @model_validator(mode="after")
     def _source_rules(self) -> Self:
         if self.source in REVIEW_SOURCES:
@@ -322,6 +374,11 @@ class Mention(SonarModel):
                 f"cluster_key for {self.source} must be {expected!r}, got {self.cluster_key!r}"
             )
         return self
+
+
+def engagement_score_for(engagement: dict[str, int]) -> int:
+    """CONTRACTS §Digest.top_mentions: the sum of the engagement values, ``0`` for ``{}``."""
+    return sum(engagement.values())
 
 
 def expected_cluster_key(source: Source, mention_id: str, author_hash: str | None) -> str | None:
@@ -370,6 +427,7 @@ class Signals(SonarModel):
     classifier: ModelSignal
     tiebreak: ModelSignal | None
     deterministic: DeterministicSignal
+    overflow: bool
 
 
 class Label(SonarModel):
@@ -413,6 +471,11 @@ class Label(SonarModel):
             )
         if self.status == "cached" and (self.usage.tokens != 0 or self.usage.cost_usd != 0.0):
             raise ValueError("cached labels carry usage {tokens: 0, cost_usd: 0.0}")
+        if self.signals.overflow:
+            if self.signals.tiebreak is not None:
+                raise ValueError("overflow means the tiebreak was never called; tiebreak is null")
+            if self.corroboration not in ("model_only", "irrelevant"):
+                raise ValueError("an overflow row is model_only (or irrelevant), never confirmed")
         return self
 
 
@@ -461,6 +524,13 @@ class RunRecord(SonarModel):
             raise ValueError("cost_usd is null until reconciled from /v1/runs")
         if self.run_id is not None and not self.run_id.strip():
             raise ValueError("run_id must be null when absent, not an empty string")
+        if self.run_id is None and self.cost_source != "local":
+            raise ValueError("rows with run_id null reconcile by construction: cost_source=local")
+        if self.cost_source == "local":
+            if self.run_id is not None:
+                raise ValueError("cost_source=local is only for rows with run_id null")
+            if self.cost_usd != 0.0:
+                raise ValueError("cost_source=local rows carry cost_usd=0.0")
         return self
 
 
@@ -470,9 +540,16 @@ class RunRecord(SonarModel):
 class TopicMethod(SonarModel):
     embedding_model: str = Field(min_length=1)
     linkage: Literal["average"] = "average"
-    threshold: float
+    threshold: float = TOPIC_DISTANCE_THRESHOLD
     min_size: Literal[3] = 3
     min_breadth: Literal[2] = 2
+
+    @field_validator("threshold")
+    @classmethod
+    def _threshold_fixed(cls, value: float) -> float:
+        if not math.isclose(value, TOPIC_DISTANCE_THRESHOLD, abs_tol=1e-12):
+            raise ValueError(f"threshold is fixed at {TOPIC_DISTANCE_THRESHOLD} (D012 F16)")
+        return value
 
 
 class Topic(SonarModel):
@@ -483,11 +560,15 @@ class Topic(SonarModel):
     name: str = Field(min_length=1)
     n: int = Field(ge=1)
     n_clusters: int = Field(ge=1)
-    share: UnitInterval
-    net: NetScore
-    ci95: CI95
+    share: UnitInterval | None
+    net: NetScore | None
+    ci95: CI95 | None
     exemplar_mention_ids: list[Hex24] = Field(min_length=3, max_length=3)
     method: TopicMethod
+
+    @property
+    def has_null_estimate(self) -> bool:
+        return self.share is None or self.net is None
 
     @field_validator("name")
     @classmethod
@@ -506,6 +587,8 @@ class Topic(SonarModel):
             )
         if self.n_clusters > self.n:
             raise ValueError("n_clusters cannot exceed n")
+        if (self.ci95 is None) != (self.net is None):
+            raise ValueError("ci95 is null iff net is null")
         return self
 
 
@@ -600,6 +683,9 @@ class MentionCounts(SonarModel):
         bad = sorted(set(value) - EXCLUSION_REASONS)
         if bad:
             raise ValueError(f"excluded_with_reason keys not allowed: {bad}")
+        missing = sorted(EXCLUSION_REASONS - set(value))
+        if missing:
+            raise ValueError(f"excluded_with_reason must carry every key, missing: {missing}")
         return value
 
     @field_validator("excluded_with_reason", "by_source", "by_brand")
@@ -611,6 +697,31 @@ class MentionCounts(SonarModel):
         return value
 
 
+class Audit(SonarModel):
+    """Tiebreak audit counts (CONTRACTS §Receipt.audit, D012 F4); H3 reads ``agreement``."""
+
+    n_sample: int = Field(ge=0)
+    n_agree: int = Field(ge=0)
+    agreement: UnitInterval | None
+    tiebreak_calls: int = Field(ge=0)
+    tiebreak_overflow: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def _agreement_rule(self) -> Self:
+        if self.n_agree > self.n_sample:
+            raise ValueError("n_agree cannot exceed n_sample")
+        if self.n_sample > self.tiebreak_calls:
+            raise ValueError("n_sample counts tiebreak calls that returned ok; cannot exceed calls")
+        if self.n_sample == 0:
+            if self.agreement is not None:
+                raise ValueError("agreement is null when n_sample is 0")
+        elif self.agreement is None or not math.isclose(
+            self.agreement, self.n_agree / self.n_sample, rel_tol=1e-9, abs_tol=1e-9
+        ):
+            raise ValueError("agreement must equal n_agree / n_sample")
+        return self
+
+
 class Abstention(SonarModel):
     scope: AbstainScope
     brand: str | None
@@ -618,13 +729,25 @@ class Abstention(SonarModel):
     reason: AbstainReason
     detail: str
 
+    @model_validator(mode="after")
+    def _reason_scope(self) -> Self:
+        if self.reason == "embedding_failed" and self.scope != "topics":
+            raise ValueError("embedding_failed is a topics-only abstention")
+        if self.reason == "signals_conflict" and self.scope != "brand":
+            raise ValueError("signals_conflict abstains a brand's WoW verdict; scope must be brand")
+        return self
+
 
 def derive_verdict(replay: bool, runs: list[RunRecord], reconciliation: Reconciliation) -> Verdict:
-    """CONTRACTS §Receipt verdict rule, re-derived by ``sonar verify``."""
+    """CONTRACTS §Receipt verdict rule, re-derived by ``sonar verify``.
+
+    Rows with ``run_id=null`` reconcile by construction (``cost_source="local"``) and
+    do not block ``RECONCILED`` (D012 F13).
+    """
     if replay:
         return "REPLAY"
     if (
-        all(r.cost_source == "/v1/runs" for r in runs)
+        all(r.cost_source == "/v1/runs" for r in runs if r.run_id is not None)
         and reconciliation.unmatched_remote_run_ids == []
     ):
         return "RECONCILED"
@@ -647,6 +770,7 @@ class Receipt(SonarModel):
     incumbent: Incumbent
     comparison: Comparison
     mentions: MentionCounts
+    audit: Audit
     abstentions: list[Abstention]
     what_could_not_be_checked: list[str]
     content_digest: str = Field(pattern=r"^([0-9a-f]{64})?$")
@@ -668,6 +792,14 @@ class Receipt(SonarModel):
         if sorted(self.reconciliation.unreconciled_local_seqs) != unreconciled:
             raise ValueError(
                 "reconciliation.unreconciled_local_seqs must list every unreconciled run"
+            )
+        local_rows = sum(1 for r in self.runs if r.cost_source == "local")
+        if self.totals.monid_runs_failed < local_rows:
+            raise ValueError("totals.monid_runs_failed counts every run_id=null (local) row")
+        listed = sum(r.cost_usd or 0.0 for r in self.runs if r.cost_source == "/v1/runs")
+        if not math.isclose(self.totals.monid_usd, listed, rel_tol=1e-9, abs_tol=1e-9):
+            raise ValueError(
+                "totals.monid_usd must sum cost_usd over runs with cost_source=/v1/runs"
             )
         equiv = self.totals.total_usd * self.comparison.briefs_per_month_assumed
         if not math.isclose(
@@ -713,78 +845,237 @@ class DateRange(SonarModel):
 
 
 class Window(SonarModel):
+    """Two equal 7-day periods: ``previous`` ends where ``current`` starts (D012 F6)."""
+
     current: DateRange
     previous: DateRange
 
-
-def _p_values_rule(verdict: WowVerdict, p_raw: float | None, p_holm: float | None) -> None:
-    if verdict == "ABSTAIN":
-        if p_raw is not None or p_holm is not None:
-            raise ValueError("p_raw and p_holm must be null on ABSTAIN")
-    elif p_raw is None or p_holm is None:
-        raise ValueError("p_raw and p_holm are reported unless the verdict is ABSTAIN")
-
-
-class WowNet(SonarModel):
-    delta: float
-    ci95: CI95
-    ci95_confirmed_only: CI95
-    verdict: WowVerdict
-    p_raw: UnitInterval | None
-    p_holm: UnitInterval | None
-
     @model_validator(mode="after")
-    def _p_values(self) -> Self:
-        _p_values_rule(self.verdict, self.p_raw, self.p_holm)
+    def _two_equal_periods(self) -> Self:
+        period = timedelta(days=PERIOD_DAYS)
+        if self.current.end - self.current.start != period:
+            raise ValueError(f"current period must span exactly {PERIOD_DAYS} days")
+        if self.previous.end - self.previous.start != period:
+            raise ValueError(f"previous period must span exactly {PERIOD_DAYS} days")
+        if self.previous.end != self.current.start:
+            raise ValueError("previous.end must equal current.start")
         return self
+
+
+def _ci_sign(ci: tuple[float, float]) -> int:
+    """+1 / -1 when the interval excludes 0 on that side, 0 when it contains 0."""
+    lo, hi = ci
+    if lo > 0:
+        return 1
+    if hi < 0:
+        return -1
+    return 0
+
+
+def derive_wow_verdict(
+    delta: float,
+    ci95: CI95,
+    ci95_confirmed_only: CI95 | None,
+    p_raw: float,
+    p_holm: float,
+) -> WowVerdict:
+    """CONTRACTS §Digest WoW verdict rule for a brand that meets the minimums (D012 F1/F7/F8).
+
+    ``p_holm`` governs; the intervals are display, except that (a) for net,
+    ``SIGNIFICANT`` also needs the confirmed-only interval to exclude 0 with the sign of
+    ``delta`` and (b) opposite-sign intervals abstain with ``signals_conflict``. Share
+    passes ``ci95_confirmed_only=None``. A brand below the minimums abstains before this
+    rule runs and carries null estimates.
+    """
+    if ci95_confirmed_only is not None:
+        full, confirmed = _ci_sign(ci95), _ci_sign(ci95_confirmed_only)
+        if full != 0 and confirmed != 0 and full != confirmed:
+            return "ABSTAIN"
+    if p_holm < ALPHA:
+        if ci95_confirmed_only is None:
+            return "SIGNIFICANT"
+        delta_sign = 1 if delta > 0 else -1 if delta < 0 else 0
+        if delta_sign != 0 and _ci_sign(ci95_confirmed_only) == delta_sign:
+            return "SIGNIFICANT"
+    if p_raw < ALPHA:
+        return "SUGGESTIVE"
+    return "NO_CHANGE_DETECTED"
 
 
 class WowShare(SonarModel):
-    delta: float
-    ci95: CI95
+    """Share-of-voice week-over-week (CONTRACTS §Digest ``WowShare``).
+
+    Every estimate is null on ``ABSTAIN`` (share has no confirmed-only interval, so the
+    only abstention is ``below_minimum``); otherwise every field is set and ``verdict``
+    equals :func:`derive_wow_verdict`.
+    """
+
+    delta: float | None
+    ci95: CI95 | None
     verdict: WowVerdict
     p_raw: UnitInterval | None
     p_holm: UnitInterval | None
 
     @model_validator(mode="after")
-    def _p_values(self) -> Self:
-        if self.verdict == "SIGNIFICANT":
-            raise ValueError("share of voice has no confirmed-only interval; report SUGGESTIVE")
-        _p_values_rule(self.verdict, self.p_raw, self.p_holm)
+    def _verdict_rule(self) -> Self:
+        fields = (self.delta, self.ci95, self.p_raw, self.p_holm)
+        if self.verdict == "ABSTAIN":
+            if any(f is not None for f in fields):
+                raise ValueError("every field but verdict is null on a share ABSTAIN")
+            return self
+        if self.delta is None or self.ci95 is None or self.p_raw is None or self.p_holm is None:
+            raise ValueError("delta, ci95, p_raw and p_holm are reported unless ABSTAIN")
+        expected = derive_wow_verdict(self.delta, self.ci95, None, self.p_raw, self.p_holm)
+        if self.verdict != expected:
+            raise ValueError(
+                f"verdict {self.verdict} contradicts the p-values; expected {expected}"
+            )
         return self
 
 
+class WowNet(SonarModel):
+    """Net-sentiment week-over-week (CONTRACTS §Digest ``WowNet``).
+
+    On ``ABSTAIN`` for ``below_minimum`` every field but ``verdict`` is null; on
+    ``signals_conflict`` the intervals and p-values are kept and only the word abstains.
+    """
+
+    delta: float | None
+    ci95: CI95 | None
+    ci95_confirmed_only: CI95 | None
+    verdict: WowVerdict
+    p_raw: UnitInterval | None
+    p_holm: UnitInterval | None
+
+    @property
+    def is_below_minimum(self) -> bool:
+        return self.verdict == "ABSTAIN" and self.delta is None
+
+    @model_validator(mode="after")
+    def _verdict_rule(self) -> Self:
+        fields = (self.delta, self.ci95, self.ci95_confirmed_only, self.p_raw, self.p_holm)
+        if all(f is None for f in fields):
+            if self.verdict != "ABSTAIN":
+                raise ValueError("null estimates require verdict ABSTAIN (below_minimum)")
+            return self
+        if (
+            self.delta is None
+            or self.ci95 is None
+            or self.ci95_confirmed_only is None
+            or self.p_raw is None
+            or self.p_holm is None
+        ):
+            raise ValueError("estimates are all null (below_minimum) or all reported")
+        expected = derive_wow_verdict(
+            self.delta, self.ci95, self.ci95_confirmed_only, self.p_raw, self.p_holm
+        )
+        if self.verdict != expected:
+            raise ValueError(
+                f"verdict {self.verdict} contradicts the intervals and p-values; "
+                f"expected {expected}"
+            )
+        return self
+
+
+def _estimate_rules(
+    what: str,
+    labelled: int,
+    net: float | None,
+    ci95: CI95 | None,
+    ci95_iid: CI95 | None,
+    design_effect: float | None,
+) -> None:
+    """Null rules shared by SentimentEntry and BySourceEntry (D012 F5, F3).
+
+    ``net`` is null when ``pos + neg + neu = 0`` or the brand abstains; the intervals
+    are null iff ``net`` is; ``design_effect = (cluster width / iid width)^2`` and is
+    null when the iid width is 0.
+    """
+    if labelled == 0 and net is not None:
+        raise ValueError(f"{what}: net must be null when pos + neg + neu is 0")
+    if net is None:
+        if ci95 is not None or ci95_iid is not None or design_effect is not None:
+            raise ValueError(f"{what}: ci95, ci95_iid and design_effect are null when net is")
+        return
+    if ci95 is None or ci95_iid is None:
+        raise ValueError(f"{what}: ci95 and ci95_iid are reported when net is")
+    iid_width = ci95_iid[1] - ci95_iid[0]
+    if iid_width == 0:
+        if design_effect is not None:
+            raise ValueError(f"{what}: design_effect is null when the iid width is 0")
+        return
+    expected = ((ci95[1] - ci95[0]) / iid_width) ** 2
+    if design_effect is None or not math.isclose(design_effect, expected, rel_tol=1e-6):
+        raise ValueError(
+            f"{what}: design_effect must equal (cluster width / iid width)^2 = {expected:.6g}"
+        )
+
+
 class SovEntry(SonarModel):
+    """Share of voice per brand; ``n`` counts mention-brand pairs and gates share minimums."""
+
     brand: str = Field(min_length=1)
     n: int = Field(ge=0)
     n_clusters: int = Field(ge=0)
-    share: UnitInterval
-    ci95: CI95
+    share: UnitInterval | None
+    ci95: CI95 | None
     basis_sources: list[Source]
     wow: WowShare
 
+    @property
+    def has_null_estimate(self) -> bool:
+        return self.share is None
+
+    @model_validator(mode="after")
+    def _paired_nulls(self) -> Self:
+        if (self.share is None) != (self.ci95 is None):
+            raise ValueError("share and ci95 are null together")
+        if len(set(self.basis_sources)) != len(self.basis_sources):
+            raise ValueError("basis_sources must be distinct")
+        if self.n_clusters > self.n:
+            raise ValueError("n_clusters cannot exceed n")
+        return self
+
 
 class SentimentEntry(SonarModel):
+    """Net sentiment per brand; ``n`` counts relevant mentions and gates net minimums."""
+
     brand: str = Field(min_length=1)
     n: int = Field(ge=0)
     n_confirmed: int = Field(ge=0)
     pos: int = Field(ge=0)
     neg: int = Field(ge=0)
     neu: int = Field(ge=0)
-    net: NetScore
-    ci95: CI95
-    ci95_iid: CI95
-    design_effect: float = Field(ge=0.0)
+    net: NetScore | None
+    ci95: CI95 | None
+    ci95_iid: CI95 | None
+    design_effect: float | None = Field(ge=0.0)
     wow: WowNet
+
+    @property
+    def labelled(self) -> int:
+        return self.pos + self.neg + self.neu
+
+    @property
+    def has_null_estimate(self) -> bool:
+        return self.net is None
 
     @model_validator(mode="after")
     def _counts(self) -> Self:
         if self.n_confirmed > self.n:
             raise ValueError("n_confirmed cannot exceed n")
+        if self.labelled > self.n:
+            raise ValueError("pos + neg + neu cannot exceed n")
+        _estimate_rules(
+            "sentiment", self.labelled, self.net, self.ci95, self.ci95_iid, self.design_effect
+        )
         return self
 
 
 class BySourceEntry(SonarModel):
+    """Per ``(brand, source)`` sentiment; ``wow_scope=false`` marks a source without
+    timestamps that counts for share but is excluded from ``wow`` and ``events`` (D012 F2)."""
+
     brand: str = Field(min_length=1)
     source: Source
     n: int = Field(ge=0)
@@ -793,22 +1084,67 @@ class BySourceEntry(SonarModel):
     neg: int = Field(ge=0)
     neu: int = Field(ge=0)
     net: NetScore | None
+    ci95: CI95 | None
+    ci95_iid: CI95 | None
+    design_effect: float | None = Field(ge=0.0)
+    wow_scope: bool
+
+    @property
+    def labelled(self) -> int:
+        return self.pos + self.neg + self.neu
+
+    @property
+    def has_null_estimate(self) -> bool:
+        return self.net is None
+
+    @property
+    def h2_scored(self) -> bool:
+        return self.source in H2_SCORED_SOURCES
 
     @model_validator(mode="after")
     def _net_null_when_empty(self) -> Self:
         if self.n == 0 and self.net is not None:
             raise ValueError("net must be null when n is 0")
+        if self.labelled > self.n:
+            raise ValueError("pos + neg + neu cannot exceed n")
+        if self.n_clusters > self.n:
+            raise ValueError("n_clusters cannot exceed n")
+        _estimate_rules(
+            "by_source", self.labelled, self.net, self.ci95, self.ci95_iid, self.design_effect
+        )
         return self
 
 
+def event_threshold(baseline_median: float, baseline_mad: float) -> float:
+    """CONTRACTS §Digest.events: ``max(5, baseline_median + 3 * baseline_mad)`` (D012 F19)."""
+    return max(float(EVENT_MIN_N), baseline_median + EVENT_MAD_MULTIPLIER * baseline_mad)
+
+
 class Event(SonarModel):
+    """A UTC day whose mention count clears the MAD threshold with breadth >= 3."""
+
     brand: str = Field(min_length=1)
     date: date
-    n: int = Field(ge=5)
+    n: int = Field(ge=EVENT_MIN_N)
     n_clusters: int = Field(ge=3)
     baseline_median: float = Field(ge=0.0)
+    baseline_mad: float = Field(ge=0.0)
+    threshold: float = Field(ge=EVENT_MIN_N)
     label: str = Field(min_length=1)
     exhibit_url: str | None
+
+    @model_validator(mode="after")
+    def _threshold_rule(self) -> Self:
+        expected = event_threshold(self.baseline_median, self.baseline_mad)
+        if not math.isclose(self.threshold, expected, rel_tol=1e-9, abs_tol=1e-9):
+            raise ValueError(
+                f"threshold must equal max(5, baseline_median + 3 * baseline_mad) = {expected}"
+            )
+        if self.n < self.threshold:
+            raise ValueError("an event is emitted only when n >= threshold")
+        if self.n_clusters > self.n:
+            raise ValueError("n_clusters cannot exceed n")
+        return self
 
     @field_validator("label")
     @classmethod
@@ -827,6 +1163,14 @@ class TopMention(SonarModel):
     lang: Lang
     label: SentimentLabel
     published_at: UtcDatetime | None
+    engagement_score: int
+
+    @property
+    def sort_key(self) -> tuple[int, float, str]:
+        """Descending ``engagement_score``, then ``published_at`` descending (null last),
+        then ``mention_id`` ascending (D012 F23); sort ascending on this key."""
+        stamp = self.published_at.timestamp() if self.published_at is not None else -math.inf
+        return (-self.engagement_score, -stamp, self.mention_id)
 
 
 class CoverageGap(SonarModel):
@@ -884,7 +1228,66 @@ class Digest(SonarModel):
         over = sorted(b for b, c in per_brand.items() if c > 10)
         if over:
             raise ValueError(f"top_mentions allows at most 10 per brand, exceeded for {over}")
+        for brand in per_brand:
+            order = [t.sort_key for t in self.top_mentions if t.brand == brand]
+            if order != sorted(order):
+                raise ValueError(
+                    f"top_mentions for {brand!r} must sort by engagement_score desc, "
+                    "published_at desc, mention_id asc"
+                )
         return self
+
+    @model_validator(mode="after")
+    def _nulls_paired_with_abstentions(self) -> Self:
+        """Every null estimate is paired with an Abstention naming brand and source (F5)."""
+        missing: list[str] = []
+        for sov in self.share_of_voice:
+            if sov.has_null_estimate and not self._abstained(sov.brand, None):
+                missing.append(f"share_of_voice {sov.brand}")
+            if sov.wow.verdict == "ABSTAIN" and not self._abstained(sov.brand, None):
+                missing.append(f"share_of_voice.wow {sov.brand}")
+        for sent in self.sentiment:
+            if sent.has_null_estimate and not self._abstained(sent.brand, None):
+                missing.append(f"sentiment {sent.brand}")
+            if sent.wow.verdict == "ABSTAIN" and not self._abstained(sent.brand, None):
+                missing.append(f"sentiment.wow {sent.brand}")
+        for row in self.by_source:
+            if row.has_null_estimate and not self._abstained(row.brand, row.source):
+                missing.append(f"by_source {row.brand}/{row.source}")
+        for t in self.topics:
+            if t.has_null_estimate and not any(
+                a.scope == "topics" and a.brand == t.brand for a in self.abstentions
+            ):
+                missing.append(f"topics {t.topic_id}")
+        if missing:
+            raise ValueError(f"null estimates without an Abstention row: {missing}")
+        return self
+
+    def _abstained(self, brand: str, source: Source | None) -> bool:
+        return any(
+            a.brand == brand and (a.source is None or a.source == source) for a in self.abstentions
+        )
+
+
+class StatsFile(SonarModel):
+    """``results/<session>/stats.json``: the Digest's numbers without narration or quotes
+    (CONTRACTS §StatsFile, D012 F21). Each field is byte-identical to the Digest's."""
+
+    share_of_voice: list[SovEntry]
+    sentiment: list[SentimentEntry]
+    by_source: list[BySourceEntry]
+    events: list[Event]
+    window: Window
+
+    @classmethod
+    def from_digest(cls, digest: Digest) -> StatsFile:
+        return cls(
+            share_of_voice=digest.share_of_voice,
+            sentiment=digest.sentiment,
+            by_source=digest.by_source,
+            events=digest.events,
+            window=digest.window,
+        )
 
 
 # --------------------------------------------------------------------------- Answer
@@ -898,7 +1301,7 @@ class Answer(SonarModel):
     question: str = Field(min_length=1)
     answer: str
     citations: list[Hex24]
-    numbers_verified: list[str]
+    verified_numbers: list[str]
     retrieved: list[Hex24] = Field(max_length=20)
     model: str
     usage: Usage
@@ -919,27 +1322,37 @@ RECORDS: dict[str, type[SonarModel]] = {
     "Topic": Topic,
     "Receipt": Receipt,
     "Digest": Digest,
+    "StatsFile": StatsFile,
     "Answer": Answer,
 }
 """Every top-level CONTRACTS record by its contract name."""
 
 __all__ = [
+    "ALPHA",
     "AUTHOR_CLUSTER_SOURCES",
     "CI95",
     "COMMENT_SOURCES",
     "ENGAGEMENT_KEYS",
+    "EVENT_MAD_MULTIPLIER",
+    "EVENT_MIN_N",
     "EXCLUSION_REASONS",
+    "H2_SCORED_SOURCES",
+    "MAX_COMPETITORS_BY_PROFILE",
     "MENTION_ID_CLUSTER_SOURCES",
+    "PERIOD_DAYS",
     "PROFILE_SOURCES",
     "RECORDS",
     "REVIEW_SOURCES",
     "SCHEMA_REV",
     "SOURCES",
+    "TOPIC_DISTANCE_THRESHOLD",
+    "WINDOW_DAYS",
     "AbstainReason",
     "AbstainScope",
     "Abstention",
     "Answer",
     "AnswerStatus",
+    "Audit",
     "BySourceEntry",
     "Comparison",
     "Corroboration",
@@ -973,6 +1386,7 @@ __all__ = [
     "SonarModel",
     "Source",
     "SovEntry",
+    "StatsFile",
     "Timestamps",
     "TopMention",
     "Topic",
@@ -988,6 +1402,9 @@ __all__ = [
     "author_hash_for",
     "canonical_json",
     "derive_verdict",
+    "derive_wow_verdict",
+    "engagement_score_for",
+    "event_threshold",
     "expected_cluster_key",
     "input_digest_for",
     "mention_id_for",
