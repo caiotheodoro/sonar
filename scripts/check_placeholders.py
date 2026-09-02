@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Fail if any tracked text file contains the strings TBD or TODO."""
+from __future__ import annotations
+
+import subprocess
+import sys
+
+
+def tracked_files() -> list[str]:
+    result = subprocess.run(
+        ["git", "ls-files"], capture_output=True, text=True, check=True
+    )
+    return [f for f in result.stdout.splitlines() if f.strip()]
+
+
+def main() -> int:
+    self_path = "scripts/check_placeholders.py"
+    exclude_prefixes = ("docs/research/",)
+    violations: list[str] = []
+    for path in tracked_files():
+        if path == self_path or any(path.startswith(p) for p in exclude_prefixes):
+            continue
+        try:
+            text = open(path, errors="ignore").read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        for needle in ("TBD", "TODO"):
+            if needle in text:
+                violations.append(f"{path}: contains {needle}")
+
+    if violations:
+        print("check-placeholders FAILED — found placeholders:")
+        for v in violations:
+            print(f"  {v}")
+        return 1
+
+    print("check-placeholders OK — no TBD or TODO found")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
