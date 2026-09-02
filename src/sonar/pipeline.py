@@ -428,6 +428,24 @@ def _build_input(adapter: Any, query: Query, now: datetime, **extra: Any) -> dic
     return result
 
 
+def _report_notes(source: SourceName, report: Any) -> list[str]:
+    """Diagnostic notes from an adapter's ``parse_with_report`` result.
+
+    The adapters that return a report do not share one shape — reddit reports
+    ``cluster_key_fallbacks``, news reports ``skipped_no_match`` — so every
+    optional field is read defensively and one adapter's shape is never
+    assumed of another.
+    """
+    notes: list[str] = []
+    fallbacks = getattr(report, "cluster_key_fallbacks", 0)
+    if fallbacks:
+        notes.append(f"cluster key fallback: {source} {fallbacks}")
+    skipped = getattr(report, "skipped_no_match", 0)
+    if skipped:
+        notes.append(f"{source}: {skipped} result(s) skipped, no brand match")
+    return notes
+
+
 def _run_source(
     ctx: _FetchContext,
     result: FetchResult,
@@ -464,10 +482,7 @@ def _run_source(
                 payload, outcome.run_id, brand, local_seq=record.local_seq, terms=list(terms)
             )
             mentions: list[Mention] = list(report.mentions)
-            if report.cluster_key_fallbacks:
-                result.notes.append(
-                    f"cluster key fallback: {source} {report.cluster_key_fallbacks}"
-                )
+            result.notes.extend(_report_notes(source, report))
         else:
             mentions = list(
                 adapter.parse(

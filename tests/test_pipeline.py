@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import httpx
@@ -250,6 +251,30 @@ class TestPlan:
 
     def test_thread_pool_width_is_six(self) -> None:
         assert MAX_WORKERS == 6 and RunOptions().max_workers == 6
+
+
+class TestReportNotes:
+    """`parse_with_report` returns heterogeneous report objects (reddit: cluster-key
+    fallbacks; news: brand-match skips). The pipeline must not assume one shape."""
+
+    def test_reddit_report_fallbacks_are_noted(self) -> None:
+        report = SimpleNamespace(mentions=[], cluster_key_fallbacks=3)
+        assert pipeline._report_notes("reddit", report) == [
+            "cluster key fallback: reddit 3"
+        ]
+
+    def test_news_report_without_cluster_key_attr_does_not_raise(self) -> None:
+        report = SimpleNamespace(mentions=[], skipped_no_match=0)
+        assert pipeline._report_notes("news", report) == []
+
+    def test_news_skipped_no_match_is_noted(self) -> None:
+        report = SimpleNamespace(mentions=[], skipped_no_match=4)
+        assert pipeline._report_notes("news", report) == [
+            "news: 4 result(s) skipped, no brand match"
+        ]
+
+    def test_report_with_neither_field_is_silent(self) -> None:
+        assert pipeline._report_notes("tiktok", SimpleNamespace(mentions=[])) == []
 
 
 # --------------------------------------------------------------------------- offline replay
