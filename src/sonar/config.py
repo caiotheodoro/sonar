@@ -1,8 +1,10 @@
 """Configuration layer: source plan, profiles, LLM ids and rates, thresholds.
 
 Every number the published-claims gate checks lives here as a named constant:
-the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.0.0, frozen
-2026-09-02), the endpoint reference table of the design document (Monid ids
+the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.1.0, frozen
+2026-09-02, amended same day by D012 A1/A2; later amendments bump the patch
+version there, never the values here without a ``DECISIONS.md`` entry), the
+endpoint reference table of the design document (Monid ids
 and prices verified 2026-09-02) and the OpenAI prices of ``docs/DECISIONS.md``
 D003. Changing a frozen value after that date is a ``docs/DECISIONS.md``
 entry, never a silent edit here.
@@ -116,7 +118,8 @@ H5_MIN_AGREEMENT: Final[float] = 0.85
 H5_N_LABELS: Final[int] = 50
 
 # ---------------------------------------------------------------------------
-# Topics (CONTRACTS Topic.method)
+# Topics (CONTRACTS Topic.method; cut, min_size and min_breadth are frozen in
+# the PRE-REGISTRATION threshold index per D012 F16)
 # ---------------------------------------------------------------------------
 
 TOPIC_MIN_SIZE: Final[int] = 3
@@ -462,4 +465,7 @@ THRESHOLD_INDEX: Final[Mapping[str, float | int]] = {
     "h4_min_total_usd_exclusive": H4_MIN_TOTAL_USD_EXCLUSIVE,
     "h5_min_agreement": H5_MIN_AGREEMENT,
     "h5_n_labels": H5_N_LABELS,
+    "topic_distance_threshold": TOPIC_DISTANCE_THRESHOLD,
+    "topic_min_size": TOPIC_MIN_SIZE,
+    "topic_min_breadth": TOPIC_MIN_BREADTH,
 }

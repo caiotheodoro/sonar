@@ -1,9 +1,15 @@
-"""The incumbent sonar is priced against: Brand24 Team.
+"""The incumbent sonar is priced against: Brand24 Team (D001).
 
 ``BRAND24_TEAM`` is the single source of the ``Receipt.incumbent`` block
-(CONTRACTS §Receipt). The published-claims gate requires these values to be
-identical to the README and to ``results/demo/receipt.json``; evidence for the
-price is ``results/incumbent/`` and ``docs/DECISIONS.md`` D001.
+(CONTRACTS §Receipt): name, monthly price, price URL, the date the price was
+checked and the monthly mentions quota. The published-claims gate requires
+these values to be identical to the README and to ``results/demo/receipt.json``
+(``tests/test_config.py`` checks the README half); evidence for the price is
+``results/incumbent/brand24-2026-09-02.png`` plus the Wayback snapshot in
+``results/incumbent/archive-url.txt``, recorded in ``docs/DECISIONS.md`` D001.
+If Brand24 changes its published price, D001 says the next incumbent is chosen
+by a new DECISIONS entry that updates this constant, the README and DECISIONS
+together, never one of them alone.
 """
 
 from __future__ import annotations

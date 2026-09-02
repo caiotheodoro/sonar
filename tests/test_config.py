@@ -1,4 +1,9 @@
-"""Every threshold in the PRE-REGISTRATION index equals its config constant."""
+"""Every threshold in the PRE-REGISTRATION index equals its config constant.
+
+The doc is read at run time, so the version line is checked for shape and
+floor (1.1.0 carried amendments A1/A2, D012) rather than a hardcoded string:
+a later patch amendment must not turn this gate red on its own.
+"""
 
 from __future__ import annotations
 
@@ -39,7 +44,7 @@ INDEX = threshold_index()
         (r"seed (\d+)", config.SEED),
         (r"α=([\d.]+) \(Holm\)", config.HOLM_ALPHA),
         (r"n_clusters < (\d+)", config.MIN_CLUSTERS_PER_WEEK),
-        (r"n < (\d+) in either week", config.MIN_MENTIONS_PER_WEEK),
+        (r"n < (\d+) in either period", config.MIN_MENTIONS_PER_WEEK),
         (r"n_day ≥ max\((\d+), median", config.EVENT_MIN_COUNT),
         (r"median \+ (\d+)·MAD", config.EVENT_MAD_MULTIPLIER),
         (r"n_clusters_day ≥ (\d+)", config.EVENT_MIN_CLUSTERS),
@@ -53,6 +58,9 @@ INDEX = threshold_index()
         (r"H4: > \$([\d.]+)", config.H4_MIN_TOTAL_USD_EXCLUSIVE),
         (r"H5: ≥ ([\d.]+) on", config.H5_MIN_AGREEMENT),
         (r"on (\d+) labels", config.H5_N_LABELS),
+        (r"distance cut ([\d.]+)", config.TOPIC_DISTANCE_THRESHOLD),
+        (r"min_size (\d+)", config.TOPIC_MIN_SIZE),
+        (r"min_breadth (\d+)", config.TOPIC_MIN_BREADTH),
     ],
 )
 def test_threshold_index_matches_constant(pattern: str, constant: float) -> None:
@@ -81,15 +89,31 @@ def test_threshold_index_mapping_covers_every_constant() -> None:
         "h4_min_total_usd_exclusive": 0.0,
         "h5_min_agreement": 0.85,
         "h5_n_labels": 50,
+        "topic_distance_threshold": 0.35,
+        "topic_min_size": 3,
+        "topic_min_breadth": 2,
     }
     assert dict(config.THRESHOLD_INDEX) == expected
     assert config.B == config.B_LIVE
 
 
+def pre_registration_version() -> tuple[int, int, int]:
+    """Semver of the frozen doc, read from its ``**Version**`` line at run time."""
+    text = PRE_REG.read_text(encoding="utf-8")
+    match = re.search(r"^\*\*Version\*\*: (\d+)\.(\d+)\.(\d+)$", text, flags=re.MULTILINE)
+    assert match is not None, "PRE-REGISTRATION.md has no '**Version**: X.Y.Z' line"
+    major, minor, patch = (int(part) for part in match.groups())
+    return major, minor, patch
+
+
 def test_pre_registration_frozen_banner_and_version() -> None:
     text = PRE_REG.read_text(encoding="utf-8")
-    assert "**Version**: 1.0.0" in text
     assert "FROZEN TEXT" in text
+    assert "**Frozen**: 2026-09-02" in text
+    # A1/A2 (D012) landed in 1.1.0; anything older predates the wording and
+    # topic thresholds this file checks. Patch bumps after that are fine.
+    assert pre_registration_version() >= (1, 1, 0)
+    assert "**Amended**: 2026-09-02, A1 and A2" in text
 
 
 # --- source plan ----------------------------------------------------------
