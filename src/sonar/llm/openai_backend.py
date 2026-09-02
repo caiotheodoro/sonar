@@ -90,7 +90,7 @@ class OpenAIBackend:
         ]
         try:
             completion = self._client.chat.completions.parse(
-                model=model, messages=messages, response_format=LabelAnswers, temperature=0.0
+                model=model, messages=messages, response_format=LabelAnswers
             )
         except openai.OpenAIError as exc:
             reason = f"{type(exc).__name__}: {str(exc)[:200]}"
@@ -134,7 +134,7 @@ class OpenAIBackend:
         ]
         try:
             completion = self._client.chat.completions.parse(
-                model=model, messages=messages, response_format=schema, temperature=0.0
+                model=model, messages=messages, response_format=schema
             )
         except ValidationError as exc:
             raise LlmUnparseable(f"{schema.__name__}: {exc}") from exc

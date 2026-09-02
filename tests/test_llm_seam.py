@@ -273,6 +273,18 @@ def test_classify_round_trips_ids_in_batch_order(harness: Harness) -> None:
     assert by_id[IDS[2]].confidence == pytest.approx(0.55)
 
 
+def test_classify_does_not_send_unsupported_temperature() -> None:
+    """The gpt-5.6 models reject `temperature` other than the default (1);
+    sending `temperature: 0.0` 400s every classify call."""
+    state = StubState(labels=_fixture_labels())
+    client = httpx2.Client(transport=httpx2.MockTransport(make_handler(state)))
+    backend = OpenAIBackend("sk-stub", rates=RATES, http_client=client, max_retries=0)
+    backend.classify(batch_of(IDS[:2]), CLASSIFIER)
+    body = json.loads(state.requests[-1].content)
+    assert body.get("temperature") in (None, 1), body.get("temperature")
+    client.close()
+
+
 def test_classify_reversed_batch_keeps_batch_order(harness: Harness) -> None:
     ids = list(reversed(IDS[:4]))
     result = harness.backend.classify(batch_of(ids), CLASSIFIER)
