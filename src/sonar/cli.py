@@ -42,6 +42,7 @@ import httpx
 from pydantic import ValidationError
 
 from sonar import config, pipeline
+from sonar.chat import command as chat_command
 from sonar.config import PROFILES
 from sonar.llm.base import LlmBackend
 from sonar.models import Query, Receipt
@@ -208,6 +209,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     verify = sub.add_parser("verify", parents=[common], help="re-derive a receipt's verdict")
     verify.add_argument("receipt", type=Path)
+    chat_command.register(sub, common, default_root=DEFAULT_ROOT)
     return parser
 
 
@@ -596,6 +598,9 @@ def main(
         "record": lambda: cmd_record(args, out=out),
         "render": lambda: cmd_render(args, out=out),
         "verify": lambda: cmd_verify(args, out=out),
+        "ask": lambda: chat_command.cmd_ask(
+            args, out=out, openai_key=load_openai_key(env), llm_factory=llm_factory
+        ),
     }
     command: str = args.command
     return handlers[command]()
