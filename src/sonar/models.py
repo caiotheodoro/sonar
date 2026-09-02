@@ -19,7 +19,7 @@ import unicodedata
 from collections import Counter
 from datetime import UTC, date, datetime, timedelta
 from itertools import pairwise
-from typing import Annotated, Any, Final, Literal, Self, get_args
+from typing import Annotated, Any, Literal, Self, get_args
 
 from pydantic import (
     AfterValidator,
@@ -104,21 +104,22 @@ EXCLUSION_REASONS: frozenset[str] = frozenset(
 H2_SCORED_SOURCES: frozenset[Source] = frozenset({"reddit", "youtube_comment"})
 """Thread-clustered comment sources whose `BySourceEntry.design_effect` scores H2 (D012 F3)."""
 
-# Every threshold below is sourced from `sonar.config`, the single source of truth
-# the published-claims gate checks; nothing here restates a number.
-WINDOW_DAYS: Final[int] = config.WINDOW_DAYS_DEFAULT
+# Every threshold below is a plain alias of a `sonar.config` constant, the single
+# source of truth the published-claims gate checks; nothing here restates a number
+# or re-annotates it (the `Final` type is inherited from config).
+WINDOW_DAYS = config.WINDOW_DAYS_DEFAULT
 """`Query.window_days` is fixed in v1 (D012 F6); the window splits into two 7-day periods."""
-PERIOD_DAYS: Final[int] = WINDOW_DAYS // 2
-TOPIC_DISTANCE_THRESHOLD: Final[float] = config.TOPIC_DISTANCE_THRESHOLD
+PERIOD_DAYS = WINDOW_DAYS // 2
+TOPIC_DISTANCE_THRESHOLD = config.TOPIC_DISTANCE_THRESHOLD
 """Average-linkage cosine-distance cut, chosen before any demo data (D012 F16)."""
-MIN_CLUSTERS: Final[int] = config.MIN_CLUSTERS_PER_WEEK
-MIN_N: Final[int] = config.MIN_MENTIONS_PER_WEEK
+MIN_CLUSTERS = config.MIN_CLUSTERS_PER_WEEK
+MIN_N = config.MIN_MENTIONS_PER_WEEK
 """Brand minimums: `n_clusters >= 5` and `n >= 20` per period gate every WoW verdict
 (`below_minimum`); the same pair over the full window is the H2 minimum on a
 `BySourceEntry` (D013 N3)."""
-EVENT_MIN_N: Final[int] = config.EVENT_MIN_COUNT
-EVENT_MAD_MULTIPLIER: Final[float] = config.EVENT_MAD_MULTIPLIER
-ALPHA: Final[float] = config.HOLM_ALPHA
+EVENT_MIN_N = config.EVENT_MIN_COUNT
+EVENT_MAD_MULTIPLIER = config.EVENT_MAD_MULTIPLIER
+ALPHA = config.HOLM_ALPHA
 """Holm-adjusted significance level for `derive_wow_verdict` (PRE-REGISTRATION §Rules)."""
 
 # Default `Query.sources` per profile. CONTRACTS names `config.SOURCE_PLAN` (W2.2)
