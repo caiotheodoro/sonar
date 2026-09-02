@@ -1,12 +1,14 @@
 """Voice layer tests (D006, D011): script, numbers gate, TTS, ``narrate``.
 
-Uses the fake llm seam and a stub ElevenLabs adapter. No network, no real
-model, no real Monid client (the stub adapter never touches the client).
+Uses the fake llm seam and a stub ElevenLabs adapter; the last class drives
+the real adapter behind a stub Monid transport so the ledger row is pinned.
+No network, no real model.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import base64
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -37,9 +39,9 @@ from sonar.models import (
     WowNet,
     WowShare,
 )
-from sonar.monid import LOCAL_DEADLINE, AlreadySubmitted, Ledger, MonidClient, MonidHalted
+from sonar.monid import BREAKER, LOCAL_DEADLINE, AlreadySubmitted, Ledger, MonidClient, MonidHalted
 from sonar.providers.base import AdapterSchemaError
-from sonar.providers.elevenlabs import TtsResult
+from sonar.providers.elevenlabs import ELEVENLABS, TtsResult
 from sonar.voice import NO_NARRATION, VoiceResult, narrate
 from sonar.voice.script import (
     MAX_ATTEMPTS,
@@ -47,9 +49,11 @@ from sonar.voice.script import (
     digest_numbers,
     extract_numbers,
     numbers_gate,
+    regate,
     write_script,
 )
 from sonar.voice.tts import BRIEF_MP3_FILENAME, synthesize_narration
+from tests.test_adapter_elevenlabs import FakeClock, Script, make_client, run_ok
 
 MP3_BYTES = b"\xff\xfb\x90\x00" * 50
 NOW = datetime(2026, 9, 2, 12, 0, 0, tzinfo=UTC)
@@ -330,10 +334,45 @@ class TestExtractNumbers:
             ("0.60 share", ["0.6"]),
             ("Cost was $0.42, share 60%", ["0.42", "60"]),
             ("no numbers here", []),
+            ("net sentiment -0.27", ["-0.27"]),
+            ("net \u22120.27", ["-0.27"]),
+            ("net \u20130.27", ["-0.27"]),
+            ("minus 0.27", ["-0.27"]),
+            ("Minus $0.27", ["-0.27"]),
+            ("-27%", ["-27"]),
+            ("2026-08-26", ["2026", "8", "26"]),
+            ("5-10 mentions", ["5", "10"]),
+            ("60 per cent", ["60"]),
+            ("60 pct", ["60"]),
         ],
     )
     def test_normalises(self, text: str, values: list[str]) -> None:
         assert [str(t.value) for t in extract_numbers(text)] == values
+
+    @pytest.mark.parametrize(
+        ("text", "decimals"),
+        [("30", 0), ("0.6", 1), ("0.60", 2), ("$1,234.50", 2), ("$0.3194", 4), ("34%", 0)],
+    )
+    def test_decimals_as_written(self, text: str, decimals: int) -> None:
+        (token,) = extract_numbers(text)
+        assert token.decimals == decimals
+
+    @pytest.mark.parametrize("text", ["60 per cent", "60 percent", "60 pct", "60%"])
+    def test_percent_spellings(self, text: str) -> None:
+        (token,) = extract_numbers(text)
+        assert token.percent and token.candidates == (Decimal(60), Decimal("0.6"))
+
+    def test_negative_percent_candidates(self) -> None:
+        (token,) = extract_numbers("-27%")
+        assert token.candidates == (Decimal(-27), Decimal("-0.27"))
+
+    def test_rounded_candidates(self) -> None:
+        assert extract_numbers("30")[0].rounded_candidates == ()
+        assert extract_numbers("0.60")[0].rounded_candidates == ((Decimal("0.6"), 2),)
+        assert extract_numbers("34%")[0].rounded_candidates == (
+            (Decimal(34), 0),
+            (Decimal("0.34"), 2),
+        )
 
     def test_percent_flag_and_candidates(self) -> None:
         (token,) = extract_numbers("60%")
@@ -351,10 +390,17 @@ class TestExtractNumbers:
 
 
 class TestDigestNumbers:
-    def test_numeric_leaves_and_dates(self, digest: Digest) -> None:
+    def test_numeric_leaves(self, digest: Digest) -> None:
         nums = digest_numbers(digest)
         assert {Decimal("0.42"), Decimal(30), Decimal("0.6"), Decimal("1.44")} <= nums
-        assert {Decimal(2026), Decimal(9), Decimal(2)} <= nums
+        assert Decimal("-0.05") in nums
+
+    def test_dates_do_not_vouch(self, digest: Digest) -> None:
+        nums = digest_numbers(digest)
+        assert Decimal(2026) not in nums
+        assert Decimal(26) not in nums
+        assert not numbers_gate("26 mentions", digest).verified
+        assert not numbers_gate("2026 was the year.", digest).verified
 
     def test_identifier_digits_do_not_vouch(self, digest: Digest) -> None:
         nums = digest_numbers(digest)
@@ -401,6 +447,93 @@ class TestNumbersGate:
         gate = numbers_gate("$999.99 twice: $999.99, then 31.", digest)
         assert gate.foreign == ("$999.99", "31")
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Net sentiment is -0.27.",
+            "Net sentiment is minus 0.27.",
+            "Net sentiment is \u22120.27.",
+            "Net sentiment is -27%.",
+            "Net sentiment is minus 27 per cent.",
+        ],
+    )
+    def test_negative_net_passes(self, text: str) -> None:
+        digest = with_net(make_digest(), -0.27)
+        assert numbers_gate(text, digest).verified
+
+    def test_negative_net_requires_the_sign(self) -> None:
+        digest = with_net(make_digest(), -0.27)
+        gate = numbers_gate("Net sentiment is 0.27.", digest)
+        assert gate.foreign == ("0.27",)
+        assert numbers_gate("Net sentiment is -0.5.", make_digest()).foreign == ("-0.5",)
+
+    def test_golden_precision_total_rounded(self) -> None:
+        digest = with_totals(make_digest(), monid_usd=0.31405, total_usd=0.31940999999999997)
+        assert numbers_gate("Cost $0.3194.", digest).verified
+        assert numbers_gate("Cost $0.32.", digest).verified
+        assert numbers_gate("Cost $0.3141.", digest).verified
+        assert numbers_gate("Cost $0.3195.", digest).foreign == ("$0.3195",)
+
+    def test_share_rounded_to_percent(self) -> None:
+        digest = with_share(make_digest(), 37 / 110)
+        assert numbers_gate("Share of voice 34%.", digest).verified
+        assert numbers_gate("Share of voice 33.6%.", digest).verified
+        assert numbers_gate("Share of voice 0.34.", digest).verified
+        assert numbers_gate("Share of voice 36%.", digest).foreign == ("36%",)
+        assert numbers_gate("Share of voice 0.36.", digest).foreign == ("0.36",)
+
+    def test_bare_integer_never_rounds(self) -> None:
+        digest = with_share(make_digest(), 29.6 / 100).model_copy(
+            update={"topics": [], "top_mentions": []}
+        )
+        assert Decimal(30) in digest_numbers(digest)
+        digest = with_net(make_digest(), 0.296)
+        assert numbers_gate("net 0.3", digest).verified
+        assert not numbers_gate("Score 296 today.", digest).verified
+
+    def test_per_cent_passes(self, digest: Digest) -> None:
+        assert numbers_gate("Share of voice is 60 per cent.", digest).verified
+        assert numbers_gate("Share of voice is 60 pct.", digest).verified
+
+
+def with_net(digest: Digest, net: float) -> Digest:
+    first, *rest = digest.sentiment
+    entry = first.model_copy(update={"net": net, "ci95": (net - 0.1, net + 0.1)})
+    return digest.model_copy(update={"sentiment": [entry, *rest]})
+
+
+def with_share(digest: Digest, share: float) -> Digest:
+    first, *rest = digest.share_of_voice
+    entry = first.model_copy(update={"share": share, "ci95": (share - 0.1, share + 0.1)})
+    return digest.model_copy(update={"share_of_voice": [entry, *rest]})
+
+
+def with_totals(digest: Digest, *, monid_usd: float, total_usd: float) -> Digest:
+    totals = digest.cost.totals.model_copy(
+        update={"monid_usd": monid_usd, "llm_usd": total_usd - monid_usd, "total_usd": total_usd}
+    )
+    return digest.model_copy(update={"cost": CostQuote(verdict=digest.cost.verdict, totals=totals)})
+
+
+class TestRegate:
+    def test_stale_cost_flips_to_unverified(self, digest: Digest) -> None:
+        narration = _script("Cost $0.42.", verified=True)
+        final = with_totals(digest, monid_usd=0.5, total_usd=0.6)
+        regated = regate(narration, final)
+        assert not regated.numbers_verified
+        assert regated.text == narration.text and regated.chars == narration.chars
+
+    def test_matching_cost_flips_to_verified(self, digest: Digest) -> None:
+        narration = _script("Cost $0.42.", verified=False)
+        assert regate(narration, digest).numbers_verified
+
+    def test_unchanged_when_verdict_holds(self, digest: Digest) -> None:
+        narration = _script(VERIFIED_TEXT, verified=True)
+        assert regate(narration, digest) is narration
+
+    def test_no_text_is_unchanged(self, digest: Digest) -> None:
+        assert regate(NO_NARRATION, digest) is NO_NARRATION
+
 
 # -- NarrationSchema ---------------------------------------------------------------
 
@@ -416,6 +549,10 @@ class TestNarrationSchema:
             NarrationSchema(narration="x" * (config.NARRATION_MAX_CHARS + 1))
         with pytest.raises(ValueError, match="empty"):
             NarrationSchema(narration="   ")
+
+    def test_padding_does_not_count_against_the_cap(self) -> None:
+        body = "x" * config.NARRATION_MAX_CHARS
+        assert NarrationSchema(narration=f"  {body}\n\n").narration == body
 
 
 # -- write_script ------------------------------------------------------------------
@@ -456,12 +593,30 @@ class TestWriteScript:
         assert not result.narration.numbers_verified
         assert result.foreign == ("$888.88",)
 
-    def test_over_budget_answer_is_unparseable(self, digest: Digest) -> None:
+    def test_over_budget_twice_is_unparseable(self, digest: Digest) -> None:
         fake = FakeBackend(
             answers={"NarrationSchema": {"narration": "x" * (config.NARRATION_MAX_CHARS + 1)}}
         )
         with pytest.raises(LlmUnparseable):
             write_script(digest, backend=fake)
+        assert fake.calls_by_kind[("NarrationSchema", config.LLM.classifier_model)] == MAX_ATTEMPTS
+
+    def test_over_budget_first_draft_is_reasked(self, digest: Digest) -> None:
+        over = "x" * (config.NARRATION_MAX_CHARS + 1)
+        fake = SequentialFake([{"narration": over}, {"narration": VERIFIED_TEXT}])
+        result = write_script(digest, backend=fake)
+        assert result.attempts == 2 and result.narration.text == VERIFIED_TEXT
+        assert result.narration.numbers_verified and len(result.usage) == 1
+        assert "exceeded" not in fake.users[0]
+        assert f"exceeded {config.NARRATION_MAX_CHARS} characters; shorten it" in fake.users[1]
+        assert "not in the digest" not in fake.users[1]
+
+    def test_over_budget_then_foreign_keeps_text_unverified(self, digest: Digest) -> None:
+        over = "x" * (config.NARRATION_MAX_CHARS + 1)
+        fake = SequentialFake([{"narration": over}, {"narration": FOREIGN_TEXT}])
+        result = write_script(digest, backend=fake)
+        assert result.attempts == MAX_ATTEMPTS
+        assert result.narration.text == FOREIGN_TEXT and not result.narration.numbers_verified
 
     def test_prompt_carries_digest_without_its_narration(self, digest: Digest) -> None:
         fake = SequentialFake([{"narration": VERIFIED_TEXT}])
@@ -494,7 +649,8 @@ class TestSynthesizeNarration:
         )
         path = tmp_path / "s1" / BRIEF_MP3_FILENAME
         assert out.voiced and out.abstention is None
-        assert out.narration.mp3_path == str(path) and path.read_bytes() == MP3_BYTES
+        assert out.narration.mp3_path == BRIEF_MP3_FILENAME
+        assert path.read_bytes() == MP3_BYTES
         assert out.narration.local_seq == 7 and out.record is stub.record
         assert out.narration.text == VERIFIED_TEXT and out.narration.numbers_verified
         assert stub.texts == [VERIFIED_TEXT] and stub.voice_ids == ["v1"]
@@ -590,7 +746,8 @@ class TestNarrate:
         assert result.narration.text == VERIFIED_TEXT
         assert result.narration.numbers_verified
         assert result.narration.local_seq == 7
-        assert result.narration.mp3_path == str(tmp_path / BRIEF_MP3_FILENAME)
+        assert result.narration.mp3_path == BRIEF_MP3_FILENAME
+        assert (tmp_path / BRIEF_MP3_FILENAME).read_bytes() == MP3_BYTES
         assert result.record is stub.record and result.abstentions == ()
         assert len(result.usage) == 1
         assert digest.model_copy(update={"narration": result.narration}).narration.chars == len(
@@ -637,3 +794,47 @@ class TestNarrate:
         )
         assert result.narration.text == VERIFIED_TEXT and result.narration.mp3_path is None
         assert [a.reason for a in result.abstentions] == ["halted"]
+
+
+class TestNarrateThroughLedger:
+    """``narrate`` with the real ElevenLabs adapter behind a stub Monid transport."""
+
+    @pytest.fixture(autouse=True)
+    def _reset_breaker(self) -> Iterator[None]:
+        BREAKER.reset()
+        yield
+        BREAKER.reset()
+
+    def test_tts_run_lands_in_the_ledger(self, digest: Digest, tmp_path: Path) -> None:
+        output = {
+            "audio": {
+                "audio_base64": base64.b64encode(MP3_BYTES).decode(),
+                "content_type": "audio/mpeg",
+                "character_count": len(VERIFIED_TEXT),
+            }
+        }
+        script = Script({("POST", "/v1/run"): [run_ok(output, "run_tts_9")]})
+        ledger = Ledger(tmp_path / "runs.jsonl")
+        fake = FakeBackend(answers={"NarrationSchema": {"narration": VERIFIED_TEXT}})
+        result = narrate(
+            digest,
+            backend=fake,
+            client=make_client(script, FakeClock()),
+            ledger=ledger,
+            out_dir=tmp_path,
+            adapter=ELEVENLABS,
+        )
+        (row,) = ledger.records
+        assert row.provider == config.ELEVENLABS_PROVIDER
+        assert row.endpoint == config.ELEVENLABS_ENDPOINT
+        assert row.brand is None and row.source is None
+        assert row.n_results == 1
+        assert row.cost_source == "unreconciled" and row.cost_usd is None
+        assert row.run_id == "run_tts_9" and row.status == "SUCCEEDED"
+        assert result.narration.local_seq == row.local_seq
+        assert result.record == row and result.abstentions == ()
+        assert result.narration.mp3_path == BRIEF_MP3_FILENAME
+        assert (tmp_path / BRIEF_MP3_FILENAME).read_bytes() == MP3_BYTES
+        (post,) = script.posts()
+        assert post["endpoint"] == config.ELEVENLABS_ENDPOINT
+        assert post["input"]["body"]["text"] == VERIFIED_TEXT

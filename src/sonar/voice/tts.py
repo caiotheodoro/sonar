@@ -24,7 +24,12 @@ from sonar.providers.elevenlabs import ELEVENLABS, TtsResult
 log = logging.getLogger(__name__)
 
 BRIEF_MP3_FILENAME = "brief.mp3"
-"""Where the narration audio lands inside the session output directory (D011)."""
+"""Where the narration audio lands inside the session output directory (D011).
+
+``Narration.mp3_path`` stores this session-relative name, never an absolute
+path, so a published ``digest.json`` carries no machine path; it resolves
+against the session directory (``out/<session>/brief.mp3``).
+"""
 
 
 class TtsAdapter(Protocol):
@@ -76,7 +81,8 @@ def synthesize_narration(
 ) -> TtsOutcome:
     """Voice a verified narration; return it with ``mp3_path`` and ``local_seq`` set.
 
-    A narration without text is skipped silently; one whose numbers are not
+    ``mp3_path`` is the session-relative :data:`BRIEF_MP3_FILENAME`; the bytes
+    are written to ``<out_dir>/brief.mp3``. A narration without text is skipped silently; one whose numbers are not
     verified is skipped without spending, and the outcome says so. Failures
     of the run itself are returned as abstentions, never raised.
     """
@@ -107,7 +113,9 @@ def synthesize_narration(
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / BRIEF_MP3_FILENAME
     path.write_bytes(result.audio)
-    voiced = narration.model_copy(update={"mp3_path": str(path), "local_seq": record.local_seq})
+    voiced = narration.model_copy(
+        update={"mp3_path": BRIEF_MP3_FILENAME, "local_seq": record.local_seq}
+    )
     return TtsOutcome(narration=voiced, record=record, abstention=None)
 
 

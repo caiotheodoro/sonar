@@ -14,6 +14,7 @@ from sonar.llm.base import LlmBackend, LlmError, Usage
 from sonar.models import Abstention, Digest, Narration, RunRecord
 from sonar.monid import Ledger, MonidClient
 from sonar.providers.elevenlabs import ELEVENLABS
+from sonar.report.digest import NO_NARRATION
 from sonar.voice.script import (
     GateResult,
     NarrationSchema,
@@ -21,14 +22,12 @@ from sonar.voice.script import (
     digest_numbers,
     extract_numbers,
     numbers_gate,
+    regate,
     write_script,
 )
 from sonar.voice.tts import BRIEF_MP3_FILENAME, TtsAdapter, TtsOutcome, synthesize_narration
 
 log = logging.getLogger(__name__)
-
-NO_NARRATION = Narration(text=None, chars=0, numbers_verified=False, mp3_path=None, local_seq=None)
-"""The narration block when no script could be produced."""
 
 
 @dataclass(frozen=True)
@@ -99,6 +98,7 @@ __all__ = [
     "extract_numbers",
     "narrate",
     "numbers_gate",
+    "regate",
     "synthesize_narration",
     "write_script",
 ]
