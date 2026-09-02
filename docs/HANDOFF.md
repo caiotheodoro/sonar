@@ -23,6 +23,7 @@ committed.
 
 | Date | Task | Run ids | Monid USD | OpenAI USD | Notes |
 |---|---|---|---|---|---|
+| 2026-09-02 | W0.1 closed | none | 0.00 | 0.00 | Hackathon registration submitted; X handle @uiuizap; Monid workspace budget/run cap left unset by decision (sonar's own guard is the stop) |
 | 2026-09-02 | W0.1 setup wizard (`scripts/setup-wizard.sh`) | none | 0.00 | 0.00 | Wizard writes `~/.sonar/.env` (mode 600) with Monid key, budget, run cap, OpenAI key, X handle. Verification calls are unbilled (`monid whoami`, `monid discover`, OpenAI `models.list`). No Monid spend has occurred yet. |
 
 Running totals: Monid 0.00 of 10.00 spent, OpenAI 0.00, reserve 1.50 intact.
