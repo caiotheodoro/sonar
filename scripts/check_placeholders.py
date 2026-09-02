@@ -21,7 +21,8 @@ def main() -> int:
         if path == self_path or any(path.startswith(p) for p in exclude_prefixes):
             continue
         try:
-            text = open(path, errors="ignore").read()
+            with open(path, errors="ignore") as fh:
+                text = fh.read()
         except (OSError, UnicodeDecodeError):
             continue
         for needle in ("TBD", "TODO"):

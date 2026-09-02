@@ -35,7 +35,8 @@ def main() -> int:
     violations: list[str] = []
     for path in tracked_files():
         try:
-            text = open(path, errors="ignore").read()
+            with open(path, errors="ignore") as fh:
+                text = fh.read()
         except (OSError, UnicodeDecodeError):
             continue
         for pat in API_KEY_PATTERNS:
