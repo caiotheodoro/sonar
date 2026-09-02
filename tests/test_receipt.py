@@ -20,6 +20,7 @@ import json
 import math
 import re
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +57,7 @@ from sonar.report.digest import (
     X_COVERAGE_GAP,
     build_digest,
     rank_top_mentions,
+    requote_cost,
     stats_file_for,
     write_digest_files,
 )
@@ -69,9 +71,11 @@ from sonar.report.receipt import (
     build_audit,
     build_receipt,
     count_mentions,
+    count_unlabelled,
     load_receipt,
     receipt_json,
     resolve_sonar_rev,
+    unlabelled_note,
     verify_receipt,
     verify_receipt_file,
     write_receipt,
@@ -403,15 +407,16 @@ def test_totals_are_hand_summed() -> None:
 def test_comparison_against_the_incumbent_price() -> None:
     receipt = build_golden_receipt()
     assert receipt.incumbent.name == BRAND24_TEAM.name
-    assert receipt.incumbent.price_usd_month == 349
+    assert receipt.incumbent.price_usd_month == BRAND24_TEAM.price_usd_month
     assert receipt.incumbent.url == BRAND24_TEAM.url
     assert receipt.incumbent.checked_at == BRAND24_TEAM.checked_at
-    assert receipt.incumbent.mentions_quota == 10000
+    assert receipt.incumbent.mentions_quota == BRAND24_TEAM.mentions_quota
     cmp = receipt.comparison
-    assert cmp.briefs_per_month_assumed == config.BRIEFS_PER_MONTH_ASSUMED == 4
-    assert math.isclose(cmp.sonar_usd_month_equiv, 0.31941 * 4)
+    assert cmp.briefs_per_month_assumed == config.BRIEFS_PER_MONTH_ASSUMED
+    equiv = 0.31941 * config.BRIEFS_PER_MONTH_ASSUMED
+    assert math.isclose(cmp.sonar_usd_month_equiv, equiv)
     assert cmp.ratio is not None
-    assert math.isclose(cmp.ratio, 349 / (0.31941 * 4))
+    assert math.isclose(cmp.ratio, BRAND24_TEAM.price_usd_month / equiv)
     assert cmp.mentions_this_brief == 110
 
 
@@ -542,8 +547,12 @@ def test_verify_rejects_a_tampered_receipt(tmp_path: Path) -> None:
     payload = receipt.model_dump(mode="json")
     payload["totals"]["monid_usd"] = 0.0
     payload["totals"]["total_usd"] = payload["totals"]["llm_usd"]
-    payload["comparison"]["sonar_usd_month_equiv"] = payload["totals"]["total_usd"] * 4
-    payload["comparison"]["ratio"] = 349 / payload["comparison"]["sonar_usd_month_equiv"]
+    payload["comparison"]["sonar_usd_month_equiv"] = (
+        payload["totals"]["total_usd"] * config.BRIEFS_PER_MONTH_ASSUMED
+    )
+    payload["comparison"]["ratio"] = (
+        BRAND24_TEAM.price_usd_month / payload["comparison"]["sonar_usd_month_equiv"]
+    )
     for row in payload["runs"]:
         if row["cost_source"] == "/v1/runs":
             row["cost_usd"] = 0.0
@@ -734,6 +743,29 @@ def test_count_mentions_carries_every_exclusion_key() -> None:
     assert counts.by_brand == {"Nubank": 6, "Inter": 1}
     with pytest.raises(ValueError, match="not an excluded_with_reason key"):
         count_mentions(fetched=0, kept=[], labels={}, dedup_dropped={"dedup_other": 1})
+    # Row 5 has no Label: in ``deduped`` but neither labelled nor excluded.
+    unlabelled = count_unlabelled(rows, labels)
+    assert unlabelled == 1
+    kept_side = counts.labelled + sum(
+        counts.excluded_with_reason[k] for k in ("refused", "unparseable", "error")
+    )
+    assert counts.deduped == kept_side + unlabelled
+
+
+def test_unlabelled_rows_are_named_in_what_could_not_be_checked() -> None:
+    rows = [mention("Nubank", f"p{i}") for i in range(3)]
+    labels = {(rows[0].mention_id, "Nubank"): label(rows[0].mention_id)}
+    assert count_unlabelled(rows, labels) == 2
+    assert count_unlabelled(rows, {}) == 3
+    assert count_unlabelled([], {}) == 0
+    note = unlabelled_note(2, "402 breaker halted the labeler")
+    assert note == "labelling: 2 deduped rows never labelled (402 breaker halted the labeler)"
+    receipt = build_golden_receipt(what_could_not_be_checked=[note])
+    assert receipt.what_could_not_be_checked == [X_NOT_CHECKED, note]
+    with pytest.raises(ValueError, match="non-zero"):
+        unlabelled_note(0, "402 breaker halted the labeler")
+    with pytest.raises(ValueError, match="reason"):
+        unlabelled_note(2, "  ")
 
 
 def test_build_audit_counts_ok_tiebreaks_in_the_sample() -> None:
@@ -972,6 +1004,20 @@ def test_digest_quotes_cost_from_receipt_and_adds_x_gap() -> None:
     assert digest2.coverage_gaps == [custom_gap]
 
 
+def test_requote_cost_changes_only_cost() -> None:
+    before = build_golden_receipt()
+    after = build_reconciled_receipt()
+    assert after.totals != before.totals and after.verdict != before.verdict
+    digest = build_test_digest(before)
+    requoted = requote_cost(digest, after)
+    assert requoted.cost.verdict == after.verdict == "RECONCILED"
+    assert requoted.cost.totals == after.totals
+    assert digest.cost.totals == before.totals  # the input is not mutated
+    dumped, redumped = digest.model_dump(mode="json"), requoted.model_dump(mode="json")
+    assert {k for k in dumped if dumped[k] != redumped[k]} == {"cost"}
+    assert requote_cost(requoted, after) == requoted
+
+
 def test_stats_file_is_the_digest_numbers_and_files_are_written(tmp_path: Path) -> None:
     digest = build_test_digest()
     stats = stats_file_for(digest)
@@ -1052,10 +1098,38 @@ def test_digest_markdown_renders_every_section() -> None:
     assert "No narration for this run." in text
 
 
+def test_receipt_markdown_billed_cells_sum_to_the_monid_line() -> None:
+    receipt = build_golden_receipt()
+    text = markdown.render_receipt(receipt)
+    billed_cells: list[Decimal] = []
+    monid_line: str | None = None
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if re.fullmatch(r"[1-8]", cells[0]):
+            cell = cells[8]
+            if cell.startswith("$"):
+                billed_cells.append(Decimal(cell[1:]))
+            else:
+                assert cell == markdown.UNRECONCILED_CELL
+        elif cells[0] == "Monid billed":
+            monid_line = cells[1]
+    assert len(billed_cells) == 7  # seq 8 is unreconciled
+    assert monid_line == "$0.3141"
+    assert f"${sum(billed_cells)}" == monid_line
+    # The double of 0.31405 is below the half; the ledger's decimal is not.
+    assert f"${receipt.totals.monid_usd:.4f}" == "$0.3140"
+
+
 def test_money_cells() -> None:
     assert markdown.usd(0.0) == "$0.0000"
     assert markdown.usd(None) == "unreconciled"
     assert markdown.usd(0.31941) == "$0.3194"
+    assert markdown.usd(0.03375) == "$0.0338"
+    assert markdown.usd(0.31405) == "$0.3141"
+    assert markdown.usd(0.00005) == "$0.0001"
+    assert markdown.usd(1.0) == "$1.0000"
+    assert markdown.usd(1e-07) == "$0.0000"
+    assert markdown.usd(349) == "$349.0000"
     assert markdown.ratio_cell(None) == "—"
     assert markdown.ratio_cell(273.16) == "273.2×"
     assert markdown.text_cell("a|b\nc") == "a\\|b c"

@@ -145,6 +145,13 @@ def build_digest(
     ``abstentions`` are the stats layer's rows (one per null estimate); the receipt's
     rows (source- and session-level) are merged in so the digest lists every abstention
     of the session once. ``cost`` is quoted from ``receipt``.
+
+    Required order in the pipeline: build this digest from a pre-voice receipt,
+    narrate it, voice the narration (which opens a new ledger row), reconcile,
+    build the final receipt, :func:`requote_cost` the digest against that receipt,
+    then re-gate the narration (``sonar.voice.script.regate``) before writing. A
+    digest written with the pre-voice ``cost`` publishes a total that omits the
+    narrate call and the ElevenLabs run.
     """
     brands = [query.brand, *query.competitors]
     return Digest(
@@ -161,6 +168,18 @@ def build_digest(
         coverage_gaps=_with_x_gap(coverage_gaps),
         cost=CostQuote(verdict=receipt.verdict, totals=receipt.totals),
         narration=narration,
+    )
+
+
+def requote_cost(digest: Digest, receipt: Receipt) -> Digest:
+    """``digest`` with ``cost`` re-quoted from ``receipt``; every other field is unchanged.
+
+    Called after the final receipt is built (post-voice, post-reconcile) so the
+    digest and the receipt publish one cost figure. The narration must be re-gated
+    against the returned digest before it ships.
+    """
+    return digest.model_copy(
+        update={"cost": CostQuote(verdict=receipt.verdict, totals=receipt.totals)}
     )
 
 
@@ -209,6 +228,7 @@ __all__ = [
     "is_relevant",
     "quote_for",
     "rank_top_mentions",
+    "requote_cost",
     "stats_file_for",
     "stats_json",
     "topics_json",

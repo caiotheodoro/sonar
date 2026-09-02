@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from datetime import date, datetime
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Final
 
 from sonar.models import (
@@ -27,6 +28,7 @@ from sonar.models import (
 )
 
 USD_DECIMALS: Final[int] = 4
+USD_QUANTUM: Final[Decimal] = Decimal(1).scaleb(-USD_DECIMALS)
 SHARE_DECIMALS: Final[int] = 3
 REPLAY_BANNER: Final[str] = (
     "> **REPLAY** — rendered from stored artifacts with `sonar render --from`, "
@@ -49,10 +51,16 @@ NULL_CELL: Final[str] = "—"
 
 
 def usd(value: float | None) -> str:
-    """``$0.0000`` for zero, ``unreconciled`` for a cost the listing has not priced."""
+    """``$0.0000`` for zero, ``unreconciled`` for a cost the listing has not priced.
+
+    Rounds the decimal the ledger carries (``repr`` of the float), half up, not the
+    binary double: ``0.03375`` prints ``$0.0338`` and ``0.31405`` prints ``$0.3141``,
+    so the printed ``billed`` cells sum to the printed ``Monid billed`` line.
+    """
     if value is None:
         return UNRECONCILED_CELL
-    return f"${value:.{USD_DECIMALS}f}"
+    amount = Decimal(repr(value)).quantize(USD_QUANTUM, rounding=ROUND_HALF_UP)
+    return f"${amount:f}"
 
 
 def ratio_cell(value: float | None) -> str:
@@ -525,6 +533,7 @@ __all__ = [
     "REPLAY_BANNER",
     "UNRECONCILED_CELL",
     "USD_DECIMALS",
+    "USD_QUANTUM",
     "abstentions_table",
     "comparison_table",
     "render_digest",

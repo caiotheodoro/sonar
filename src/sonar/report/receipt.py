@@ -246,6 +246,13 @@ def count_mentions(
     status ``ok`` or ``cached``; ``refused``, ``unparseable`` and ``error`` rows are
     excluded with that reason; a labelled row is excluded as ``not_about_brand`` when
     ``about_brand`` is false and as ``irrelevant_label`` when the label is ``irrelevant``.
+
+    A kept row with no entry in ``labels`` (labeler halted by the 402 breaker, OpenAI
+    outage after retries, a batch never sent) is counted in ``deduped`` but in neither
+    ``labelled`` nor any exclusion bucket: the contract fixes the eight keys. The
+    pipeline must call :func:`count_unlabelled` on the same inputs and, when the
+    count is non-zero, add :func:`unlabelled_note` to ``what_could_not_be_checked``
+    so the card's Mentions block says why it does not reconcile.
     """
     reasons: dict[str, int] = {
         "not_about_brand": 0,
@@ -286,6 +293,25 @@ def count_mentions(
         by_source=by_source,
         by_brand=by_brand,
     )
+
+
+def count_unlabelled(kept: Sequence[Mention], labels: Mapping[tuple[str, str], Label]) -> int:
+    """Kept rows with no ``Label`` at all: neither ``labelled`` nor excluded in
+    :func:`count_mentions`, so ``deduped`` exceeds the sum of the two by this number."""
+    return sum(1 for row in kept if (row.mention_id, row.brand) not in labels)
+
+
+def unlabelled_note(count: int, reason: str) -> str:
+    """The ``what_could_not_be_checked`` sentence for a non-zero :func:`count_unlabelled`.
+
+    ``reason`` names why the labeler stopped (for example ``"402 breaker halted the
+    labeler"``); ``count`` must be positive because a zero count is not a gap.
+    """
+    if count <= 0:
+        raise ValueError("unlabelled_note is only for a non-zero count")
+    if not reason.strip():
+        raise ValueError("reason must name why the rows were never labelled")
+    return f"labelling: {count} deduped rows never labelled ({reason.strip()})"
 
 
 def build_audit(
@@ -478,10 +504,12 @@ __all__ = [
     "build_receipt",
     "build_totals",
     "count_mentions",
+    "count_unlabelled",
     "elevenlabs_usd",
     "load_receipt",
     "receipt_json",
     "resolve_sonar_rev",
+    "unlabelled_note",
     "verify_receipt",
     "verify_receipt_file",
     "write_receipt",
