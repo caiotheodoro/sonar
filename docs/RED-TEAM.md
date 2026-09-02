@@ -498,6 +498,34 @@ sources and README states the basis.
 
 **Outcome.** Open until W6.1.
 
+## 17. The topic clustering cut was tuned on the demo
+
+**Attack.** The topic layer cuts an average-linkage cosine dendrogram at
+distance 0.35 with `min_size 3` and `min_breadth 2`. If that value was
+chosen by looking at the demo brand's clusters, the "topics" Brand24
+feature is reproduced on one brand only, and a judge's live brand can
+produce one giant cluster or none. D012 (F16) states the cut was fixed
+before any demo data existed.
+
+**If it lands.** The commit that sets `TOPIC_DISTANCE_CUT` in `config.py`
+is dated after the first `sonar run` on the demo brand, or the value
+changes between the first lite run (W5.5) and the frozen demo (W6.1)
+without a DECISIONS entry.
+
+**How we would know.** `git log -S TOPIC_DISTANCE_CUT` shows the value's
+history against the HANDOFF ledger of live runs. The rehearsal on a
+never-used brand (W8.2) reports its topic count and largest-cluster
+share beside the demo's.
+
+**Landed if.** The cut changed after live data existed without a
+DECISIONS entry, or the rehearsal brand yields zero topics or one topic
+holding more than 80 % of relevant mentions.
+
+**Severity.** S2. Topics are reported as "not tuned" in COVERAGE and the
+demo keeps whatever the fixed cut produced.
+
+**Outcome.** Open until W8.2.
+
 ---
 
 **Open questions**
