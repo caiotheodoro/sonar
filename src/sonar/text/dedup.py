@@ -4,8 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Literal
 
 from sonar.text.normalize import normalize_url, text_key
+
+DedupReason = Literal["dedup_native_id", "dedup_url", "dedup_text"]
+"""Coded drop reason; each value is a `Receipt.mentions.excluded_with_reason` key."""
+
+DEDUP_REASONS: tuple[DedupReason, ...] = ("dedup_native_id", "dedup_url", "dedup_text")
+"""Every `DedupReason` value, in precedence order (CONTRACTS §Dedup precedence)."""
 
 
 @dataclass(frozen=True)
@@ -20,12 +27,16 @@ class DedupItem:
     brand: str
 
 
+Dropped = tuple[DedupItem, DedupReason, str]
+"""A dropped item, the coded rule that dropped it, and the winner's `raw_ref`."""
+
+
 @dataclass(frozen=True)
 class DedupResult:
-    """Return value of dedup: kept items and dropped items with reasons."""
+    """Return value of dedup: kept items and dropped items with coded reasons."""
 
     kept: list[DedupItem]
-    dropped: list[tuple[DedupItem, str]]
+    dropped: list[Dropped]
 
 
 def _sort_key(item: DedupItem) -> tuple[int, int]:
@@ -35,24 +46,26 @@ def _sort_key(item: DedupItem) -> tuple[int, int]:
 
 
 def dedup(items: Sequence[DedupItem]) -> DedupResult:
-    """Dedup within a single source following the precedence rules.
+    """Dedup within each `(source, brand)` group following the precedence rules.
 
     1. (source, native_id) – two items with same source and non-null native_id are one
     2. normalised url – among native_id=null survivors, equal URLs are one
     3. text_key – among native_id=null and url=null survivors, equal text_key is one
 
-    Returns the first item by raw_ref order as the winner.
+    Dedup never merges across sources, and never across brands: a mention
+    matching the brand and a competitor is kept once per brand
+    (CONTRACTS §Dedup precedence). Within a group the first item by
+    `raw_ref` order (lower local_seq, then lower item index) wins.
     """
     kept: list[DedupItem] = []
-    dropped: list[tuple[DedupItem, str]] = []
+    dropped: list[Dropped] = []
 
-    # Group by source first (dedup never merges across sources)
-    by_source: dict[str, list[DedupItem]] = {}
+    by_group: dict[tuple[str, str], list[DedupItem]] = {}
     for item in items:
-        by_source.setdefault(item.source, []).append(item)
+        by_group.setdefault((item.source, item.brand), []).append(item)
 
-    for source_items in by_source.values():
-        sorted_items = sorted(source_items, key=_sort_key)
+    for group_items in by_group.values():
+        sorted_items = sorted(group_items, key=_sort_key)
         _dedup_group(sorted_items, kept, dropped)
 
     return DedupResult(kept=kept, dropped=dropped)
@@ -61,9 +74,9 @@ def dedup(items: Sequence[DedupItem]) -> DedupResult:
 def _dedup_group(
     items: list[DedupItem],
     kept: list[DedupItem],
-    dropped: list[tuple[DedupItem, str]],
+    dropped: list[Dropped],
 ) -> None:
-    """Dedup a list of items from the same source."""
+    """Dedup a list of items that share one `(source, brand)`."""
     seen_native: dict[str, DedupItem] = {}
     seen_url: dict[str, DedupItem] = {}
     seen_text: dict[str, DedupItem] = {}
@@ -71,30 +84,27 @@ def _dedup_group(
     for item in items:
         # Rule 1: native_id
         if item.native_id is not None:
-            key = f"native:{item.source}:{item.native_id}"
-            if key in seen_native:
-                dropped.append((item, f"duplicate native_id of {seen_native[key].raw_ref}"))
+            if item.native_id in seen_native:
+                dropped.append((item, "dedup_native_id", seen_native[item.native_id].raw_ref))
                 continue
-            seen_native[key] = item
+            seen_native[item.native_id] = item
             kept.append(item)
             continue
 
         # Rule 2: normalised url
         if item.url is not None:
             norm_url = normalize_url(item.url)
-            url_key = f"url:{item.source}:{norm_url}"
-            if url_key in seen_url:
-                dropped.append((item, f"duplicate url of {seen_url[url_key].raw_ref}"))
+            if norm_url in seen_url:
+                dropped.append((item, "dedup_url", seen_url[norm_url].raw_ref))
                 continue
-            seen_url[url_key] = item
+            seen_url[norm_url] = item
             kept.append(item)
             continue
 
         # Rule 3: text_key
         tk = text_key(item.text)
-        text_key_val = f"text:{item.source}:{tk}"
-        if text_key_val in seen_text:
-            dropped.append((item, f"duplicate text_key of {seen_text[text_key_val].raw_ref}"))
+        if tk in seen_text:
+            dropped.append((item, "dedup_text", seen_text[tk].raw_ref))
             continue
-        seen_text[text_key_val] = item
+        seen_text[tk] = item
         kept.append(item)

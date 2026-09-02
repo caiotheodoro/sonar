@@ -36,18 +36,20 @@ _EN_STOPWORDS: frozenset[str] = frozenset({
     "who", "whom",
 })
 
-_LANG_RATIOS = {
-    "pt": _PT_STOPWORDS,
-    "en": _EN_STOPWORDS,
-}
+DOMINANCE_FACTOR = 2
+"""When both ratios exceed 0.10, a language wins only with this many times the other's hits."""
 
 
 def detect_lang(text: str) -> str:
     """Return 'pt', 'en', 'other', or 'unknown'.
 
     Ratio = count of stopwords in text / total word count.
-    Above 0.10 → that language; both above 0.10 → 'other';
-    fewer than 5 words → 'unknown'.
+    Fewer than 5 words → 'unknown'. Exactly one ratio above 0.10 → that
+    language. Both above 0.10 → the dominant language, where dominant means
+    at least `DOMINANCE_FACTOR` times the other's stopword hits (words such
+    as "a" and "do" sit in both lists, so short sentences routinely trip
+    both thresholds); neither dominates → 'other'. Neither above 0.10 →
+    'other'.
     """
     words = _WORD_RE.findall(normalize(text))
     if len(words) < 5:
@@ -57,8 +59,12 @@ def detect_lang(text: str) -> str:
     pt_ratio = pt_hits / len(words)
     en_ratio = en_hits / len(words)
     if pt_ratio > 0.10 and en_ratio > 0.10:
-        # Both above threshold — pick the dominant one
-        return "pt" if pt_ratio >= en_ratio else "en"
+        if pt_hits >= DOMINANCE_FACTOR * en_hits:
+            return "pt"
+        if en_hits >= DOMINANCE_FACTOR * pt_hits:
+            return "en"
+        # Genuinely mixed text: report neither language rather than guess.
+        return "other"
     if pt_ratio > 0.10:
         return "pt"
     if en_ratio > 0.10:
