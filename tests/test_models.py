@@ -523,6 +523,31 @@ def test_query_profile_tables_match_config() -> None:
     assert m.TOPIC_DISTANCE_THRESHOLD == config.TOPIC_DISTANCE_THRESHOLD
 
 
+@pytest.mark.parametrize(
+    ("models_name", "config_name"),
+    [
+        ("ALPHA", "HOLM_ALPHA"),
+        ("WINDOW_DAYS", "WINDOW_DAYS_DEFAULT"),
+        ("TOPIC_DISTANCE_THRESHOLD", "TOPIC_DISTANCE_THRESHOLD"),
+        ("MIN_CLUSTERS", "MIN_CLUSTERS_PER_WEEK"),
+        ("MIN_N", "MIN_MENTIONS_PER_WEEK"),
+        ("EVENT_MIN_N", "EVENT_MIN_COUNT"),
+        ("EVENT_MAD_MULTIPLIER", "EVENT_MAD_MULTIPLIER"),
+    ],
+)
+def test_models_thresholds_are_sourced_from_config(models_name: str, config_name: str) -> None:
+    """Each models.py threshold is the config.py constant itself, not a restated literal.
+
+    Review 2026-09-02 (stats) fix items 1 and 2: a DECISIONS amendment to config.py
+    must reach the structural validators and `derive_wow_verdict` without a second edit.
+    """
+    models_value = getattr(m, models_name)
+    config_value = getattr(config, config_name)
+    assert models_value == config_value
+    assert type(models_value) is type(config_value)
+    assert m.PERIOD_DAYS == config.WINDOW_DAYS_DEFAULT // 2 == config.WOW_SPLIT_DAYS
+
+
 def test_query_defaults() -> None:
     q = m.Query.model_validate({"brand": "Nubank"})
     assert q.brand_aliases == []
