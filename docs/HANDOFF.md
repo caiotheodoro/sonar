@@ -68,6 +68,14 @@ Recurring operator jobs, all free:
 - An account rate limit killed five workers mid-edit; each was re-dispatched with orders to audit its own leftover diff first. Nothing was lost; nothing partial was committed.
 - Suite: 570 tests green; 6 mypy errors remain in adapter files against the corrected Provider protocol, queued for the Wave 3 fix wave.
 
+### 2026-09-02 — Waves 3 and 4
+
+- Wave 3 adapters: two reviews (`…code-review-adapters-a.md`, `…-b.md`) FAIL → 13 fixes → verification review PASS (`…code-review-adapters-verify.md`). Wave 3 gate passed.
+- W3.7 live smoke on Nubank recorded (see ledger). Findings: Google Maps accepts a search URL; reviews and thread comments rarely contain the brand string, hence D014 (match_kind: text, inherited, entity) applied across contracts, models, adapters and config with `tests/test_fixtures_live.py` on the real payloads.
+- Wave 4 layers (sentiment, topics, stats, report, voice) committed; three separate-context reviews in progress. Claims gate (`make check-claims`) live with demo checks deferred to W6.1.
+- Contracts at schema_rev 1.1.2, PRE-REGISTRATION v1.1.2, DECISIONS through D015, `docs-frozen` at `144ccd9`.
+- Wallet: $0.75 of the $1 free credit remains; a top-up is required before W5.5 (lite run ≈ $0.75 plus TTS probe) and W6.1 (full demo ≈ $2.8).
+
 ## What not to do
 
 - Do not start a live run while another session is unreconciled.
