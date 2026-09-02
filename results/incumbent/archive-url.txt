@@ -1,0 +1,2 @@
+closest snapshot (checked 2026-09-02): http://web.archive.org/web/20260812155142/https://brand24.com/prices/
+save request 2026-09-02: timed out, retry at W8.1
