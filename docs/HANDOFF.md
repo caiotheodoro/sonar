@@ -23,10 +23,11 @@ committed.
 
 | Date | Task | Run ids | Monid USD | OpenAI USD | Notes |
 |---|---|---|---|---|---|
+| 2026-09-02 | W3.7 smoke | 01M1GPJXYTAMZNGWQNT7Y7KWG0, 01M1GPP9HXJKQQYJ0V2FFCE0QV | 0.25 | 0.00 | smoke Nubank via scripts/record_fixtures.py: reddit 40 results $0.2480, google_maps 4 results $0.0027 (estimate $0.0338); reconciled, no unmatched; wallet $1.00 → $0.75 |
 | 2026-09-02 | W0.1 closed | none | 0.00 | 0.00 | Hackathon registration submitted; X handle @uiuizap; Monid workspace budget/run cap left unset by decision (sonar's own guard is the stop) |
 | 2026-09-02 | W0.1 setup wizard (`scripts/setup-wizard.sh`) | none | 0.00 | 0.00 | Wizard writes `~/.sonar/.env` (mode 600) with Monid key, budget, run cap, OpenAI key, X handle. Verification calls are unbilled (`monid whoami`, `monid discover`, OpenAI `models.list`). No Monid spend has occurred yet. |
 
-Running totals: Monid 0.00 of 10.00 spent, OpenAI 0.00, reserve 1.50 intact.
+Running totals: Monid 0.25 of 10.00 spent (wallet balance $0.75 of the $1 free credit; top-up needed before W6.1), OpenAI 0.00, reserve 1.50 not yet funded.
 
 Row format: one row per session id. `Run ids` lists every Monid run id
 the receipt contains, including `run_id=null` rows written as

@@ -1,0 +1,68 @@
+{
+  "items": [
+    {
+      "runId": "01M1GPP9HXJKQQYJ0V2FFCE0QV",
+      "caller": "USER#user_3IlAXlehmCReVV3pHcxis7nQgB1",
+      "provider": "apify",
+      "providerName": "Apify",
+      "endpoint": "/compass/google-maps-reviews-scraper",
+      "status": "COMPLETED",
+      "providerResponse": {
+        "httpStatus": 200
+      },
+      "price": {
+        "type": "PER_RESULT",
+        "amount": {
+          "value": 0.000675,
+          "currency": "USD"
+        },
+        "notes": [
+          "Per-result price applies per query in the input. Total results ≈ number of input queries × per-query limit. Pass a single query to maintain predictable cost."
+        ]
+      },
+      "cost": {
+        "value": 0.0027,
+        "currency": "USD"
+      },
+      "resultCount": 4,
+      "billedUnits": 4,
+      "createdAt": "2026-09-02T09:20:07.682Z",
+      "startedAt": "2026-09-02T09:20:07.933Z",
+      "completedAt": "2026-09-02T09:20:41.830Z"
+    },
+    {
+      "runId": "01M1GPJXYTAMZNGWQNT7Y7KWG0",
+      "caller": "USER#user_3IlAXlehmCReVV3pHcxis7nQgB1",
+      "provider": "apify",
+      "providerName": "Apify",
+      "endpoint": "/trudax/reddit-scraper-lite",
+      "status": "COMPLETED",
+      "providerResponse": {
+        "httpStatus": 200
+      },
+      "price": {
+        "type": "PER_RESULT",
+        "amount": {
+          "value": 0.0057,
+          "currency": "USD"
+        },
+        "notes": [
+          "Results can be limited by either an exact result count or a max page count, depending on which parameter is set. Page-based limits yield multiple results per page. Read the input schema carefully to understand which limit mode you are using."
+        ],
+        "flatFee": {
+          "value": 0.02,
+          "currency": "USD"
+        }
+      },
+      "cost": {
+        "value": 0.248,
+        "currency": "USD"
+      },
+      "resultCount": 40,
+      "billedUnits": 40,
+      "createdAt": "2026-09-02T09:18:17.489Z",
+      "startedAt": "2026-09-02T09:18:17.711Z",
+      "completedAt": "2026-09-02T09:20:04.945Z"
+    }
+  ]
+}
