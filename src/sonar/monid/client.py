@@ -6,7 +6,9 @@ is polled on ``GET /v1/runs/{id}`` with backoff until a terminal status or the
 caller's deadline. ``429`` honours ``Retry-After`` and otherwise backs off
 2, 4, 8, 16 seconds (four retries, five attempts). ``402`` trips a process-wide
 breaker so that no further POST leaves this process (CONTRACTS §RunRecord,
-design §Error matrix).
+design §Error matrix); a ``402`` seen while polling or listing trips it too, but
+an in-flight poll of an already-accepted run continues to its terminal state or
+the deadline.
 
 Failures are returned as data on ``RunOutcome.status`` using the ledger's local
 status vocabulary (``LOCAL_REJECTED_<http>``, ``LOCAL_BACKOFF_EXHAUSTED``,
@@ -407,6 +409,10 @@ class MonidClient:
                     wait = retry
                 continue
             if last_code == 402:
+                # Decision: a 402 mid-poll trips the breaker (no further POST leaves this
+                # process) but does not abort this poll. The run was already accepted and
+                # may still reach a terminal state; the row keeps its run_id either way
+                # (deadline -> LOCAL_DEADLINE) and is priced from the listing, never resubmitted.
                 self._breaker.trip("Monid 402 while polling: " + _excerpt(response))
                 last_error = _excerpt(response)
                 continue

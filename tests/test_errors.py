@@ -12,6 +12,7 @@ from typing import Any
 import httpx
 import pytest
 
+from sonar.models import RunRecord as ModelRunRecord
 from sonar.monid import (
     BREAKER,
     AlreadySubmitted,
@@ -21,6 +22,7 @@ from sonar.monid import (
     RunRecord,
     RunRequest,
 )
+from sonar.monid.ledger import PENDING, is_failed
 
 Handler = Callable[[httpx.Request], httpx.Response]
 
@@ -135,9 +137,14 @@ def test_rate_limit_backs_off_then_succeeds(ledger: Ledger, clock: FakeClock) ->
 
     lines = read_lines(ledger.path)
     assert [line["run_id"] for line in lines] == [None, "run_sync_1"]
-    assert lines[0]["status"] == "LOCAL_PENDING"
+    assert lines[0]["status"] == PENDING
+    assert (lines[0]["cost_source"], lines[0]["cost_usd"]) == ("local", 0.0), (
+        "the pre-POST row has no run_id and is local by construction"
+    )
     assert lines[0]["local_seq"] == lines[1]["local_seq"] == 1
     assert lines[1]["submitted_at"].endswith("Z")
+    assert RunRecord is ModelRunRecord, "the ledger writes sonar.models.RunRecord rows"
+    assert not is_failed(record)
 
 
 def test_rate_limit_exhausts_after_four_retries(ledger: Ledger, clock: FakeClock) -> None:
@@ -152,6 +159,11 @@ def test_rate_limit_exhausts_after_four_retries(ledger: Ledger, clock: FakeClock
     assert record.n_results == 0
     assert record.error == "busy"
     assert not BREAKER.tripped
+    assert (record.cost_source, record.cost_usd) == ("local", 0.0), (
+        "reconciled by construction at write time, before any reconcile()"
+    )
+    assert is_failed(record)
+    assert ledger.unreconciled_seqs() == []
 
 
 # -- 402 breaker ----------------------------------------------------------
@@ -168,6 +180,11 @@ def test_402_trips_breaker_and_blocks_further_posts(
     assert record.status == "LOCAL_REJECTED_402"
     assert record.run_id is None
     assert "insufficient credit" in (record.error or "")
+    assert (record.cost_source, record.cost_usd) == ("local", 0.0), (
+        "reconciled by construction at write time, before any reconcile()"
+    )
+    assert is_failed(record)
+    assert ledger.unreconciled_seqs() == []
     assert BREAKER.tripped and client.halted
 
     second = RunRequest("apify", "/streamers/youtube-scraper", {"searchQueries": ["Nubank"]})
@@ -208,6 +225,9 @@ def test_deadline_keeps_run_id_and_never_resubmits(ledger: Ledger, clock: FakeCl
     assert record.completed_at is None
     assert record.n_results is None
     assert record.cost_source == "unreconciled"
+    assert record.cost_usd is None
+    assert is_failed(record)
+    assert ledger.unreconciled_seqs() == [1], "LOCAL_DEADLINE stays unreconciled until listed"
     assert clock.now >= 10.0
     assert len(script.posts()) == 1
     polls = [r for r in script.requests if r.method == "GET"]
@@ -368,13 +388,15 @@ def test_reconcile_joins_by_run_id_and_pages_by_cursor(ledger: Ledger, clock: Fa
     assert a.provider_http_status == 200
     assert (b.cost_usd, b.billed_units, b.status, b.provider_http_status) == (0.0, 0, "FAILED", 502)
     assert b.cost_source == "/v1/runs"
-    assert (c.run_id, c.cost_usd, c.cost_source) == (None, 0.0, "/v1/runs")
+    assert is_failed(b) and not is_failed(a)
+    assert (c.run_id, c.cost_usd, c.cost_source) == (None, 0.0, "local")
     assert Ledger(ledger.path).records == ledger.records
 
 
-def test_reconcile_reports_unmatched_remote_and_keeps_null_rows_unreconciled(
+def test_reconcile_reports_unmatched_remote_and_local_rows_reconcile_regardless(
     ledger: Ledger, clock: FakeClock
 ) -> None:
+    """D012 F13: a run_id=null row is local by construction, whatever else the listing shows."""
     started = datetime.now(UTC) - timedelta(minutes=5)
     submit_sync(ledger, clock, "run_a", REQUEST)
     rejected = Script({("POST", "/v1/run"): [httpx.Response(503, text="down")]})
@@ -411,8 +433,75 @@ def test_reconcile_reports_unmatched_remote_and_keeps_null_rows_unreconciled(
             ]
         }
     )
+    assert ledger.records[1].cost_source == "local", "settled at write time"
     result = ledger.reconcile(make_client(script, clock), started_at=started)
     assert result.unmatched_remote_run_ids == ["run_ghost"]
-    assert result.unreconciled_local_seqs == [2], "the null-id row cannot be cleared"
+    assert result.unreconciled_local_seqs == [], "a local row is never unreconciled"
     assert ledger.records[0].cost_source == "/v1/runs"
-    assert ledger.records[1].cost_source == "unreconciled"
+    assert (ledger.records[1].cost_source, ledger.records[1].cost_usd) == ("local", 0.0)
+    assert is_failed(ledger.records[1])
+
+
+def test_sync_run_without_run_id_is_local_and_not_failed(ledger: Ledger, clock: FakeClock) -> None:
+    """D013 N6 / OQ-2: a succeeded `$0` sync run that returned no id is local, not failed."""
+    script = Script({("POST", "/v1/run"): [httpx.Response(200, json={"results": [{"url": "u"}]})]})
+    record, outcome = ledger.submit(
+        make_client(script, clock),
+        RunRequest("tinyfish", "/search", {"query": "Nubank"}),
+        brand="Nubank",
+        source="news",
+        estimate_usd=0.0,
+    )
+    assert outcome.succeeded
+    assert record.run_id is None
+    assert record.status == "SUCCEEDED"
+    assert record.n_results == 1
+    assert record.completed_at is not None
+    assert (record.cost_source, record.cost_usd) == ("local", 0.0)
+    assert not is_failed(record)
+    assert ledger.unreconciled_seqs() == []
+
+    listing = Script({("GET", "/v1/runs"): [listing_page([], None)]})
+    result = ledger.reconcile(make_client(listing, clock), started_at=datetime.now(UTC))
+    assert result.unreconciled_local_seqs == []
+    assert result.unmatched_remote_run_ids == []
+    assert Ledger(ledger.path).records == ledger.records
+
+
+def test_402_while_polling_trips_breaker_but_finishes_the_poll(
+    ledger: Ledger, clock: FakeClock
+) -> None:
+    """A 402 mid-poll halts further POSTs; the accepted run is still polled to its end."""
+    script = Script(
+        {
+            ("POST", "/v1/run"): [httpx.Response(202, json={"runId": "run_async_402"})],
+            ("GET", "/v1/runs/run_async_402"): [
+                httpx.Response(402, json={"error": "insufficient credit"}),
+                httpx.Response(
+                    200,
+                    json={"runId": "run_async_402", "status": "SUCCEEDED", "output": [1]},
+                ),
+            ],
+        }
+    )
+    client = make_client(script, clock)
+    record, outcome = ledger.submit(
+        client, REQUEST, brand="b", source="reddit", estimate_usd=0.2, deadline_s=60.0
+    )
+    assert BREAKER.tripped and client.halted
+    assert outcome.completed and outcome.succeeded
+    assert record.run_id == "run_async_402"
+    assert record.status == "SUCCEEDED"
+    assert record.n_results == 1
+    assert record.cost_source == "unreconciled"
+    assert len(script.posts()) == 1
+    assert len([r for r in script.requests if r.method == "GET"]) == 2
+    with pytest.raises(MonidHalted):
+        ledger.submit(
+            client,
+            RunRequest("apify", "/streamers/youtube-scraper", {"q": "x"}),
+            brand="b",
+            source="youtube",
+            estimate_usd=0.1,
+        )
+    assert len(script.posts()) == 1

@@ -6,9 +6,25 @@ with ``run_id=null``. The row is closed after the client returns, keyed by
 ``local_seq``; the last line per ``local_seq`` wins on load. A run that ever
 received an id is never resubmitted through this ledger (``AlreadySubmitted``).
 
-``RunRecord`` follows CONTRACTS §RunRecord field-for-field. ``src/sonar/models.py``
-(W2.1) is the package-wide home for records; when it lands, this module can
-import ``RunRecord`` from there instead of defining it.
+``RunRecord`` and ``CostSource`` are imported from ``sonar.models``, the
+package-wide home for wire records; every row written here passes that
+model's validators (CONTRACTS §RunRecord, D012 F12/F13, D013 N6). In short:
+
+* ``run_id=null`` rows are ``cost_source="local"`` with ``cost_usd=0.0`` at
+  write time — every ``LOCAL_*`` failure without an id and a succeeded ``$0``
+  sync run that returned no id (OQ-2). They never appear in
+  ``unreconciled_local_seqs``.
+* rows with a ``run_id`` are ``unreconciled`` (``cost_usd=null``) until the
+  listing shows them; ``LOCAL_DEADLINE`` keeps its id and stays unreconciled.
+* a local row counts as failed iff its status starts with ``LOCAL_``
+  (:func:`is_failed`).
+
+The pre-POST row carries the Monid pending status ``PENDING`` rather than a
+``LOCAL_`` value: CONTRACTS enumerates the local statuses exhaustively as
+``LOCAL_REJECTED_<http>``, ``LOCAL_BACKOFF_EXHAUSTED`` and ``LOCAL_DEADLINE``,
+and ``sonar.models.RunRecord`` rejects any other ``LOCAL_`` value. A row left
+at ``PENDING`` after a crash between ``open`` and ``close`` therefore reads as
+a run that never reached a terminal state, ``run_id=null``, local, ``$0``.
 """
 
 from __future__ import annotations
@@ -17,10 +33,9 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
-
+from sonar.models import CostSource, RunRecord, Source
 from sonar.monid.client import (
     FAILURE_STATUSES,
     MonidClient,
@@ -30,9 +45,9 @@ from sonar.monid.client import (
     RunRequest,
 )
 
-CostSource = Literal["/v1/runs", "unreconciled"]
-
-LOCAL_PENDING = "LOCAL_PENDING"
+PENDING = "PENDING"
+# Name kept for the ``sonar.monid`` re-export; the value is the pre-POST status above.
+LOCAL_PENDING = PENDING
 LOCAL_DEADLINE = "LOCAL_DEADLINE"
 LOCAL_BACKOFF_EXHAUSTED = "LOCAL_BACKOFF_EXHAUSTED"
 LOCAL_PREFIX = "LOCAL_"
@@ -44,47 +59,17 @@ def utcnow() -> datetime:
     return datetime.now(UTC).replace(microsecond=0)
 
 
-def _iso(value: datetime | None) -> str | None:
-    if value is None:
-        return None
-    return value.astimezone(UTC).replace(microsecond=0).strftime("%Y-%m-%dT%H:%M:%SZ")
+def is_failed(record: RunRecord) -> bool:
+    """D013 N6: a row is failed iff its status starts with ``LOCAL_`` or is a Monid failure state.
+
+    A succeeded run with ``run_id=null`` from a sync endpoint is ``local`` and not failed.
+    """
+    return record.status.startswith(LOCAL_PREFIX) or record.status.upper() in FAILURE_STATUSES
 
 
-class RunRecord(BaseModel):
-    """One ledger row. Wire names as in CONTRACTS §RunRecord."""
-
-    model_config = ConfigDict(frozen=True, extra="forbid")
-
-    local_seq: int = Field(ge=1)
-    run_id: str | None
-    provider: str
-    endpoint: str
-    brand: str | None
-    source: str | None
-    input_digest: str
-    submitted_at: datetime
-    completed_at: datetime | None
-    status: str
-    provider_http_status: int | None
-    n_results: int | None
-    estimate_usd: float
-    cost_usd: float | None
-    billed_units: int | None
-    cost_source: CostSource
-    attempts: int = Field(ge=1)
-    error: str | None
-
-    @field_serializer("submitted_at", "completed_at")
-    def _serialize_dt(self, value: datetime | None) -> str | None:
-        return _iso(value)
-
-    @property
-    def is_local(self) -> bool:
-        return self.status.startswith(LOCAL_PREFIX)
-
-    @property
-    def is_failed(self) -> bool:
-        return self.is_local or self.status.upper() in FAILURE_STATUSES
+def _updated(record: RunRecord, **changes: Any) -> RunRecord:
+    """Copy with changes, re-running the model validators (``model_copy`` would skip them)."""
+    return RunRecord.model_validate({**record.model_dump(), **changes})
 
 
 class AlreadySubmitted(Exception):
@@ -192,8 +177,6 @@ class Ledger:
                     record = RunRecord.model_validate_json(line)
                     self._records[record.local_seq] = record
 
-    # -- views ------------------------------------------------------------
-
     @property
     def records(self) -> list[RunRecord]:
         return [self._records[seq] for seq in sorted(self._records)]
@@ -207,6 +190,10 @@ class Ledger:
             if record.input_digest == digest and record.run_id is not None:
                 return record
         return None
+
+    def unreconciled_seqs(self) -> list[int]:
+        """Rows with a ``run_id`` not yet matched in the listing; never a ``local`` row (D012 F13)."""
+        return [r.local_seq for r in self.records if r.cost_source == "unreconciled"]
 
     # -- writes -----------------------------------------------------------
 
@@ -222,10 +209,10 @@ class Ledger:
         request: RunRequest,
         *,
         brand: str | None,
-        source: str | None,
+        source: Source | None,
         estimate_usd: float,
     ) -> RunRecord:
-        """Write the pre-POST row (``run_id=null``, status ``LOCAL_PENDING``)."""
+        """Write the pre-POST row (``run_id=null``, status ``PENDING``, local ``$0`` by construction)."""
         seq = max(self._records, default=0) + 1
         return self._append(
             RunRecord(
@@ -238,35 +225,45 @@ class Ledger:
                 input_digest=request.digest,
                 submitted_at=self._now(),
                 completed_at=None,
-                status=LOCAL_PENDING,
+                status=PENDING,
                 provider_http_status=None,
                 n_results=None,
                 estimate_usd=estimate_usd,
-                cost_usd=None,
+                cost_usd=0.0,
                 billed_units=None,
-                cost_source="unreconciled",
+                cost_source="local",
                 attempts=1,
                 error=None,
             )
         )
 
     def close(self, local_seq: int, outcome: RunOutcome, n_results: int | None) -> RunRecord:
-        """Rewrite the row with what the client observed. ``n_results`` is ignored unless terminal."""
+        """Rewrite the row with what the client observed. ``n_results`` is ignored unless terminal.
+
+        ``cost_source`` is settled here, at write time: a row without a ``run_id`` is
+        ``local`` with ``cost_usd=0.0`` (it was never accepted by Monid, so the listing
+        can never price it); a row with a ``run_id`` — including ``LOCAL_DEADLINE``,
+        which keeps its id — is ``unreconciled`` until :meth:`reconcile` matches it.
+        """
         record = self._records[local_seq]
         terminal = outcome.completed or (
             outcome.run_id is None and outcome.status.startswith(LOCAL_PREFIX)
         )
+        local = outcome.run_id is None
+        cost_source: CostSource = "local" if local else "unreconciled"
         return self._append(
-            record.model_copy(
-                update={
-                    "run_id": outcome.run_id,
-                    "status": outcome.status,
-                    "completed_at": self._now() if outcome.completed else None,
-                    "provider_http_status": outcome.provider_http_status,
-                    "n_results": (n_results if n_results is not None else 0) if terminal else None,
-                    "attempts": outcome.attempts,
-                    "error": outcome.error,
-                }
+            _updated(
+                record,
+                run_id=outcome.run_id,
+                status=outcome.status,
+                completed_at=self._now() if outcome.completed else None,
+                provider_http_status=outcome.provider_http_status,
+                n_results=(n_results if n_results is not None else 0) if terminal else None,
+                attempts=outcome.attempts,
+                error=outcome.error,
+                cost_usd=0.0 if local else None,
+                billed_units=None,
+                cost_source=cost_source,
             )
         )
 
@@ -276,7 +273,7 @@ class Ledger:
         request: RunRequest,
         *,
         brand: str | None,
-        source: str | None,
+        source: Source | None,
         estimate_usd: float,
         deadline_s: float = 300.0,
         counter: Callable[[dict[str, Any] | None], int] = count_results,
@@ -292,8 +289,6 @@ class Ledger:
         n_results = counter(outcome.body) if outcome.succeeded else 0
         return self.close(opened.local_seq, outcome, n_results), outcome
 
-    # -- reconcile --------------------------------------------------------
-
     def reconcile(
         self,
         client: MonidClient,
@@ -304,8 +299,10 @@ class Ledger:
     ) -> ReconcileResult:
         """Join ``GET /v1/runs`` onto the ledger by run id and copy billed fields.
 
-        On a listing failure nothing is written; ``fetched_at`` is ``None`` and every
-        row is reported unreconciled (receipt verdict PARTIAL, exit 4 upstream).
+        Only rows with a ``run_id`` take part; ``local`` rows were settled at write
+        time and are never listed as unreconciled. On a listing failure nothing is
+        written; ``fetched_at`` is ``None`` and every row with a ``run_id`` still
+        unmatched is reported (receipt verdict PARTIAL, exit 4 upstream).
         """
         try:
             items = list(client.list_runs() if listing is None else listing)
@@ -314,9 +311,7 @@ class Ledger:
                 fetched_at=None,
                 n_listed_in_window=0,
                 unmatched_remote_run_ids=[],
-                unreconciled_local_seqs=[
-                    r.local_seq for r in self.records if r.cost_source != "/v1/runs"
-                ],
+                unreconciled_local_seqs=self.unreconciled_seqs(),
                 error=str(exc),
             )
         fetched_at = self._now()
@@ -351,40 +346,23 @@ class Ledger:
             )
             provider_status = _remote_provider_status(remote)
             self._append(
-                record.model_copy(
-                    update={
-                        "cost_usd": cost,
-                        "billed_units": _remote_int(remote, "billedUnits"),
-                        "status": status,
-                        "provider_http_status": provider_status
-                        if provider_status is not None
-                        else record.provider_http_status,
-                        "cost_source": "/v1/runs",
-                    }
+                _updated(
+                    record,
+                    cost_usd=cost,
+                    billed_units=_remote_int(remote, "billedUnits"),
+                    status=status,
+                    provider_http_status=provider_status
+                    if provider_status is not None
+                    else record.provider_http_status,
+                    cost_source="/v1/runs",
                 )
             )
-
-        # A run_id=null row reconciles to $0 only when the listing window is closed
-        # (started_at given) and no unmatched remote run could be that row
-        # (CONTRACTS §Receipt verdict rule).
-        if started_at is not None and not unmatched_remote:
-            for record in self.records:
-                if record.run_id is None and record.cost_source != "/v1/runs":
-                    if record.submitted_at < started_at:
-                        continue
-                    self._append(
-                        record.model_copy(
-                            update={"cost_usd": 0.0, "billed_units": 0, "cost_source": "/v1/runs"}
-                        )
-                    )
 
         return ReconcileResult(
             fetched_at=fetched_at,
             n_listed_in_window=len(in_window),
             unmatched_remote_run_ids=unmatched_remote,
-            unreconciled_local_seqs=[
-                r.local_seq for r in self.records if r.cost_source != "/v1/runs"
-            ],
+            unreconciled_local_seqs=self.unreconciled_seqs(),
             error=None,
         )
 
@@ -398,12 +376,14 @@ __all__ = [
     "LOCAL_BACKOFF_EXHAUSTED",
     "LOCAL_DEADLINE",
     "LOCAL_PENDING",
+    "PENDING",
     "AlreadySubmitted",
     "CostSource",
     "Ledger",
     "ReconcileResult",
     "RunRecord",
     "count_results",
+    "is_failed",
     "load_ledger",
     "utcnow",
 ]
