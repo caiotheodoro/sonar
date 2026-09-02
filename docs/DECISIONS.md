@@ -332,4 +332,43 @@ the change.
 
 ---
 
-*End of decisions. Next entry would be D011.*
+## D011 — ElevenLabs endpoint shape, resolving CONTRACTS OQ-6
+
+**Decision.** The voice brief uses `elevenlabs /text-to-speech` with
+`model_id="eleven_flash_v2_5"`, `voice_id` and `text` all in `input.body`,
+text capped at 900 characters (the endpoint caps at 5,000). The run output
+carries an `audio` object with a signed `download_link` (valid about one
+hour, file retained seven days); the adapter downloads the MP3 at run time
+and stores it under `out/<session>/brief.mp3`. `audio_base64` is only
+present when Monid's save failed and is treated as a fallback, not the
+primary path. `RunRecord.billed_units` for this run is characters.
+
+**Rationale.** The public catalog does not expose schemas; the
+authenticated inspect (`docs/monid/inspect/elevenlabs_text-to-speech.json`,
+captured 2026-09-02 via `POST /v1/inspect`) does. Flash v2.5 is half the
+price of multilingual v2 ($0.05 vs $0.10 per 1,000 characters) and the
+brief is English only (D006), so the multilingual model buys nothing.
+
+**Evidence.** Inspect response fields `text`, `model_id`, `voice_id`,
+`voice_settings`; price matrix keyed on `model_id`; notes state per-run
+retention, the signed link, and that an unknown voice or exhausted quota
+returns a COMPLETED run with the provider error as data at no charge.
+`elevenlabs /voices` is $0 and lists voice ids. The Monid CLI's `inspect`
+rejects the leading-slash path (`Endpoint '/text-to-speech' not found`)
+while the raw API accepts it; adapters use the raw API.
+
+**Alternatives rejected.** `eleven_multilingual_v2` (double price, no
+benefit for English); `eleven_v3` (same price as multilingual, expressive
+voice not needed for a receipt readout); MiniMax `t2a_v2` (per-million
+pricing, not a Monid-verified English voice path).
+
+**Reverses when.** The ElevenLabs quota behind Monid is exhausted during
+judging (the run completes with a provider error, no charge): the brief is
+skipped with a warning and the digest and receipt still ship, per the
+error matrix. If the flash model's audio is judged unacceptable on the
+first live call (W5.5), switch to `eleven_multilingual_v2` and log the
+cost delta.
+
+---
+
+*End of decisions. Next entry would be D012.*
