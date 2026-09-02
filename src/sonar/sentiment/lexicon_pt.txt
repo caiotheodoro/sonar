@@ -1,0 +1,172 @@
+# Portuguese sentiment lexicon (deterministic signal, PRE-REGISTRATION v1.1.1
+# §Two-signal labelling policy: "lexicon sign otherwise"). One entry per line:
+# polarity (+ or -), a tab, then the term. Terms are matched on
+# sonar.text.normalize output (NFKC, casefold, whitespace collapsed) at word
+# boundaries; multi-word entries are matched before their sub-words, so a
+# negated phrase such as "não recomendo" wins over "recomendo".
++	adorei
++	adoro
++	amei
++	amo
++	amamos
++	ótimo
++	ótima
++	ótimos
++	ótimas
++	otimo
++	otima
++	excelente
++	excelentes
++	maravilhoso
++	maravilhosa
++	perfeito
++	perfeita
++	incrível
++	incriveis
++	incríveis
++	sensacional
++	fantástico
++	fantástica
++	top
++	show
++	nota 10
++	nota dez
++	recomendo
++	recomendamos
++	super recomendo
++	recomendadíssimo
++	satisfeito
++	satisfeita
++	feliz
++	confiável
++	confiavel
++	rápido
++	rápida
++	prático
++	prática
++	fácil
++	facil
++	bom
++	boa
++	bons
++	boas
++	muito bom
++	muito boa
++	melhor
++	melhores
++	gostei
++	gostamos
++	funciona bem
++	atendimento excelente
++	atendimento ótimo
++	sem taxas
++	vale a pena
++	parabéns
++	parabens
++	obrigado
++	obrigada
++	eficiente
++	ajudou
++	resolveu
++	resolvido
++	elogio
++	elogios
+-	não recomendo
+-	nao recomendo
+-	não gostei
+-	nao gostei
+-	não funciona
+-	nao funciona
+-	não resolve
+-	nao resolve
+-	não resolveu
+-	nao resolveu
+-	não vale a pena
+-	nao vale a pena
+-	péssimo
+-	péssima
+-	pessimo
+-	pessima
+-	horrível
+-	horrivel
+-	terrível
+-	terrivel
+-	ruim
+-	ruins
+-	pior
+-	piores
+-	lixo
+-	vergonha
+-	vergonhoso
+-	absurdo
+-	abusivo
+-	abusiva
+-	golpe
+-	fraude
+-	roubo
+-	roubaram
+-	enganação
+-	enganacao
+-	propaganda enganosa
+-	descaso
+-	decepção
+-	decepcao
+-	decepcionado
+-	decepcionada
+-	decepcionante
+-	frustrado
+-	frustrada
+-	frustrante
+-	insatisfeito
+-	insatisfeita
+-	problema
+-	problemas
+-	erro
+-	erros
+-	falha
+-	falhas
+-	bug
+-	bugs
+-	travando
+-	travou
+-	trava
+-	lento
+-	lenta
+-	demora
+-	demorado
+-	demorada
+-	demorando
+-	bloqueado
+-	bloqueada
+-	bloquearam
+-	bloqueio
+-	cancelaram
+-	cancelamento indevido
+-	cobrança indevida
+-	cobranca indevida
+-	cobraram
+-	taxa abusiva
+-	juros abusivos
+-	juros altos
+-	reclamação
+-	reclamacao
+-	reclamar
+-	reclamando
+-	ninguém resolve
+-	ninguem resolve
+-	sem resposta
+-	sem suporte
+-	suporte péssimo
+-	atendimento péssimo
+-	atendimento ruim
+-	atendimento horrível
+-	odeio
+-	odiei
+-	detesto
+-	raiva
+-	nunca mais
+-	arrependido
+-	arrependida
+-	cuidado
+-	fujam
+-	fuja

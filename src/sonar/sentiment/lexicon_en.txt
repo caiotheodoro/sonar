@@ -1,0 +1,149 @@
+# English sentiment lexicon (deterministic signal, PRE-REGISTRATION v1.1.1
+# §Two-signal labelling policy: "lexicon sign otherwise"). One entry per line:
+# polarity (+ or -), a tab, then the term. Terms are matched on
+# sonar.text.normalize output (NFKC, casefold, whitespace collapsed) at word
+# boundaries; multi-word entries are matched before their sub-words, so a
+# negated phrase such as "not recommended" wins over "recommended".
++	love
++	loved
++	loving
++	great
++	excellent
++	amazing
++	awesome
++	fantastic
++	wonderful
++	perfect
++	brilliant
++	outstanding
++	superb
++	impressive
++	impressed
++	best
++	better
++	good
++	very good
++	really good
++	nice
++	solid
++	reliable
++	fast
++	quick
++	easy
++	easy to use
++	seamless
++	smooth
++	helpful
++	friendly
++	convenient
++	intuitive
++	recommend
++	recommended
++	highly recommend
++	would recommend
++	worth it
++	happy
++	satisfied
++	pleased
++	thank you
++	thanks
++	kudos
++	works well
++	works great
++	no fees
++	well done
++	five stars
++	5 stars
++	like it
++	liked it
++	enjoy
++	enjoyed
+-	not recommended
+-	do not recommend
+-	don't recommend
+-	dont recommend
+-	would not recommend
+-	wouldn't recommend
+-	not good
+-	not great
+-	not happy
+-	not satisfied
+-	not worth it
+-	not working
+-	doesn't work
+-	does not work
+-	didn't work
+-	did not work
+-	never works
+-	stopped working
+-	bad
+-	worst
+-	worse
+-	terrible
+-	horrible
+-	awful
+-	poor
+-	useless
+-	garbage
+-	trash
+-	scam
+-	fraud
+-	rip off
+-	ripoff
+-	ripped off
+-	stole
+-	stolen
+-	disappointed
+-	disappointing
+-	disappointment
+-	frustrated
+-	frustrating
+-	annoying
+-	annoyed
+-	angry
+-	furious
+-	hate
+-	hated
+-	problem
+-	problems
+-	issue
+-	issues
+-	error
+-	errors
+-	bug
+-	bugs
+-	buggy
+-	glitch
+-	crash
+-	crashes
+-	crashed
+-	crashing
+-	slow
+-	laggy
+-	broken
+-	blocked
+-	locked out
+-	frozen
+-	unfair
+-	hidden fees
+-	overcharged
+-	overcharge
+-	charged twice
+-	double charged
+-	no response
+-	no support
+-	unhelpful
+-	rude
+-	ignored
+-	waste of time
+-	waste of money
+-	never again
+-	avoid
+-	beware
+-	warning
+-	complaint
+-	complaints
+-	refund
+-	one star
+-	1 star
+-	zero stars
