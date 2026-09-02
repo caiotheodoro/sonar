@@ -1,0 +1,490 @@
+{
+  "abstentions": [],
+  "b": 10000,
+  "n_rows": 255,
+  "n_units": 109,
+  "seed": 777,
+  "stats": {
+    "by_source": [
+      {
+        "brand": "Nubank",
+        "ci95": [
+          -0.0784313725490196,
+          0.5522388059701493
+        ],
+        "ci95_iid": [
+          0.05082627118644087,
+          0.48438683712121194
+        ],
+        "design_effect": 2.115948252326854,
+        "n": 62,
+        "n_clusters": 18,
+        "neg": 17,
+        "net": 0.27419354838709675,
+        "neu": 11,
+        "pos": 34,
+        "source": "reddit",
+        "wow_scope": true
+      },
+      {
+        "brand": "Nubank",
+        "ci95": [
+          0.0,
+          0.75
+        ],
+        "ci95_iid": [
+          -0.125,
+          0.75
+        ],
+        "design_effect": 0.7346938775510203,
+        "n": 12,
+        "n_clusters": 3,
+        "neg": 2,
+        "net": 0.3333333333333333,
+        "neu": 4,
+        "pos": 6,
+        "source": "youtube_comment",
+        "wow_scope": false
+      },
+      {
+        "brand": "Nubank",
+        "ci95": [
+          0.5833333333333334,
+          1.0
+        ],
+        "ci95_iid": [
+          0.5881127450980403,
+          1.0
+        ],
+        "design_effect": 1.0233420243635127,
+        "n": 12,
+        "n_clusters": 12,
+        "neg": 0,
+        "net": 0.8333333333333334,
+        "neu": 2,
+        "pos": 10,
+        "source": "google_maps",
+        "wow_scope": true
+      },
+      {
+        "brand": "Nubank",
+        "ci95": [
+          -0.6666666666666666,
+          1.0
+        ],
+        "ci95_iid": [
+          -0.6666666666666666,
+          1.0
+        ],
+        "design_effect": 1.0,
+        "n": 6,
+        "n_clusters": 6,
+        "neg": 2,
+        "net": 0.16666666666666666,
+        "neu": 1,
+        "pos": 3,
+        "source": "news",
+        "wow_scope": true
+      },
+      {
+        "brand": "Inter",
+        "ci95": [
+          0.09375,
+          0.5357142857142857
+        ],
+        "ci95_iid": [
+          0.09433962264150944,
+          0.5434782608695652
+        ],
+        "design_effect": 0.9683079928701636,
+        "n": 52,
+        "n_clusters": 14,
+        "neg": 12,
+        "net": 0.3269230769230769,
+        "neu": 11,
+        "pos": 29,
+        "source": "reddit",
+        "wow_scope": true
+      },
+      {
+        "brand": "Inter",
+        "ci95": [
+          -0.25,
+          0.25
+        ],
+        "ci95_iid": [
+          -0.5335897435897424,
+          0.375
+        ],
+        "design_effect": 0.30283380164394036,
+        "n": 12,
+        "n_clusters": 3,
+        "neg": 4,
+        "net": -0.08333333333333333,
+        "neu": 5,
+        "pos": 3,
+        "source": "youtube_comment",
+        "wow_scope": false
+      },
+      {
+        "brand": "Inter",
+        "ci95": [
+          -0.07692307692307693,
+          1.0
+        ],
+        "ci95_iid": [
+          0.0,
+          1.0
+        ],
+        "design_effect": 1.1597633136094674,
+        "n": 12,
+        "n_clusters": 12,
+        "neg": 3,
+        "net": 0.5,
+        "neu": 0,
+        "pos": 9,
+        "source": "google_maps",
+        "wow_scope": true
+      },
+      {
+        "brand": "Inter",
+        "ci95": [
+          -0.3333333333333333,
+          1.0
+        ],
+        "ci95_iid": [
+          -0.4,
+          1.0
+        ],
+        "design_effect": 0.90702947845805,
+        "n": 6,
+        "n_clusters": 6,
+        "neg": 1,
+        "net": 0.3333333333333333,
+        "neu": 2,
+        "pos": 3,
+        "source": "news",
+        "wow_scope": true
+      },
+      {
+        "brand": "C6 Bank",
+        "ci95": [
+          0.16666666666666666,
+          0.5365853658536586
+        ],
+        "ci95_iid": [
+          0.13998837209302337,
+          0.559322033898305
+        ],
+        "design_effect": 0.7782033880895017,
+        "n": 51,
+        "n_clusters": 14,
+        "neg": 9,
+        "net": 0.35294117647058826,
+        "neu": 15,
+        "pos": 27,
+        "source": "reddit",
+        "wow_scope": true
+      },
+      {
+        "brand": "C6 Bank",
+        "ci95": [
+          -0.25,
+          0.25
+        ],
+        "ci95_iid": [
+          -0.5833333333333334,
+          0.42857142857142855
+        ],
+        "design_effect": 0.24415224913494812,
+        "n": 12,
+        "n_clusters": 3,
+        "neg": 5,
+        "net": -0.08333333333333333,
+        "neu": 3,
+        "pos": 4,
+        "source": "youtube_comment",
+        "wow_scope": false
+      },
+      {
+        "brand": "C6 Bank",
+        "ci95": [
+          -0.36363636363636365,
+          0.6923076923076923
+        ],
+        "ci95_iid": [
+          -0.375,
+          0.7
+        ],
+        "design_effect": 0.9648613081956373,
+        "n": 12,
+        "n_clusters": 12,
+        "neg": 4,
+        "net": 0.16666666666666666,
+        "neu": 2,
+        "pos": 6,
+        "source": "google_maps",
+        "wow_scope": true
+      },
+      {
+        "brand": "C6 Bank",
+        "ci95": [
+          -0.5,
+          0.5
+        ],
+        "ci95_iid": [
+          -0.5,
+          0.5
+        ],
+        "design_effect": 1.0,
+        "n": 6,
+        "n_clusters": 6,
+        "neg": 1,
+        "net": 0.0,
+        "neu": 4,
+        "pos": 1,
+        "source": "news",
+        "wow_scope": true
+      }
+    ],
+    "events": [
+      {
+        "baseline_mad": 3.0,
+        "baseline_median": 4.0,
+        "brand": "Nubank",
+        "date": "2026-08-23",
+        "exhibit_url": "https://reddit.com/r/x/post-Nubank-4/4",
+        "label": "App outage",
+        "n": 16,
+        "n_clusters": 6,
+        "threshold": 13.0
+      },
+      {
+        "baseline_mad": 3.0,
+        "baseline_median": 4.0,
+        "brand": "Nubank",
+        "date": "2026-08-29",
+        "exhibit_url": "https://reddit.com/r/x/spike/8",
+        "label": "App outage",
+        "n": 17,
+        "n_clusters": 7,
+        "threshold": 13.0
+      },
+      {
+        "baseline_mad": 2.0,
+        "baseline_median": 4.0,
+        "brand": "C6 Bank",
+        "date": "2026-08-28",
+        "exhibit_url": "https://reddit.com/r/x/post-C6 Bank-1/3",
+        "label": "c6 bank",
+        "n": 12,
+        "n_clusters": 5,
+        "threshold": 10.0
+      },
+      {
+        "baseline_mad": 2.0,
+        "baseline_median": 4.0,
+        "brand": "C6 Bank",
+        "date": "2026-08-29",
+        "exhibit_url": "https://reddit.com/r/x/post-C6 Bank-0/2",
+        "label": "c6 bank",
+        "n": 11,
+        "n_clusters": 4,
+        "threshold": 10.0
+      }
+    ],
+    "sentiment": [
+      {
+        "brand": "Nubank",
+        "ci95": [
+          0.11537356321839091,
+          0.5542168674698795
+        ],
+        "ci95_iid": [
+          0.17240452354467936,
+          0.5154720564297339
+        ],
+        "design_effect": 1.6362878817511228,
+        "n": 92,
+        "n_confirmed": 43,
+        "neg": 21,
+        "net": 0.34782608695652173,
+        "neu": 18,
+        "pos": 53,
+        "wow": {
+          "ci95": [
+            -0.9679545454545455,
+            -0.003298704702006607
+          ],
+          "ci95_confirmed_only": [
+            -1.135634408028184,
+            0.08120614035087707
+          ],
+          "delta": -0.44999999999999996,
+          "p_holm": 0.24400000000000002,
+          "p_raw": 0.0488,
+          "verdict": "SUGGESTIVE"
+        }
+      },
+      {
+        "brand": "Inter",
+        "ci95": [
+          0.11494252873563218,
+          0.4729907539118063
+        ],
+        "ci95_iid": [
+          0.10843373493975904,
+          0.4675324675324675
+        ],
+        "design_effect": 0.994157758052858,
+        "n": 82,
+        "n_confirmed": 39,
+        "neg": 20,
+        "net": 0.2926829268292683,
+        "neu": 18,
+        "pos": 44,
+        "wow": {
+          "ci95": [
+            -0.5801894567696455,
+            0.2944748040313549
+          ],
+          "ci95_confirmed_only": [
+            -0.6071428571428572,
+            0.38333333333333336
+          ],
+          "delta": -0.06666666666666671,
+          "p_holm": 1.0,
+          "p_raw": 0.6734,
+          "verdict": "NO_CHANGE_DETECTED"
+        }
+      },
+      {
+        "brand": "C6 Bank",
+        "ci95": [
+          0.07462289615751035,
+          0.3950617283950617
+        ],
+        "ci95_iid": [
+          0.058809251856082365,
+          0.4066029900332225
+        ],
+        "design_effect": 0.8488809034376354,
+        "n": 81,
+        "n_confirmed": 42,
+        "neg": 19,
+        "net": 0.2345679012345679,
+        "neu": 24,
+        "pos": 38,
+        "wow": {
+          "ci95": [
+            -0.722920673076923,
+            -0.03556946274337583
+          ],
+          "ci95_confirmed_only": [
+            -1.1148535777947541,
+            -0.10714285714285715
+          ],
+          "delta": -0.35365853658536583,
+          "p_holm": 0.17880000000000001,
+          "p_raw": 0.0298,
+          "verdict": "SUGGESTIVE"
+        }
+      }
+    ],
+    "share_of_voice": [
+      {
+        "basis_sources": [
+          "reddit",
+          "youtube_comment",
+          "google_maps",
+          "news"
+        ],
+        "brand": "Nubank",
+        "ci95": [
+          0.25702533453973997,
+          0.46850681975422526
+        ],
+        "n": 92,
+        "n_clusters": 39,
+        "share": 0.3607843137254902,
+        "wow": {
+          "ci95": [
+            -0.3480947538776621,
+            0.12393290714193464
+          ],
+          "delta": -0.112647209421403,
+          "p_holm": 1.0,
+          "p_raw": 0.3508,
+          "verdict": "NO_CHANGE_DETECTED"
+        }
+      },
+      {
+        "basis_sources": [
+          "reddit",
+          "youtube_comment",
+          "google_maps",
+          "news"
+        ],
+        "brand": "Inter",
+        "ci95": [
+          0.2183406113537118,
+          0.4273513139695712
+        ],
+        "n": 82,
+        "n_clusters": 35,
+        "share": 0.3215686274509804,
+        "wow": {
+          "ci95": [
+            -0.13883860775178883,
+            0.31069754024254276
+          ],
+          "delta": 0.0883256528417819,
+          "p_holm": 1.0,
+          "p_raw": 0.4262,
+          "verdict": "NO_CHANGE_DETECTED"
+        }
+      },
+      {
+        "basis_sources": [
+          "reddit",
+          "youtube_comment",
+          "google_maps",
+          "news"
+        ],
+        "brand": "C6 Bank",
+        "ci95": [
+          0.21681047197640121,
+          0.4235294117647059
+        ],
+        "n": 81,
+        "n_clusters": 35,
+        "share": 0.3176470588235294,
+        "wow": {
+          "ci95": [
+            -0.20194279784978997,
+            0.245333782174463
+          ],
+          "delta": 0.024321556579621095,
+          "p_holm": 1.0,
+          "p_raw": 0.8418,
+          "verdict": "NO_CHANGE_DETECTED"
+        }
+      }
+    ],
+    "window": {
+      "current": {
+        "end": "2026-09-02T12:00:00Z",
+        "start": "2026-08-26T12:00:00Z"
+      },
+      "previous": {
+        "end": "2026-08-26T12:00:00Z",
+        "start": "2026-08-19T12:00:00Z"
+      }
+    }
+  },
+  "what_could_not_be_checked": [
+    "youtube_comment: items lacking a timestamp, excluded from WoW and events (Nubank)",
+    "youtube_comment: items lacking a timestamp, excluded from WoW and events (Inter)",
+    "youtube_comment: items lacking a timestamp, excluded from WoW and events (C6 Bank)"
+  ]
+}
