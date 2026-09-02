@@ -24,6 +24,7 @@ committed.
 | Date | Task | Run ids | Monid USD | OpenAI USD | Notes |
 |---|---|---|---|---|---|
 | 2026-09-02 | W3.7 smoke | 01M1GPJXYTAMZNGWQNT7Y7KWG0, 01M1GPP9HXJKQQYJ0V2FFCE0QV | 0.25 | 0.00 | smoke Nubank via scripts/record_fixtures.py: reddit 40 results $0.2480, google_maps 4 results $0.0027 (estimate $0.0338); reconciled, no unmatched; wallet $1.00 → $0.75 |
+| 2026-09-02 | W5.5 real (key 2) | session 20260902T194057Z-nubank-57d7a9, `out/w5.5-real/` (21 run ids in its runs.jsonl) | 0.4733 | 0.0454 | `sonar run --profile lite Nubank --vs Inter --no-voice`, backgrounded, on **key 2**. **verdict RECONCILED, `sonar verify` passes.** 133 mentions, **all 133 labelled, 0 errors** — the classifier fix holds on real data. But: (a) 56/133 `not_about_brand` — "Inter" collides with Inter Milan (football topic "Lautaro Chooses to Stay at Inter" clustered); (b) sentiment + SoV **abstained** for both brands (too few relevant after the homonym filter); (c) 3 adapters hit `schema_drift` on Apify "no-results" error-items — youtube/facebook return `{error,…}` items the adapter reads as a missing `id`/`text`; reddit skipped on one deleted comment with no `body`; Inter reddit hit the RUNNING deadline. Real digest/receipt in `out/w5.5-real/`. Key 2 wallet ≈ $0.53. |
 | 2026-09-02 | W5.5 attempt 3 (killed) | session `out/w5.5-attempt3` — orphan reddit 01M1HT1AR6C3NSMXWKSGEYKY28 (billed, not in local ledger by id), youtube 01M1HT1ARNJJQ7J8WAYVNB5HE5, instagram 01M1HT1AR53RTERJ2Z61EKGXNS, tiktok 01M1HT1ARVFD0KQYJSRV4SC38D, gmaps 01M1HT1ARQXVQE3S5P9RSEEG71, facebook 01M1HT1ARS3X87HSX3R4NRVYM7, trustpilot 01M1HT1FMDDB38CR8N01RD5GCQ, g2 01M1HT1R5ARG6DW2KT9E31FAE0, news 01M1HT1V9TMZ5EK9VF5J7R931V + 01M1HT1XW5NZRMFCNKB56MQ0GG, yt-comments 01M1HT3E0JVSKKKKD8SJ85J6P6 (BLOCKED) | ~0.2408 | 0.00 | `sonar run --profile lite Nubank --no-voice` on the **old** key. Killed by a 120 s foreground timeout while polling — must background live runs. Monid ran every fetch anyway: reddit $0.134, youtube $0.0225, instagram $0.00345, tiktok $0.009, gmaps $0.01485/22, facebook $0.007, trustpilot $0.03 (0), g2 $0.02 (0), news $0, yt-comments BLOCKED $0. No receipt, no mentions saved. Old key wallet ≈ $0.05 — effectively spent, per operator instruction switch to the second key here. |
 | 2026-09-02 | W5.5 attempt 2 | session 20260902T192411Z-nubank-f69c73 — 01M1HS8D4W77SMAG0BAJT21H5E, 01M1HS8D5H28HVJ3WWTW1P683F, 01M1HS8P8HW8AXWVCQCMP077Q4, 01M1HS8YQ030M5CRQ8RF125AJH, 01M1HS90D9ESQ39XTH5N95GAMS, 01M1HS8YS69JD24SF84NJ1J8PV, 01M1HS8D3AMMT0SW77T9MB09KM, 01M1HS8D41WS3KTJJDFV1EPGCC, 01M1HS9J5ZR8S5NV324MFDN9NH, 01M1HS8D3FCWAMA7RS8FQ7VJW4, 01M1HS8D6MM6EXC4HQS8WMAANW | 0.2320 | ~0.0000 | `sonar run --profile lite Nubank --no-voice` after the pipeline fix. **verdict RECONCILED**, 11 runs, 0 failed, no unmatched. 67 mentions fetched (reddit 15, tiktok 19, instagram 15, gmaps 9, youtube 5, facebook 2, news 2). trustpilot/g2 lookups found no entity (abstained, reviews skipped); yt-comments HTTP 400. **All 67 labelled `error`** — second bug: `gpt-5.6-luna` rejects `temperature=0.0` (400), so every classify batch failed, `llm_usd $0`, empty topics. Fixed `ec789de` (drop the param; verified live). Real mentions saved; not re-analysed (no offline re-label path, single brand). Wallet ~$0.52 → ~$0.29. |
 | 2026-09-02 | W5.5 attempt 1 (crashed) | session 20260902T190653Z-nubank-cb9cae — reddit 01M1HR8PMMP6SESZMP3SYG24WC, youtube 01M1HR8PN33AQCS8DNS2AW8H2F, yt-comments 01M1HRAFHKNH5FJC2SCZNN2TTP, tiktok 01M1HR8PMSP89RE2QZ1G847C4V, instagram 01M1HR8PN48VHQ87S2DZRK6QJS, gmaps 01M1HR8PMZZVV4H0WWQMY9AN4W, facebook 01M1HR8PN2GR27M85MNPCA0DEK, trustpilot 01M1HR97KK9CBJYSCEJNZYD616, g2 01M1HR98976QYRZ6ZFSW2MTFJF, news 01M1HR9GD0Y816J620RJYWVNTM | 0.2266 | 0.00 | `sonar run --profile lite Nubank --no-voice`, est $0.4293; session dir left uncommitted under out/. All 10 source runs COMPLETED; pipeline then crashed parsing the news result (pre-existing bug, fixed `fc5b2c9`). No receipt written. Costs from `GET /v1/runs` (authoritative): reddit $0.134/20, youtube $0.0225/5, yt-comments $0 (HTTP 400, no charge), tiktok $0.009/20, instagram $0.00345, gmaps $0.000675/**1 review**, facebook $0.007/2, trustpilot $0.03 (0 companies), g2 $0.02 (0 products), news $0. No unmatched, nothing pending — reconciliation obligation met by direct listing. Data too thin to salvage (1 maps review, 0 trustpilot/g2/yt-comments). Wallet $0.75 → ~$0.52. |
@@ -31,7 +32,7 @@ committed.
 | 2026-09-02 | W0.1 + W0.3 | none | 0.00 | 0.00 | keys stored in ~/.sonar/.env; monid whoami OK, balance $1.00; OpenAI models list OK (gpt-5.6-luna/terra present); 7 inspects saved to docs/monid/inspect/ (all free) |
 | 2026-09-02 | W0.1 setup wizard (`scripts/setup-wizard.sh`) | none | 0.00 | 0.00 | Wizard writes `~/.sonar/.env` (mode 600) with Monid key, budget, run cap, OpenAI key, X handle. Verification calls are unbilled (`monid whoami`, `monid discover`, OpenAI `models.list`). No Monid spend has occurred yet. |
 
-Running totals — **key 1** (`monid_live_VI12…`): Monid **0.9494** of the $1 free credit spent (0.25 W3.7 + 0.2266 attempt-1 + 0.2320 attempt-2 + 0.2408 attempt-3); ≈ $0.05 left, treated as exhausted. **Key 2** (`monid_live_DJVq…`, swapped into `~/.sonar/.env` 2026-09-02, old value backed up to `~/.sonar/.env.bak-*`): fresh $1, W5.5 real run in progress against it. OpenAI ≈ 0.00 so far. Reserve 1.50 not yet funded. A real top-up is still needed for W6.1.
+Running totals — **key 1** (`monid_live_VI12…`): $0.9494 of the $1 free credit spent (0.25 W3.7 + 0.2266 attempt-1 + 0.2320 attempt-2 + 0.2408 attempt-3); ≈ $0.05 left, exhausted. **Key 2** (`monid_live_DJVq…`, in `~/.sonar/.env` since 2026-09-02, old value at `~/.sonar/.env.bak-*`): $0.4733 spent on the W5.5 real run, ≈ $0.53 left. OpenAI $0.0454 total. Reserve 1.50 not yet funded. A real top-up is still needed for W6.1 (full, 4 brands, $2.8).
 
 Row format: one row per session id. `Run ids` lists every Monid run id
 the receipt contains, including `run_id=null` rows written as
@@ -142,6 +143,28 @@ When a direct run's receipt row is committed, its HANDOFF ledger row notes
 - **Blocked on top-up.** ~$4.90 of Monid spend left (W5.5 $1.29 + W6.1
   $2.82 + W8.2 $0.80; W7.2 ≈ $0), plus the $1.50 judging reserve → top up
   ~$8 at app.monid.ai and W5.5 runs first try.
+
+### 2026-09-02 — W5.5 real run: pipeline works, demo config and 3 adapters do not
+
+The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
+133/133 mentions labelled with no errors. Blockers found for W6.1:
+
+- **"Inter" is unusable as a competitor.** Inter Milan (football) drowns
+  Banco Inter — 42 % of mentions `not_about_brand`, the only Inter topic
+  was about a footballer's contract. Need a clean competitor (PicPay,
+  Itaú, C6) or `--brand-hint "Banco Inter"` + aliases, then re-measure.
+- **3 adapters mis-handle Apify "no-results" items.** youtube and facebook
+  return `[{error, …}]` when the search finds nothing; `youtube.py` /
+  `facebook.py` read that as a missing required `id` / `text` and raise
+  `AdapterSchemaError` (→ whole-source `schema_drift` abstention) instead
+  of an `empty` abstention. `reddit.py` aborts the whole fetch on one
+  deleted comment with no `body` — should skip-and-count. Fix before W6.1
+  or half the sources abstain.
+- **reddit is slow** — Inter's reddit run hit the per-run deadline while
+  RUNNING. Consider a longer reddit deadline or a smaller cap.
+- Sentiment + SoV abstained: after the homonym filter, too few relevant
+  mentions per brand to clear the pre-registered thresholds. Should
+  clear with a real competitor and cleaner adapters.
 
 ### 2026-09-02 — W5.5 attempt 1: real run, real bug
 
