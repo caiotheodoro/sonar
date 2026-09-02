@@ -2,15 +2,15 @@
 
 Files here are **not** recorded fixtures and are exempt from the rule in
 `tests/fixtures/README.md` ("recorded from real runs, never hand-written").
-Each filename ends in `_sample.json` to make that visible. They exist so
-adapter tests can run before `sonar record --profile smoke` (W3.7) lands the
-real payloads; once a recorded fixture for the same `(provider, endpoint)`
-exists, the adapter test switches to it and the sample is deleted.
+Each filename contains `sample` (either `_sample.json` or `SAMPLE-hand-built-*`)
+to make that visible. They exist so adapter tests can run before
+`sonar record --profile smoke` (W3.7) lands the real payloads; once a recorded
+fixture for the same `(provider, endpoint)` exists, the adapter test switches
+to it and the sample is deleted.
 
-| File | Provider / endpoint | Owner |
-|---|---|---|
-| `reddit_reddit-scraper-lite_sample.json` | `apify /trudax/reddit-scraper-lite` | W3.1 |
-| `tinyfish_search_sample.json` | `tinyfish /search` (`domain_type=news`) | W3.1 |
+See the directory listing for the current set of sample files. Files prefixed
+`SAMPLE-hand-built-*` were created to test adapters for which no recorded
+fixture yet exists.
 
 Field names follow the endpoint reference table of
 `docs/research/2026-09-02-task-graph-and-design.md` and the actor's public

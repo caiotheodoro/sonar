@@ -1,12 +1,13 @@
 """Provider protocol and AdapterSchemaError.
 
-W2.1 owns ``src/sonar/models.py`` and will define the frozen pydantic
-Mention model.  The protocol is defined here so adapters can import it
-without pulling in the full model layer.
+The frozen pydantic Mention model lives in ``src/sonar/models.py``.
+The protocol is defined here so adapters can import it without pulling
+in the full model layer.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, Protocol, runtime_checkable
 
 
@@ -47,12 +48,20 @@ class Provider(Protocol):
         ...
 
     def parse(
-        self, raw: dict[str, Any], run_id: str, brand: str
+        self,
+        raw: dict[str, Any],
+        run_id: str | None,
+        brand: str,
+        *,
+        local_seq: int | None = None,
+        terms: Sequence[str] | None = None,
     ) -> list[Any]:
         """Parse a Monid provider response into a list of Mention records.
 
         *raw* is the ``providerResponse`` body; *run_id* is the Monid run
-        id; *brand* is the brand this batch was fetched for.
+        id (``None`` for ``$0`` sync endpoints); *brand* is the brand this
+        batch was fetched for.  *local_seq* is required to build
+        ``Mention.raw_ref``.
 
         Raises :class:`AdapterSchemaError` on unexpected payload shape.
         """

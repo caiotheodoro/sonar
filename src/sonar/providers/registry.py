@@ -7,7 +7,7 @@ before submitting a run.
 Example adapter registration (from ``x.py``)::
 
     from sonar.providers.registry import PROVIDERS
-    PROVIDERS["x"] = XProvider()
+    PROVIDERS["x"] = _XProvider()
 """
 
 from __future__ import annotations

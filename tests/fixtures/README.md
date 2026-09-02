@@ -11,7 +11,8 @@ tests/fixtures/
   <provider>_<endpoint>_<brand>_<timestamp>.json   # raw provider response payload
   runs.jsonl                                        # ledger (one JSON line per RunRecord)
   v1_runs_page.json                                 # snapshot of GET /v1/runs response
-  labels.jsonl                                      # sentiment labels (one JSON line per Label)
+  labels.json                                       # sentiment labels (single JSON object keyed by mention_id)
+  samples/                                          # hand-built sample payloads (exempt from Rule 1, see samples/README.md)
 ```
 
 - **One raw payload per (provider, endpoint, brand)**.  The filename
@@ -26,9 +27,9 @@ tests/fixtures/
   reconcile time.  Contains the ``runId``, ``status``,
   ``providerResponse.httpStatus``, ``cost``, and ``billedUnits`` fields
   the receipt depends on.
-- **labels.jsonl** — one :class:`~sonar.models.Label` per line, produced
-  by the two-signal labelling pipeline.  Used by ``test_labeler.py`` and
-  ``test_rules.py``.
+- **labels.json** — a single JSON object ``{"labels": {<mention_id>: {...}, ...}}``
+  produced by the two-signal labelling pipeline.  Used by ``test_labeler.py``
+  and ``test_rules.py``.
 
 ## Recording convention
 

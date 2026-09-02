@@ -7,6 +7,7 @@ pipeline can report it as a coverage gap rather than a missing adapter.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from sonar.providers.registry import PROVIDERS
@@ -28,7 +29,15 @@ class _XProvider:
     def build_input(self, query: Any) -> dict[str, Any]:
         raise RuntimeError("X/Twitter endpoint unavailable")
 
-    def parse(self, raw: Any, run_id: str, brand: str) -> list[Any]:
+    def parse(
+        self,
+        raw: Any,
+        run_id: str | None,
+        brand: str,
+        *,
+        local_seq: int | None = None,
+        terms: Sequence[str] | None = None,
+    ) -> list[Any]:
         raise RuntimeError("X/Twitter endpoint unavailable")
 
     def unit_cost(self, n_results: int) -> float:
