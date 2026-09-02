@@ -1,7 +1,8 @@
 """TikTok adapter for ``apify /apidojo/tiktok-scraper`` (W3.3).
 
 Input: ``keywords`` from the brand and its aliases, ``maxItems`` from
-``config.SOURCE_PLAN``, ``dateRange="THIS_MONTH"``. Output items carry the
+``config.SOURCE_PLAN``, ``dateRange="THIS_MONTH"``, ``sortType="DATE_POSTED"``.
+Output items carry the
 caption in ``title``, the upload time in ``uploadedAtFormatted`` and the
 author under ``channel``; ``cluster_key`` is the author hash (CONTRACTS
 §cluster_key rules), falling back to ``mention_id`` when the payload has no
@@ -27,6 +28,10 @@ _PLAN = config.SOURCE_PLAN["tiktok"]
 _SOURCE: Source = "tiktok"
 _LANGS: frozenset[str] = frozenset({"pt", "en", "other", "unknown"})
 _DATE_RANGE = "THIS_MONTH"
+# Actor enum is RELEVANCE | MOST_LIKED | DATE_POSTED (default RELEVANCE); keyword
+# search only. DATE_POSTED keeps run order deterministic and recency-first, the
+# same knob reddit sets with ``sort=new`` and google_maps with ``reviewsSort=newest``.
+_SORT_TYPE = "DATE_POSTED"
 _TEXT_KEYS: tuple[str, ...] = ("title", "caption", "desc")
 _ITEM_LIST_KEYS: tuple[str, ...] = ("output", "items", "data", "results")
 _ENGAGEMENT: tuple[tuple[str, str], ...] = (
@@ -200,6 +205,7 @@ class TikTokProvider:
             "keywords": _terms_of(query),
             "maxItems": _cap_for(query),
             "dateRange": _DATE_RANGE,
+            "sortType": _SORT_TYPE,
         }
 
     def parse(

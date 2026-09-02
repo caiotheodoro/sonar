@@ -93,6 +93,16 @@ def test_tiktok_build_input_full() -> None:
         "keywords": ["Nubank", "Nu bank", "Nu"],
         "maxItems": config.SOURCE_PLAN["tiktok"].caps["full"],
         "dateRange": "THIS_MONTH",
+        "sortType": "DATE_POSTED",
+    }
+
+
+def test_tiktok_build_input_sort_type_is_actor_enum_member() -> None:
+    """``sortType`` is the ``apidojo/tiktok-scraper`` enum for keyword search."""
+    assert TIKTOK.build_input(query("full"))["sortType"] in {
+        "RELEVANCE",
+        "MOST_LIKED",
+        "DATE_POSTED",
     }
 
 
