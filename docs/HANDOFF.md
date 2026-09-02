@@ -24,11 +24,12 @@ committed.
 | Date | Task | Run ids | Monid USD | OpenAI USD | Notes |
 |---|---|---|---|---|---|
 | 2026-09-02 | W3.7 smoke | 01M1GPJXYTAMZNGWQNT7Y7KWG0, 01M1GPP9HXJKQQYJ0V2FFCE0QV | 0.25 | 0.00 | smoke Nubank via scripts/record_fixtures.py: reddit 40 results $0.2480, google_maps 4 results $0.0027 (estimate $0.0338); reconciled, no unmatched; wallet $1.00 → $0.75 |
+| 2026-09-02 | W5.5 attempt 1 (crashed) | session 20260902T190653Z-nubank-cb9cae — reddit 01M1HR8PMMP6SESZMP3SYG24WC, youtube 01M1HR8PN33AQCS8DNS2AW8H2F, yt-comments 01M1HRAFHKNH5FJC2SCZNN2TTP, tiktok 01M1HR8PMSP89RE2QZ1G847C4V, instagram 01M1HR8PN48VHQ87S2DZRK6QJS, gmaps 01M1HR8PMZZVV4H0WWQMY9AN4W, facebook 01M1HR8PN2GR27M85MNPCA0DEK, trustpilot 01M1HR97KK9CBJYSCEJNZYD616, g2 01M1HR98976QYRZ6ZFSW2MTFJF, news 01M1HR9GD0Y816J620RJYWVNTM | 0.2266 | 0.00 | `sonar run --profile lite Nubank --no-voice`, est $0.4293; session dir left uncommitted under out/. All 10 source runs COMPLETED; pipeline then crashed parsing the news result (pre-existing bug, fixed `fc5b2c9`). No receipt written. Costs from `GET /v1/runs` (authoritative): reddit $0.134/20, youtube $0.0225/5, yt-comments $0 (HTTP 400, no charge), tiktok $0.009/20, instagram $0.00345, gmaps $0.000675/**1 review**, facebook $0.007/2, trustpilot $0.03 (0 companies), g2 $0.02 (0 products), news $0. No unmatched, nothing pending — reconciliation obligation met by direct listing. Data too thin to salvage (1 maps review, 0 trustpilot/g2/yt-comments). Wallet $0.75 → ~$0.52. |
 | 2026-09-02 | W0.1 closed | none | 0.00 | 0.00 | Hackathon registration submitted; X handle @uiuizap; Monid workspace budget/run cap left unset by decision (sonar's own guard is the stop) |
 | 2026-09-02 | W0.1 + W0.3 | none | 0.00 | 0.00 | keys stored in ~/.sonar/.env; monid whoami OK, balance $1.00; OpenAI models list OK (gpt-5.6-luna/terra present); 7 inspects saved to docs/monid/inspect/ (all free) |
 | 2026-09-02 | W0.1 setup wizard (`scripts/setup-wizard.sh`) | none | 0.00 | 0.00 | Wizard writes `~/.sonar/.env` (mode 600) with Monid key, budget, run cap, OpenAI key, X handle. Verification calls are unbilled (`monid whoami`, `monid discover`, OpenAI `models.list`). No Monid spend has occurred yet. |
 
-Running totals: Monid 0.25 of 10.00 spent (wallet balance $0.75 of the $1 free credit; top-up needed before W6.1), OpenAI 0.00, reserve 1.50 not yet funded.
+Running totals: Monid **0.4766** of 10.00 spent (0.25 W3.7 + 0.2266 W5.5-attempt-1); wallet ≈ $0.52 of the $1 free credit; top-up required before any full W5.5 / W6.1. OpenAI 0.00. Reserve 1.50 not yet funded.
 
 Row format: one row per session id. `Run ids` lists every Monid run id
 the receipt contains, including `run_id=null` rows written as
@@ -45,7 +46,7 @@ the job runs.
 | Job | Command | Est. Monid | Measured | Status |
 |---|---|---|---|---|
 | W3.7 smoke fixtures | `uv run python scripts/record_fixtures.py --brand Nubank --profile smoke` | 0.40 | done 2026-09-02, billed 0.25 | fixtures committed; see ledger |
-| W5.5 lite run + Avenza empty + TTS probe | `sonar run --profile lite Nubank --vs Inter`; `sonar run --profile lite Avenza` | 1.30 | `sonar plan` 2026-09-02: lite Nubank+Inter **$0.8587**, Avenza lite ≈ $0.43, TTS ≈ $0 | blocked: wallet $0.75, need top-up |
+| W5.5 lite run + Avenza empty + TTS probe | `sonar run --profile lite Nubank --vs Inter`; `sonar run --profile lite Avenza` | 1.30 | attempt 1 (Nubank solo, no-voice) billed $0.2266, crashed on a pipeline bug before a receipt (fixed `fc5b2c9`); real caps: gmaps 1 review, trustpilot/g2 0 hits | blocked: wallet ≈ $0.52, need top-up for the full Nubank+Inter+Avenza run |
 | W6.1 full demo + empty | `sonar run --profile full Nubank --vs Inter C6 Itaú --resamples 10000` | 2.80 | `sonar plan` 2026-09-02: **$2.8168** over 4 brands | waiting on W5.5 + top-up |
 | W7.2 narration TTS | one ElevenLabs run through `voice/tts` | 0.10 | not run | waiting on W7.1 |
 | W8.2 rehearsal | `sonar run --profile lite <never-used brand>` | 0.80 | not run | waiting on W8.1 |
@@ -139,6 +140,23 @@ When a direct run's receipt row is committed, its HANDOFF ledger row notes
 - **Blocked on top-up.** ~$4.90 of Monid spend left (W5.5 $1.29 + W6.1
   $2.82 + W8.2 $0.80; W7.2 ≈ $0), plus the $1.50 judging reserve → top up
   ~$8 at app.monid.ai and W5.5 runs first try.
+
+### 2026-09-02 — W5.5 attempt 1: real run, real bug
+
+- `sonar run --profile lite Nubank --no-voice` fired live. All 10 source
+  runs COMPLETED ($0.2266 billed, from `GET /v1/runs`), then the pipeline
+  crashed: `_run_source` read `report.cluster_key_fallbacks` on the news
+  adapter's report, which only reddit's carries. Pre-existing W5.1 bug;
+  smoke (reddit+maps) never hit it. Fixed in `fc5b2c9` with
+  `_report_notes()` + regression tests; suite 1365 green.
+- No receipt was written, so `sonar reconcile` (needs one) can't run.
+  Billing is settled anyway: every run terminal, no unmatched, verified
+  against the listing directly. Session dir kept under `out/`.
+- Live data was thin pre-crash: 1 Google Maps review, 0 Trustpilot, 0 G2,
+  youtube-comments HTTP 400. Not worth salvaging — a funded rerun starts
+  clean.
+- Wallet ≈ $0.52. **OQ-HO-3 still open** (needs a real lite run with two
+  weeks of populated data).
 
 ## Open questions
 
