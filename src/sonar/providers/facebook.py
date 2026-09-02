@@ -182,7 +182,7 @@ class FacebookProvider:
     def parse(
         self,
         raw: Any,
-        run_id: str,
+        run_id: str | None,
         brand: str,
         *,
         local_seq: int | None = None,
@@ -190,7 +190,9 @@ class FacebookProvider:
     ) -> list[Mention]:
         """Turn the run body into Mention rows for *brand*.
 
-        *run_id* is the Monid run id; Apify runs always carry one. *local_seq*
+        *run_id* is the Monid run id; Apify runs always carry one, but the
+        :class:`~sonar.providers.base.Provider` protocol allows ``None`` for
+        sync endpoints, so it is passed through to ``Mention.run_id`` as-is. *local_seq*
         is the ledger row that saved *raw* (``raw_ref`` = ``"{local_seq}#{index}"``)
         and is keyword-only with a ``None`` default so the signature stays
         compatible with :class:`~sonar.providers.base.Provider`; omitting it is

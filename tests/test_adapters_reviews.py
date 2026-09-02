@@ -106,6 +106,36 @@ class TestGoogleMapsBuildInput:
         payload = google_maps.PROVIDER.build_input(_query("full"), now=NOW)
         assert payload["reviewsStartDate"] == "2026-08-19"
 
+    def test_place_id_path_replaces_search_url(self) -> None:
+        payload = google_maps.PROVIDER.build_input(
+            _query("full"), now=NOW, place_id="ChIJN1t_tDeuEmsRUsoyG83frY4"
+        )
+        assert payload == {
+            "placeIds": ["ChIJN1t_tDeuEmsRUsoyG83frY4"],
+            "maxReviews": 50,
+            "reviewsSort": "newest",
+            "reviewsStartDate": WINDOW_START,
+        }
+        assert "startUrls" not in payload
+
+    def test_place_id_path_ignores_brand_name(self) -> None:
+        query = Query(brand="Nubank", competitors=["Inter"], profile="full")
+        payload = google_maps.PROVIDER.build_input(
+            query, brand="Inter", now=NOW, place_id="ChIJplaceInter"
+        )
+        assert payload["placeIds"] == ["ChIJplaceInter"]
+        assert "startUrls" not in payload
+
+    @pytest.mark.parametrize("place_id", ["", "   "])
+    def test_blank_place_id_is_a_caller_error(self, place_id: str) -> None:
+        with pytest.raises(ValueError, match="place_id"):
+            google_maps.PROVIDER.build_input(_query("full"), now=NOW, place_id=place_id)
+
+    def test_search_url_stays_default_when_no_place_id(self) -> None:
+        payload = google_maps.PROVIDER.build_input(_query("full"), now=NOW, place_id=None)
+        assert payload["startUrls"] == [{"url": "https://www.google.com/maps/search/Nubank"}]
+        assert "placeIds" not in payload
+
     def test_unit_cost_matches_config(self) -> None:
         plan = SOURCE_PLAN["google_maps"]
         assert google_maps.PROVIDER.unit_cost(10) == pytest.approx(10 * plan.per_result_usd)
@@ -167,9 +197,7 @@ class TestGoogleMapsParse:
         assert last.url is None
         assert last.rating == 3
 
-    def test_place_title_carries_brand_when_text_does_not(
-        self, gmaps_raw: dict[str, Any]
-    ) -> None:
+    def test_place_title_carries_brand_when_text_does_not(self, gmaps_raw: dict[str, Any]) -> None:
         second = google_maps.PROVIDER.parse(gmaps_raw, "run_x", "Nubank", local_seq=1)[1]
         assert "nubank" not in second.text.lower()
         assert second.matched_terms == ["nubank"]
@@ -196,6 +224,11 @@ class TestGoogleMapsParse:
         bare: list[dict[str, Any]] = gmaps_raw["output"]
         mentions = google_maps.PROVIDER.parse(bare, "run_x", "Nubank", local_seq=1)
         assert len(mentions) == 3
+
+    def test_run_id_none_is_accepted_per_protocol(self, gmaps_raw: dict[str, Any]) -> None:
+        mentions = google_maps.PROVIDER.parse(gmaps_raw, None, "Nubank", local_seq=1)
+        assert len(mentions) == 3
+        assert {m.run_id for m in mentions} == {None}
 
 
 class TestGoogleMapsSchemaDrift:
@@ -273,9 +306,7 @@ class TestFacebookBuildInput:
             profile="full",
         )
         payload = facebook.PROVIDER.build_input(query, now=NOW)
-        assert payload["startUrls"] == [
-            {"url": "https://www.facebook.com/NubankBrasil/reviews"}
-        ]
+        assert payload["startUrls"] == [{"url": "https://www.facebook.com/NubankBrasil/reviews"}]
 
     def test_competitor_uses_its_own_name(self) -> None:
         query = Query(brand="Nubank", competitors=["Banco Inter"], profile="full")
@@ -327,6 +358,11 @@ class TestFacebookParse:
         for m in facebook.PROVIDER.parse(fb_raw, "run_x", "Nubank", local_seq=1):
             assert m.cluster_key == m.mention_id
             assert facebook.PROVIDER.cluster_key(m) == m.mention_id
+
+    def test_run_id_none_is_accepted_per_protocol(self, fb_raw: dict[str, Any]) -> None:
+        mentions = facebook.PROVIDER.parse(fb_raw, None, "Nubank", local_seq=1)
+        assert len(mentions) == 3
+        assert {m.run_id for m in mentions} == {None}
 
     def test_mention_id_falls_back_to_url_then_text(self, fb_raw: dict[str, Any]) -> None:
         mentions = facebook.PROVIDER.parse(fb_raw, "run_x", "Nubank", local_seq=1)

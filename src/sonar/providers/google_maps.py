@@ -5,6 +5,17 @@ Maps search URL for the brand name, ``maxReviews`` always set from
 ``config.SOURCE_PLAN`` (the actor default is ten million), ``reviewsSort``
 ``newest`` and ``reviewsStartDate`` at the start of the query window.
 
+Input-path caveat (review 2026-09-02 adapters-b, F7): the endpoint reference
+lists ``startUrls[]`` and ``placeIds[]`` without saying which URL shapes the
+actor accepts. A ``/maps/search/<name>`` URL is a results listing, not a
+resolved place page, and the actor is documented upstream as a reviews
+scraper rather than a place-discovery crawler. Whether it accepts a search
+URL is UNVERIFIED until the W3.7 live smoke run records a real payload; the
+search URL stays the default so the demo can run without a manual place
+lookup. ``build_input(..., place_id=...)`` is the fallback path: it emits
+``placeIds`` instead of ``startUrls`` so the recorder can retry with a
+resolved Google place id if the search URL returns nothing.
+
 Output items carry ``reviewId``, ``text``, ``stars``, ``publishedAtDate``,
 ``likesCount``, ``name``, ``title`` (the place name) and a few more. Four keys
 are required and their absence is schema drift (``AdapterSchemaError``); every
@@ -138,15 +149,29 @@ class GoogleMapsProvider:
         *,
         brand: str | None = None,
         now: datetime | None = None,
+        place_id: str | None = None,
     ) -> dict[str, Any]:
-        """Actor input for one brand (the Query brand unless *brand* names a competitor)."""
+        """Actor input for one brand (the Query brand unless *brand* names a competitor).
+
+        Default path: ``startUrls`` with a Maps search URL for the brand name
+        (acceptance unverified, see the module docstring). When *place_id* is
+        given the input carries ``placeIds`` instead and the brand name is not
+        used, so the recorder can retry with a resolved place id.
+        """
         name = query.brand if brand is None else brand
         cap = PLAN.caps[query.profile]
         if cap == 0:
             raise ValueError(f"{SOURCE} is not fetched under profile {query.profile}")
         start = (now or datetime.now(UTC)).astimezone(UTC) - timedelta(days=query.window_days)
+        target: dict[str, Any]
+        if place_id is None:
+            target = {"startUrls": [{"url": SEARCH_URL + quote(name, safe="")}]}
+        else:
+            if not place_id.strip():
+                raise ValueError("place_id must be a non-empty Google place id when given")
+            target = {"placeIds": [place_id.strip()]}
         return {
-            "startUrls": [{"url": SEARCH_URL + quote(name, safe="")}],
+            **target,
             "maxReviews": cap,
             "reviewsSort": REVIEWS_SORT,
             "reviewsStartDate": start.date().isoformat(),
@@ -155,7 +180,7 @@ class GoogleMapsProvider:
     def parse(
         self,
         raw: Any,
-        run_id: str,
+        run_id: str | None,
         brand: str,
         *,
         local_seq: int | None = None,
@@ -163,7 +188,9 @@ class GoogleMapsProvider:
     ) -> list[Mention]:
         """Turn the run body into Mention rows for *brand*.
 
-        *run_id* is the Monid run id; Apify runs always carry one. *local_seq*
+        *run_id* is the Monid run id; Apify runs always carry one, but the
+        :class:`~sonar.providers.base.Provider` protocol allows ``None`` for
+        sync endpoints, so it is passed through to ``Mention.run_id`` as-is. *local_seq*
         is the ledger row that saved *raw* (``raw_ref`` = ``"{local_seq}#{index}"``)
         and is keyword-only with a ``None`` default so the signature stays
         compatible with :class:`~sonar.providers.base.Provider`; omitting it is
