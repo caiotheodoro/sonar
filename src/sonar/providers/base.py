@@ -1,16 +1,13 @@
-"""Provider protocol, AdapterSchemaError, and forward Mention declaration.
+"""Provider protocol and AdapterSchemaError.
 
-W2.1 owns ``src/sonar/models.py`` and will replace the placeholder Mention
-dataclass below with the frozen pydantic model.  The protocol is defined
-here so adapters can import it without pulling in the full model layer.
+W2.1 owns ``src/sonar/models.py`` and will define the frozen pydantic
+Mention model.  The protocol is defined here so adapters can import it
+without pulling in the full model layer.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
-
-if TYPE_CHECKING:
-    from sonar.models import Mention
+from typing import Any, Protocol, runtime_checkable
 
 
 class AdapterSchemaError(Exception):
