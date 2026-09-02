@@ -110,10 +110,10 @@ def test_pre_registration_frozen_banner_and_version() -> None:
     text = PRE_REG.read_text(encoding="utf-8")
     assert "FROZEN TEXT" in text
     assert "**Frozen**: 2026-09-02" in text
-    # A1/A2 (D012) landed in 1.1.0; anything older predates the wording and
-    # topic thresholds this file checks. Patch bumps after that are fine.
-    assert pre_registration_version() >= (1, 1, 0)
-    assert "**Amended**: 2026-09-02, A1 and A2" in text
+    # A1/A2 (D012) landed in 1.1.0 and A3 (D013) in 1.1.1; anything older
+    # predates the wording and thresholds this file checks.
+    assert pre_registration_version() >= (1, 1, 1)
+    assert "**Amended**: 2026-09-02, A1, A2 and A3" in text
 
 
 # --- source plan ----------------------------------------------------------

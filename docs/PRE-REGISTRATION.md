@@ -1,13 +1,16 @@
 # PRE-REGISTRATION — sonar statistics plan
 
-**Version**: 1.1.0
+**Version**: 1.1.1
 **Frozen**: 2026-09-02 (design reference: `docs/research/2026-09-02-task-graph-and-design.md`)
-**Amended**: 2026-09-02, A1 and A2 (see §Amendments; `docs/DECISIONS.md` D012)
+**Amended**: 2026-09-02, A1, A2 and A3 (see §Amendments; `docs/DECISIONS.md` D012, D013)
 
 > **FROZEN TEXT.** Any change to the thresholds, rules, or hypotheses below
-> after this freeze date is a **DECISIONS.md entry** (not an edit to this file).
-> The entry must state the prior value, the new value, rationale, and reversal
-> clause. This banner and the version line above are never modified by edits.
+> after the freeze date goes through a **DECISIONS.md entry** stating the
+> prior value, the new value, rationale, and reversal clause; only then is
+> it applied to the sections below in place, together with an §Amendments
+> entry quoting the prior value and a bump of the version line above. No
+> other edit touches this file after the freeze; the `docs-frozen` tag marks
+> the commit that applied the latest amendment.
 
 ---
 
@@ -26,10 +29,12 @@
    (`window_days == 14`); periods are `current = [now − 7 d, now)` and
    `previous = [now − 14 d, now − 7 d)` by `published_at`; delta in share
    and net, `current − previous`. Mentions with `published_at = null` count
-   for share but are excluded from WoW and from events; their source is
-   flagged `wow_scope = false` (per source, in `by_source`) and listed under
-   `what_could_not_be_checked`. This is a scope flag, not an abstention: the
-   source stays in `basis_sources`.
+   for share but are excluded from WoW and from events, one by one. A source
+   every one of whose items lacks a timestamp is flagged `wow_scope = false`
+   (per source, in `by_source`) and listed under `what_could_not_be_checked`;
+   a source with mixed timestamps keeps `wow_scope = true` and only its null
+   items are dropped. This is a scope flag, not an abstention: the source
+   stays in `basis_sources`.
 
 ---
 
@@ -55,17 +60,25 @@ comparison; the design effect quantifies how much clustering matters.
 Holm-adjusted α = **0.05** over the family brands × {net WoW, share WoW}.
 The per-test two-sided p-value is the bootstrap `p = 2 · min(P(Δ ≤ 0),
 P(Δ ≥ 0))` over the B shared resamples. Raw and Holm-adjusted p are both
-reported; the adjusted one governs the verdict word.
+reported; the adjusted one governs the verdict word. Holm is applied over
+the tests with non-null `p_raw`, so `m` is the number of non-abstained tests
+in the family.
+
+Rows are evaluated in the order ABSTAIN, SIGNIFICANT, SUGGESTIVE,
+NO_CHANGE_DETECTED; SUGGESTIVE and NO_CHANGE_DETECTED both require not
+ABSTAIN.
 
 | Verdict | Condition |
 |---|---|
-| **SIGNIFICANT** | `p_holm < 0.05` on the full set **and**, for net, the confirmed-only 95 % CI excludes 0 with the same sign as the full-set point estimate. For share (no confirmed-only interval): `p_holm < 0.05` |
-| **SUGGESTIVE** | `p_raw < 0.05` and not SIGNIFICANT |
-| **NO_CHANGE_DETECTED** | `p_raw ≥ 0.05` (minimums met) |
-| **ABSTAIN** | Minimums not met (reason `below_minimum`), **or** the full-set and confirmed-only 95 % CIs exclude 0 with opposite signs (reason `signals_conflict`) |
+| **ABSTAIN** | Minimums not met (reason `below_minimum`), **or** the full-set and confirmed-only 95 % CIs exclude 0 with opposite signs (reason `signals_conflict`); evaluated first |
+| **SIGNIFICANT** | Not ABSTAIN and `p_holm < 0.05` on the full set **and**, for net, the confirmed-only 95 % CI excludes 0 with the same sign as the full-set point estimate (a null confirmed-only CI, `n_confirmed = 0`, never satisfies this). For share (no confirmed-only interval): `p_holm < 0.05` |
+| **SUGGESTIVE** | Not ABSTAIN, `p_raw < 0.05` and not SIGNIFICANT |
+| **NO_CHANGE_DETECTED** | Not ABSTAIN and `p_raw ≥ 0.05` (minimums met) |
 
 The 95 % CIs are published alongside every verdict as display; they are not
-the rule. Share WoW is part of the design: the Holm family is brands × {net
+the rule. A confirmed-only CI with `n_confirmed = 0` is null and paired with
+an `Abstention` row of reason `degenerate`; the verdict is still decided by
+the rows above. Share WoW is part of the design: the Holm family is brands × {net
 WoW, share WoW}, eight tests for a brand with three competitors.
 
 ---
@@ -83,8 +96,11 @@ pairs over `basis_sources`); for net, `SentimentEntry.n` (relevant
 mentions). Each is evaluated per period.
 
 Abstained sources leave `basis_sources` for **every** brand (not just the
-abstaining brand). Every abstained (null) estimate is paired with an
-`Abstention` row naming the brand, the source (or null) and the reason.
+abstaining brand). Every null `share`, `net`, `ci95`, `delta`, `p_raw` and
+`p_holm` is paired with an `Abstention` row naming the brand, the source (or
+null) and the reason. A `design_effect` with zero iid CI width and a
+confirmed-only CI with `n_confirmed = 0` are null with minimums met; each is
+paired with a row of reason `degenerate`.
 
 **Abstain reasons** (per source, brand, topics, or verdict):
 
@@ -100,11 +116,14 @@ abstaining brand). Every abstained (null) estimate is paired with an
 | `halted` | Monid 402 breaker stopped the session |
 | `embedding_failed` | embedding call failed; topics abstain, chat falls back to lexical retrieval |
 | `signals_conflict` | verdict only: full-set and confirmed-only CIs exclude 0 with opposite signs |
+| `degenerate` | minimums met but the estimate is undefined: `design_effect` with zero iid CI width, or confirmed-only CI with `n_confirmed = 0` |
 
 `no_timestamps` is not an abstention. Items lacking a timestamp (all
 `youtube_comment` items; some Instagram hashtag items) keep their source in
-`basis_sources`; the source carries `wow_scope = false` and is excluded from
-WoW and events only.
+`basis_sources` and are excluded from WoW and events only, item by item. A
+source carries `wow_scope = false` only when every one of its items lacks a
+timestamp (`youtube_comment`); a mixed source such as Instagram keeps
+`wow_scope = true`.
 
 ---
 
@@ -141,6 +160,7 @@ The model supplies observations; code decides. Thresholds frozen here:
 | Audit sample | a fixed **10 %** of rows (seed 777) always sent to the tiebreak model, for H3 |
 | Denominators | for the 10 % sample and the 40 % cap: relevant mention–brand rows after dedup, per brand, per session; a mention kept for two brands is two rows and may be sampled in each |
 | `contested` | a tiebreak triggered by disagreement or low confidence disagrees with the classifier; tiebreak label wins; excluded from the confirmed-only subset |
+| `model_only` | no tiebreak adopted and not `confirmed`: a null deterministic signal with classifier confidence ≥ 0.6, a failed tiebreak call, or `overflow = true` |
 
 Precedence:
 
@@ -152,6 +172,9 @@ Precedence:
    (`confirmed`).
 3. A mention that would have triggered a tiebreak but hit the 40 % cap keeps
    the classifier label (`model_only`, `overflow = true`).
+4. An audit-sample tiebreak on a mention with a null deterministic signal and
+   classifier confidence ≥ 0.6 is never adopted, whether or not it agrees:
+   `model_only`, `decided_by = classifier`, recorded and counted in H3 only.
 
 ---
 
@@ -160,10 +183,10 @@ Precedence:
 | Id | Hypothesis | Threshold | Stopping rule |
 |---|---|---|---|
 | **H1** | Brand + 3 competitors, all-in cost < $5 | `< $5` total, where `total_usd = monid_usd + llm_usd` and `elevenlabs_usd` is a breakout of `monid_usd`, not additive | Measured from frozen demo receipt; pass if `receipt.totals.total_usd < 5` |
-| **H2** | Design effect ≥ 1.5 on thread-clustered comment sources | `≥ 1.5` | Measured at bootstrap from `by_source.design_effect`; pass if `design_effect ≥ 1.5` on each of `reddit` and `youtube_comment` that meets minimums; `tiktok` and `instagram` (author-clustered) are reported, not scored |
+| **H2** | Design effect ≥ 1.5 on thread-clustered comment sources | `≥ 1.5` | Measured at bootstrap from `by_source.design_effect`; pass if `design_effect ≥ 1.5` on each of `reddit` and `youtube_comment` that meets minimums, where meets minimums is `n_clusters ≥ 5` and `n ≥ 20` on the `BySourceEntry` over the full window (not per period); `tiktok` and `instagram` (author-clustered) are reported, not scored |
 | **H3** | Classifier–tiebreak agreement on audit sample ≥ 0.85 | `≥ 0.85` | 10 % fixed audit (seed 777); pass if `receipt.audit.agreement ≥ 0.85` |
 | **H4** | Zero-mention brand still costs > $0 | `> $0` | Avenza run yields a receipt; pass if `receipt.totals.total_usd > 0` even when `mentions.fetched = 0` |
-| **H5** | 50-label blind hand check agreement ≥ 0.85 | `≥ 0.85` | 50 relevant mention–brand rows from the frozen demo, all brands pooled, seed 777, stratified by source in proportion; the rater sees text only (no rationale, deterministic signal, source, or brand label); agreement is raw agreement with the final `label`; pass if `agreement ≥ 0.85`; published either way |
+| **H5** | 50-label blind hand check agreement ≥ 0.85 | `≥ 0.85` | 50 relevant mention–brand rows from the frozen demo, all brands pooled, seed 777, stratified by source in proportion (largest-remainder allocation of the 50 slots: floor of `50 · n_source / N` per source, remaining slots to the largest fractional remainders, ties by `Source` enum order; a source's allocation is capped at its row count and the surplus is reassigned by the same rule); the rater sees text only (no rationale, deterministic signal, source, or brand label); agreement is raw agreement with the final `label`; pass if `agreement ≥ 0.85`; published either way |
 
 ---
 
@@ -173,23 +196,25 @@ The published-claims test asserts each of these equals the constant in
 `src/sonar/config.py`:
 
 - 95 %, B=2000 live, B=10000 frozen demo, seed 777
-- α=0.05 (Holm); `p_holm` governs SIGNIFICANT, `p_raw` governs SUGGESTIVE
+- α=0.05 (Holm) over the tests with non-null `p_raw`; `p_holm` governs
+  SIGNIFICANT, `p_raw` governs SUGGESTIVE; ABSTAIN evaluated first
 - window_days = 14; periods `[now − 7 d, now)` and `[now − 14 d, now − 7 d)`
 - abstain at n_clusters < 5 or n < 20 in either period
 - events: n_day ≥ max(5, median + 3·MAD), n_clusters_day ≥ 3, 14-day baseline
   excluding the tested day, UTC days
 - tiebreak: confidence < 0.6, cap 40 %, audit 10 %
 - topics: average-linkage cosine distance cut 0.35, min_size 3, min_breadth 2
-- H1: < $5; H2: ≥ 1.5 on reddit and youtube_comment; H3: ≥ 0.85;
-  H4: > $0; H5: ≥ 0.85 on 50 labels, seed 777
+- H1: < $5; H2: ≥ 1.5 on reddit and youtube_comment with n_clusters ≥ 5 and
+  n ≥ 20 per source over the full window; H3: ≥ 0.85; H4: > $0;
+  H5: ≥ 0.85 on 50 labels, seed 777, largest-remainder stratification
 
 ---
 
 ## Amendments
 
-Each amendment is a `docs/DECISIONS.md` entry plus a version bump, as the
-banner requires. Prior values are quoted; the sections above show the new
-values.
+Each amendment is a `docs/DECISIONS.md` entry, applied in place, plus a
+version bump, as the banner requires. Prior values are quoted; the sections
+above show the new values.
 
 ### A1 — same-day gate corrections (v1.0.0, commit `56240f2`)
 
@@ -223,23 +248,72 @@ brackets):
 - [F1, F7, F8] Verdict rule: prior CI-based table; new `p_holm` governs
   SIGNIFICANT, `p_raw` governs SUGGESTIVE and NO_CHANGE_DETECTED,
   opposite-sign CIs → ABSTAIN `signals_conflict`; share WoW confirmed.
-- [F2, F11] Abstain reasons: `no_timestamps` removed and replaced by the
-  per-source `wow_scope` flag; `below_minimum`, `halted`, `embedding_failed`,
-  `signals_conflict` added; Instagram wording is "items lacking a timestamp".
+- [F2, F11] Abstain reasons: prior seven reasons ending in `no_timestamps`
+  ("no timestamp field in response (Instagram)"); new `no_timestamps` removed
+  and replaced by the per-source `wow_scope` flag; `below_minimum`, `halted`,
+  `embedding_failed`, `signals_conflict` added; Instagram wording is "items
+  lacking a timestamp".
 - [F3] H2: prior "for youtube_comment"; new scored on `reddit` and
   `youtube_comment` from `by_source.design_effect`.
-- [F4] H3 reads `receipt.audit.agreement`; overflow count is
-  `receipt.audit.tiebreak_overflow`.
-- [F5] Null estimates are paired with an `Abstention` row.
-- [F6] Window fixed at 14 days; periods stated; minimums per period.
-- [F9, F10, F17] Two-signal precedence 1–3, overflow case, denominators.
-- [F15] Resampling frame: one global index over `(brand, cluster_key)`.
-- [F16] Topic cut 0.35, `min_size 3`, `min_breadth 2` added to the threshold
-  index.
-- [F18] Share minimums use `SovEntry.n`; net minimums use `SentimentEntry.n`.
-- [F19] Event baseline excludes the tested day; UTC days; `baseline_mad` and
-  `threshold` published.
+- [F4] H3: prior "pass if `agreement ≥ 0.85`" with the overflow count
+  "published in the receipt"; new reads `receipt.audit.agreement`; overflow
+  count is `receipt.audit.tiebreak_overflow`.
+- [F5] Prior: no pairing rule; new every null estimate is paired with an
+  `Abstention` row.
+- [F6] Window: prior "split at `now − 7 d`", minimums "in either week"; new
+  fixed at 14 days, periods `[now − 7 d, now)` and `[now − 14 d, now − 7 d)`,
+  minimums per period.
+- [F9, F10, F17] Two-signal policy: prior cap row "at most 40 % of a brand's
+  mentions; beyond the cap, mentions stay `model_only`", `contested` row
+  "tiebreak disagrees with classifier", no precedence list, no denominators;
+  new precedence 1–3, overflow case (`overflow = true`, excluded from the
+  confirmed-only subset), denominators as rows per brand per session.
+- [F15] Resampling: prior "shared resample indices (paired deltas across
+  brands)"; new one global index over `(brand, cluster_key)`, a cluster
+  spanning both periods resampled as one unit.
+- [F16] Prior: topic cut absent from the threshold index; new 0.35,
+  `min_size 3`, `min_breadth 2` added.
+- [F18] Prior: "`n < 20` mentions" with no field named; new share minimums
+  use `SovEntry.n`, net minimums use `SentimentEntry.n`.
+- [F19] Event baseline: prior "the full 14-day window", no day convention,
+  no published baseline fields; new excludes the tested day, UTC days,
+  `baseline_mad` and `threshold` published.
 - [F24] H1: prior "total (Monid + LLM + ElevenLabs)"; new
   `total_usd = monid_usd + llm_usd`, ElevenLabs a breakout.
-- [F25] H5 sampling frame, seed, stratification and blinding defined.
+- [F25] H5: prior "50 labels rated blind (rationale hidden)"; new sampling
+  frame (50 relevant mention–brand rows, all brands pooled), seed 777,
+  stratification by source, blinding (text only) and raw agreement with the
+  final `label` defined.
 - [F26] A1 recorded above.
+
+### A3 — D013, second review resolutions (v1.1.1, 2026-09-02)
+
+Applies `docs/DECISIONS.md` D013, resolving
+`docs/research/reviews/2026-09-02-contracts-review-2.md` (item ids in
+brackets):
+
+- [N1] Verdict rule: prior SUGGESTIVE and `signals_conflict` ABSTAIN could
+  both hold; new ABSTAIN is evaluated first and SUGGESTIVE and
+  NO_CHANGE_DETECTED both require not ABSTAIN.
+- [N2] Holm: prior `m` unstated when a test abstains; new Holm is applied
+  over the tests with non-null `p_raw`, `m` = number of non-abstained tests.
+- [N3] H2: prior "that meets minimums" undefined per source; new
+  `n_clusters ≥ 5` and `n ≥ 20` on the `BySourceEntry` over the full window.
+- [N4] Pairing: prior "every abstained (null) estimate"; new named fields
+  `share`, `net`, `ci95`, `delta`, `p_raw`, `p_holm`; `design_effect` with
+  zero iid width and confirmed-only CI with `n_confirmed = 0` are null and
+  paired with the new reason `degenerate` (eleventh abstain reason).
+- [N5] `model_only` row added to the two-signal table: no tiebreak adopted
+  and not `confirmed`.
+- [A1] Mixed-timestamp sources: prior "their source is flagged
+  `wow_scope = false`"; new only a source with no timestamped item is
+  flagged; null items are dropped one by one.
+- [A2] Precedence rule 4: audit-only tiebreak on a null-signal, confidence
+  ≥ 0.6 mention is never adopted.
+- [A3] H5 stratification: prior "in proportion"; new largest-remainder
+  allocation with ties by `Source` enum order.
+- [A4] Banner reworded to the mechanism actually used (DECISIONS entry,
+  in-place edit, amendment, version bump); A2 above now quotes prior values
+  for every finding.
+- N6 changes CONTRACTS only (ledger and receipt rules); no statistics text
+  here is affected.

@@ -1,9 +1,10 @@
 # CONTRACTS — sonar record schemas
 
-`schema_rev: 1.1.0`. Source of truth: `docs/research/2026-09-02-task-graph-and-design.md`,
+`schema_rev: 1.1.1`. Source of truth: `docs/research/2026-09-02-task-graph-and-design.md`,
 Appendix §Contracts, §Pipeline rules, §Statistics, §Error matrix, as amended
 by `docs/DECISIONS.md` D012 (review
-`docs/research/reviews/2026-09-02-contracts-review.md`). This file is frozen
+`docs/research/reviews/2026-09-02-contracts-review.md`) and D013 (review
+`docs/research/reviews/2026-09-02-contracts-review-2.md`). This file is frozen
 at the Wave 1 gate (`docs-frozen` tag). Any later change goes through a
 `docs/DECISIONS.md` entry by the wave lead, bumps `schema_rev`, and is listed
 in §Changelog.
@@ -46,8 +47,10 @@ Review sources (carry a `rating`): `google_maps`, `facebook`, `trustpilot`,
 `g2`. Comment sources (cluster bootstrap expected to show design effect,
 H2): `reddit`, `youtube_comment`, `tiktok`, `instagram`. H2 is scored on the
 two thread-clustered comment sources, `reddit` and `youtube_comment`, from
-`BySourceEntry.design_effect`; the author-clustered sources `tiktok` and
-`instagram` are reported, not scored (D012 F3).
+`BySourceEntry.design_effect` on each entry that meets the H2 minimums
+(`n_clusters ≥ 5` and `n ≥ 20` on the `BySourceEntry` over the full window,
+D013 N3); the author-clustered sources `tiktok` and `instagram` are
+reported, not scored (D012 F3).
 
 ### Other closed enums
 
@@ -69,16 +72,21 @@ two thread-clustered comment sources, `reddit` and `youtube_comment`, from
 | `AbstainReason` | see below | Receipt, Digest |
 | `AbstainScope` | `source`, `brand`, `topics`, `voice`, `session` | Receipt, Digest |
 
-`AbstainReason` values (PRE-REGISTRATION v1.1.0 §Abstain reasons, identical
+`AbstainReason` values (PRE-REGISTRATION v1.1.1 §Abstain reasons, identical
 list): `empty`, `provider_failed`, `rate_limited`, `deadline`, `unavailable`,
 `schema_drift`, `below_minimum` (brand-level, `n_clusters < 5` or `n < 20` in
 either period; see §Digest for which `n`), `halted` (Monid 402 breaker),
 `embedding_failed` (topics only; chat falls back to lexical retrieval and
 says so), `signals_conflict` (verdict only; full-set and confirmed-only CIs
-exclude 0 with opposite signs). `no_timestamps` is **not** an abstention
-(D012 F2): a source whose items carry no `published_at` keeps counting for
-share and is flagged `wow_scope=false` on its `BySourceEntry`, excluded from
-`wow` and `events`, and listed under `what_could_not_be_checked`.
+exclude 0 with opposite signs), `degenerate` (minimums met but one estimate
+is undefined: `design_effect` when the iid CI width is 0, or
+`ci95_confirmed_only` when `n_confirmed = 0`; D013 N4). `no_timestamps` is
+**not** an abstention (D012 F2): a source every one of whose items lacks
+`published_at` keeps counting for share and is flagged `wow_scope=false` on
+its `BySourceEntry`, excluded from `wow` and `events`, and listed under
+`what_could_not_be_checked`; in a source with mixed timestamps the items
+lacking one are dropped from `wow` and `events` one by one and the source
+keeps `wow_scope=true` (D013 A1).
 
 ## Query
 
@@ -142,7 +150,7 @@ Mention; `brand` is carried in the joined output, not in the Label record.
 | `rationale` | `str` | ≤ 20 words, English, from the deciding model call; hidden during the H5 blind hand check |
 | `topic_id` | `str \| None` | assigned by `topics/`; `null` before clustering or when the mention is in no cluster of `min_size` |
 | `signals` | `Signals` | see below |
-| `corroboration` | `Corroboration` | assigned by the precedence in §Two-signal policy below: `confirmed`: classifier agrees with a non-null deterministic signal (a tiebreak never overrides this), or a tiebreak triggered by disagreement or low confidence agrees with the classifier; `contested`: such a tiebreak disagreed with the classifier and won; `model_only`: no deterministic signal and no tiebreak adopted (classifier confidence ≥ 0.6, tiebreak failed, or `signals.overflow=true`); `irrelevant`: `about_brand=false` or `label=irrelevant` |
+| `corroboration` | `Corroboration` | assigned by the precedence in §Two-signal policy below: `confirmed`: classifier agrees with a non-null deterministic signal (a tiebreak never overrides this), or a tiebreak triggered by disagreement or low confidence agrees with the classifier; `contested`: such a tiebreak disagreed with the classifier and won; `model_only`: no tiebreak adopted and not `confirmed`: a null deterministic signal with classifier confidence ≥ 0.6, a failed tiebreak call, or `signals.overflow=true` (D013 N5); `irrelevant`: `about_brand=false` or `label=irrelevant` |
 | `decided_by` | `DecidedBy` | `tiebreak` iff the tiebreak call ran and its label was adopted |
 | `prompt_rev` | `str` | `config.PROMPT_REV` used for the classifier call |
 | `status` | `LabelStatus` | `cached` when served from the label cache keyed by `(mention_id, prompt_rev, classifier model)`; `refused`, `unparseable`, `error` after 4 SDK retries exclude the mention with that reason |
@@ -181,6 +189,10 @@ Precedence (D012 F9, F10):
    label: `model_only`, `signals.overflow=true`, `decided_by=classifier`,
    excluded from the confirmed-only subset and counted in
    `Receipt.audit.tiebreak_overflow`.
+4. A tiebreak triggered by (c) alone (audit sample; null deterministic
+   signal; classifier confidence ≥ 0.6) is never adopted, whether or not it
+   agrees: `model_only`, `decided_by=classifier`, recorded in
+   `signals.tiebreak` and counted in `Receipt.audit` (H3) only (D013 A2).
 
 `tests/test_rules.py` enumerates this matrix exhaustively.
 
@@ -207,13 +219,14 @@ ElevenLabs voice run and calls that never received a run id, has a row.
 | `estimate_usd` | `float` | computed at submit time from the endpoint price table in `config` and the requested caps |
 | `cost_usd` | `float \| None` | billed cost from `GET /v1/runs` `cost.value` only; `null` until reconciled; never copied from the estimate |
 | `billed_units` | `int \| None` | `billedUnits` from `GET /v1/runs`; `null` until reconciled |
-| `cost_source` | `CostSource` | `/v1/runs` once `cost_usd` was filled from the listing; `local` for `run_id=null` rows (every `LOCAL_*` status), reconciled by construction with `cost_usd=0.0` at write time; `unreconciled` for rows with a `run_id` not yet matched in the listing |
+| `cost_source` | `CostSource` | `/v1/runs` once `cost_usd` was filled from the listing; `local` for `run_id=null` rows (every `LOCAL_*` status except `LOCAL_DEADLINE`, and a succeeded `$0` sync run that returned no id, OQ-2), reconciled by construction with `cost_usd=0.0` at write time; `LOCAL_DEADLINE` keeps its `run_id` and is `unreconciled` until the listing shows it; `unreconciled` for rows with a `run_id` not yet matched in the listing |
 | `attempts` | `int` | POST attempts incl. 429 retries; ≥ 1 |
 | `error` | `str \| None` | last error text (HTTP body excerpt ≤ 500 chars, or local reason); `null` on success |
 
 Totals in the Receipt sum `cost_usd` over rows with `cost_source="/v1/runs"`
 only; a `local` row carries `cost_usd=0.0` and is counted in
-`monid_runs_failed`; an `unreconciled` row contributes `0.0` and is listed in
+`monid_runs_failed` iff its `status` starts with `LOCAL_` (a succeeded
+`run_id=null` sync run is `local` and not failed; D013 N6); an `unreconciled` row contributes `0.0` and is listed in
 `Receipt.reconciliation.unreconciled_local_seqs`. Provider errors cost 0
 upstream and reconcile to `cost_usd=0.0` with `cost_source="/v1/runs"`.
 
@@ -271,7 +284,7 @@ the verdict is `RECONCILED`.
 | `monid_runs` | `int` | count of `runs`, including `run_id=null` |
 | `monid_runs_billed` | `int` | runs with `cost_usd > 0` |
 | `monid_runs_zero_results` | `int` | runs with `n_results = 0` (billed or not) |
-| `monid_runs_failed` | `int` | runs whose `status` is not a success state (Monid failure states and every `LOCAL_*`) |
+| `monid_runs_failed` | `int` | runs whose `status` is a Monid failure state or starts with `LOCAL_`; a succeeded `run_id=null` sync run is not failed (D013 N6) |
 | `llm_usd` | `float` | Σ OpenAI cost from `Label.usage`, topic naming, narration, and `Answer.usage` appended by `reconcile` |
 | `llm_calls` | `dict[LlmKind, int]` | call counts by kind; cached labels are not calls |
 | `llm_tokens` | `int` | Σ tokens over the same calls |
@@ -288,39 +301,48 @@ The analysis output (`digest.json`), rendered to Markdown and narrated.
 | `competitors` | `list[str]` | as validated in Query |
 | `window` | `Window` | `{current: {start: datetime, end: datetime}, previous: {start: datetime, end: datetime}}`; `current` = `[now − 7 d, now)`, `previous` = `[now − 14 d, now − 7 d)`; `window_days` is fixed at 14 so the two periods are equal; minimums apply per period |
 | `share_of_voice` | `list[SovEntry]` | one per brand incl. competitors; `{brand: str, n: int, n_clusters: int, share: float \| None, ci95: CI95 \| None, basis_sources: list[Source], wow: WowShare}`; `share = n_b / Σ n` over `basis_sources`; `n` counts mention–brand pairs and is the `n` gating share minimums (`n < 20` per period → `below_minimum`); `share` and `ci95` are `null` iff the brand abstains or `Σ n = 0` |
-| `sentiment` | `list[SentimentEntry]` | one per brand; `{brand: str, n: int, n_confirmed: int, pos: int, neg: int, neu: int, net: float \| None, ci95: CI95 \| None, ci95_iid: CI95 \| None, design_effect: float \| None, wow: WowNet}`; `n` counts relevant mentions and is the `n` gating net minimums; `design_effect = (cluster width / iid width)²`, `null` when the iid width is 0; every estimate is `null` when `pos + neg + neu = 0` or the brand abstains |
-| `by_source` | `list[BySourceEntry]` | one per `(brand, source)` in `basis_sources`; `{brand: str, source: Source, n: int, n_clusters: int, pos: int, neg: int, neu: int, net: float \| None, ci95: CI95 \| None, ci95_iid: CI95 \| None, design_effect: float \| None, wow_scope: bool}`; estimates `null` under the same rule as `SentimentEntry`; `wow_scope=false` iff the source's items carry no `published_at` (the source counts for share, is excluded from `wow` and `events`, and is listed in `what_could_not_be_checked`); H2 reads `design_effect` on `reddit` and `youtube_comment` |
+| `sentiment` | `list[SentimentEntry]` | one per brand; `{brand: str, n: int, n_confirmed: int, pos: int, neg: int, neu: int, net: float \| None, ci95: CI95 \| None, ci95_iid: CI95 \| None, design_effect: float \| None, wow: WowNet}`; `n` counts relevant mentions and is the `n` gating net minimums; `design_effect = (cluster width / iid width)²`, `null` when the iid width is 0 (paired with an `Abstention` row of reason `degenerate`, D013 N4); every estimate is `null` when `pos + neg + neu = 0` or the brand abstains |
+| `by_source` | `list[BySourceEntry]` | one per `(brand, source)` in `basis_sources`; `{brand: str, source: Source, n: int, n_clusters: int, pos: int, neg: int, neu: int, net: float \| None, ci95: CI95 \| None, ci95_iid: CI95 \| None, design_effect: float \| None, wow_scope: bool}`; estimates `null` under the same rule as `SentimentEntry`; `wow_scope=false` iff every item of the source for that brand has `published_at=null` (the source counts for share, is excluded from `wow` and `events`, and is listed in `what_could_not_be_checked`); with mixed timestamps `wow_scope=true` and the null items are dropped from `wow` and `events` one by one (D013 A1); H2 reads `design_effect` on `reddit` and `youtube_comment` where the entry meets the H2 minimums `n_clusters ≥ 5` and `n ≥ 20` over the full window, not per period (D013 N3) |
 | `topics` | `list[Topic]` | ordered by brand then `topic_id` |
 | `events` | `list[Event]` | `{brand: str, date: date, n: int, n_clusters: int, baseline_median: float, baseline_mad: float, threshold: float, label: str, exhibit_url: str \| None}`; days are UTC; `baseline_median` and `baseline_mad` are over the daily counts of the 14-day window excluding the tested day; `threshold = max(5, baseline_median + 3·baseline_mad)`; emitted iff `n ≥ threshold` and `n_clusters ≥ 3` over the day's mentions; `label` ≤ 6 words is the name of the day's largest topic, else the highest-`engagement_score` mention's matched term; `exhibit_url` is that mention's `url` |
 | `top_mentions` | `list[TopMention]` | ≤ 10 per brand sorted by `engagement_score` descending, where `engagement_score` = sum of the numeric values of `Mention.engagement` (`0` for `{}`), ties broken by `published_at` descending (`null` last) then `mention_id` ascending; `{mention_id: str, brand: str, source: Source, url: str \| None, quote: str, lang: Lang, label: SentimentLabel, published_at: datetime \| None, engagement_score: int}`; `quote` ≤ 240 chars, verbatim, original language |
-| `abstentions` | `list[Abstention]` | same shape as Receipt; an abstained source leaves `basis_sources` for every brand; every `null` estimate in this Digest is paired with exactly one `Abstention` row naming the brand, the source (or `null` for brand-level) and the reason |
+| `abstentions` | `list[Abstention]` | same shape as Receipt; an abstained source leaves `basis_sources` for every brand; every `null` in `share`, `net`, `ci95`, `delta`, `p_raw` and `p_holm` is paired with exactly one `Abstention` row naming the brand, the source (or `null` for brand-level) and the reason (`ci95_iid` is `null` iff `ci95` is and shares its row); a `null` `design_effect` from a zero iid width and a `null` `ci95_confirmed_only` from `n_confirmed = 0` are each paired with one row of reason `degenerate` (D013 N4) |
 | `coverage_gaps` | `list[CoverageGap]` | `{source: str, reason: AbstainReason, note: str}`; always contains `{source: "x", reason: "unavailable", …}` |
 | `cost` | `CostQuote` | `{verdict: Verdict, totals: Totals}` copied from the Receipt, never recomputed |
 | `narration` | `Narration` | `{text: str \| None, chars: int, numbers_verified: bool, mp3_path: str \| None, local_seq: int \| None}`; `text` ≤ 900 chars English; `numbers_verified=true` iff every number in `text` occurs in this Digest; `local_seq` points at the ElevenLabs RunRecord |
 
 `WowNet` (sentiment): `{delta: float \| None, ci95: CI95 \| None, ci95_confirmed_only: CI95 \| None, verdict: WowVerdict, p_raw: float \| None, p_holm: float \| None}`.
 `WowShare` (share of voice): `{delta: float \| None, ci95: CI95 \| None, verdict: WowVerdict, p_raw: float \| None, p_holm: float \| None}`.
+`ci95_confirmed_only` is `null` when `n_confirmed = 0`, paired with an
+`Abstention` row of reason `degenerate` (D013 N4).
 
 `delta` = current − previous, paired on the shared resample index
 (§Resampling frame). `p_raw` is the two-sided bootstrap p-value
 `2 · min(P(Δ ≤ 0), P(Δ ≥ 0))`; `p_holm` is Holm-adjusted at α = 0.05 over
-the family brands × {net WoW, share WoW}. Verdict per PRE-REGISTRATION
-v1.1.0 §Verdict rule (D012 F1, F7, F8); the Holm-adjusted p governs, CIs are
-published as display:
+the family brands × {net WoW, share WoW}, applied over the tests with
+non-null `p_raw`, so `m` is the number of non-abstained tests in the family
+(D013 N2). Verdict per PRE-REGISTRATION v1.1.1 §Verdict rule (D012 F1, F7,
+F8; D013 N1); the Holm-adjusted p governs, CIs are published as display.
+Rules are evaluated in the order `ABSTAIN`, `SIGNIFICANT`, `SUGGESTIVE`,
+`NO_CHANGE_DETECTED`, and `SUGGESTIVE` and `NO_CHANGE_DETECTED` both require
+not `ABSTAIN`:
 
-- `SIGNIFICANT` iff `p_holm < 0.05` on the full set **and**, for net,
-  `ci95_confirmed_only` excludes 0 with the same sign as the full-set
-  `delta`; for share (no confirmed-only interval) iff `p_holm < 0.05`.
-- `SUGGESTIVE` iff `p_raw < 0.05` and not `SIGNIFICANT`.
-- `NO_CHANGE_DETECTED` iff `p_raw ≥ 0.05` with minimums met
-  (`n_clusters ≥ 5` and `n ≥ 20` in both periods).
 - `ABSTAIN` iff minimums are not met (reason `below_minimum`) **or** `ci95`
   and `ci95_confirmed_only` exclude 0 with opposite signs (reason
-  `signals_conflict`).
+  `signals_conflict`); evaluated first.
+- `SIGNIFICANT` iff not `ABSTAIN` and `p_holm < 0.05` on the full set
+  **and**, for net, `ci95_confirmed_only` excludes 0 with the same sign as
+  the full-set `delta` (a `null` `ci95_confirmed_only` never satisfies this
+  clause); for share (no confirmed-only interval) iff `p_holm < 0.05`.
+- `SUGGESTIVE` iff not `ABSTAIN`, `p_raw < 0.05` and not `SIGNIFICANT`.
+- `NO_CHANGE_DETECTED` iff not `ABSTAIN` and `p_raw ≥ 0.05` (minimums met:
+  `n_clusters ≥ 5` and `n ≥ 20` in both periods).
 
 On `ABSTAIN` for `below_minimum` every field but `verdict` is `null`; on
 `signals_conflict` the intervals and p-values are kept and only the verdict
-word abstains.
+word abstains; on `degenerate` (`n_confirmed = 0`) only
+`ci95_confirmed_only` is `null` and the verdict is decided by the rules
+above.
 
 ### Resampling frame
 
@@ -420,10 +442,12 @@ else:                                                verdict = PARTIAL
 
 `RECONCILED` iff every row with a `run_id` has `cost_source="/v1/runs"` and
 no remote run in the window is unmatched. Rows with `run_id=null` (`LOCAL_*`
-statuses) are reconciled by construction: `cost_usd=0.0`,
-`cost_source="local"`, counted in `monid_runs_failed`, never in
-`unreconciled_local_seqs` (D012 F13). A row with a `run_id` that the listing
-does not return stays `unreconciled` and the verdict is `PARTIAL`.
+statuses other than `LOCAL_DEADLINE`, and succeeded `$0` sync runs that
+returned no id) are reconciled by construction: `cost_usd=0.0`,
+`cost_source="local"`, never in `unreconciled_local_seqs` (D012 F13), and
+counted in `monid_runs_failed` iff `status` starts with `LOCAL_` (D013 N6).
+A row with a `run_id` that the listing does not return, including
+`LOCAL_DEADLINE`, stays `unreconciled` and the verdict is `PARTIAL`.
 `GET /v1/runs` failure leaves `reconciliation.fetched_at=null`, verdict
 `PARTIAL`, exit 4; `sonar reconcile --session <id>` reruns and may upgrade
 to `RECONCILED`. `sonar verify` exits 0 only on `RECONCILED`; a `REPLAY`
@@ -437,7 +461,7 @@ Each is resolved by the named trigger; the resolution lands as a
 | Id | Question | Provisional value in this contract | Resolved by |
 |---|---|---|---|
 | OQ-1 | Exact Monid status vocabulary for running and succeeded states | `status` is `str`, not an enum; the four failure states above are the ones the Error matrix names | W3.7 recorded `tests/fixtures/v1_runs_page.json` |
-| OQ-2 | Whether `$0` sync endpoints (`tinyfish /search`, `/fetch`) return a `runId` and appear in `GET /v1/runs` | `Mention.run_id` is `str \| None` (D012 F12); a sync run without an id has `RunRecord.run_id=null`, `cost_usd=0.0`, `cost_source="local"` | W3.1 news fixture from the first live `sonar record` |
+| OQ-2 | Whether `$0` sync endpoints (`tinyfish /search`, `/fetch`) return a `runId` and appear in `GET /v1/runs` | `Mention.run_id` is `str \| None` (D012 F12); a sync run without an id has `RunRecord.run_id=null`, `cost_usd=0.0`, `cost_source="local"` and, when succeeded, is not counted in `monid_runs_failed` (D013 N6) | W3.1 news fixture from the first live `sonar record` |
 | OQ-3 | Facebook reviews carry `isRecommended`, not stars | `rating` = 5 when recommended, 1 when not, so the deterministic bucket still applies | W3.4 adapter test on a recorded fixture |
 | OQ-4 | Treatment of `published_at=null` mentions (YouTube comments, some Instagram) in WoW and events | in-window for SoV (the fetch was window-bounded), excluded from `wow` and `events`, source flagged `BySourceEntry.wow_scope=false` and listed in `what_could_not_be_checked` | Resolved: D012 F2 |
 | OQ-5 | Trustpilot and G2 native id, rating, timestamp and author field names | Mention fields typed as above; adapter fills `native_id` from whatever unique review id the schema exposes | W0.3 `docs/monid/inspect/*.json` |
@@ -445,6 +469,41 @@ Each is resolved by the named trigger; the resolution lands as a
 | OQ-7 | `wow` on share-of-voice entries and the `p_raw`/`p_holm` fields are additions to Appendix §Contracts so the Holm family "brands × {net, share}" is representable | included as specified | Resolved: D012 F1/F8, share WoW confirmed as part of the design |
 
 ## Changelog
+
+### 1.1.1 — 2026-09-02, D013
+
+Applies `docs/DECISIONS.md` D013, resolving
+`docs/research/reviews/2026-09-02-contracts-review-2.md`. Item ids in
+brackets.
+
+- [N1] §Digest verdict rule: rows evaluated in the order `ABSTAIN`,
+  `SIGNIFICANT`, `SUGGESTIVE`, `NO_CHANGE_DETECTED`; `SUGGESTIVE` and
+  `NO_CHANGE_DETECTED` both require not `ABSTAIN`.
+- [N2] Holm is applied over the tests with non-null `p_raw`; `m` is the
+  number of non-abstained tests in the family.
+- [N3] H2 minimums defined on the `BySourceEntry` over the full window:
+  `n_clusters ≥ 5` and `n ≥ 20` (comment-source paragraph and `by_source`).
+- [N4] `AbstainReason` gains `degenerate`; the pairing rule names `share`,
+  `net`, `ci95`, `delta`, `p_raw`, `p_holm`; `design_effect` with zero iid
+  width and `ci95_confirmed_only` with `n_confirmed = 0` are `null` and
+  paired with a `degenerate` row; `WowNet.ci95_confirmed_only` null rule
+  stated.
+- [N5] `Label.corroboration`: `model_only` = no tiebreak adopted and not
+  `confirmed` (null deterministic signal with confidence ≥ 0.6, failed
+  tiebreak call, or `signals.overflow=true`).
+- [N6] `RunRecord.cost_source`, Totals, `monid_runs_failed`, §Receipt
+  verdict rule and OQ-2: a `local` row is failed iff `status` starts with
+  `LOCAL_`; a succeeded `run_id=null` sync run is `local`, `cost_usd=0.0`,
+  not failed; `LOCAL_DEADLINE` keeps its `run_id` and is `unreconciled`
+  until listed.
+- [A1] `BySourceEntry.wow_scope=false` iff every item of the source lacks
+  `published_at`; mixed sources keep `wow_scope=true` and drop null items
+  one by one.
+- [A2] §Two-signal policy rule 4: an audit-only tiebreak on a null-signal,
+  confidence ≥ 0.6 mention is never adopted (`model_only`,
+  `decided_by=classifier`, H3 only).
+- Header cites D013; `AbstainReason` and verdict text cite PRE-REGISTRATION
+  v1.1.1.
 
 ### 1.1.0 — 2026-09-02, D012
 

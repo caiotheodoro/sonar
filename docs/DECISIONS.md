@@ -492,4 +492,79 @@ Either lands as a new entry; frozen text stays.
 
 ---
 
-*End of decisions. Next entry would be D013.*
+## D013 — Resolutions to the second CONTRACTS / PRE-REGISTRATION review (N1–N6, A1–A4)
+
+**Decision.** `docs/research/reviews/2026-09-02-contracts-review-2.md` (a
+separate-context review of 1.1.0 / v1.1.0 against D012) returned FAIL with
+six S2 contradictions introduced by the D012 amendments and four S3
+ambiguities. Each is resolved below; CONTRACTS.md moves to `schema_rev`
+1.1.1 and PRE-REGISTRATION.md to v1.1.1 with amendment A3, and the
+`docs-frozen` tag moves to the commit that applies them. Numbered by the
+review's item ids; N1–N6 are the lead's resolutions, recorded verbatim.
+
+- **N1, verdict order.** ABSTAIN is evaluated first and SUGGESTIVE and
+  NO_CHANGE_DETECTED both require not ABSTAIN.
+- **N2, Holm family size.** Holm is applied over the tests with non-null
+  `p_raw`, so `m` is the number of non-abstained tests in the family.
+- **N3, H2 minimums.** H2's meets-minimums is `n_clusters` at least 5 and
+  `n` at least 20 on the `BySourceEntry` over the full window.
+- **N4, pairing rule.** The pairing rule applies to `share`, `net`, `ci95`,
+  `delta`, `p_raw` and `p_holm`; `design_effect` with zero iid width and
+  `ci95_confirmed_only` with `n_confirmed` equal to zero are null and paired
+  with an `Abstention` row using a new reason `degenerate`, added to the
+  abstention enum in both documents.
+- **N5, `model_only`.** `model_only` means no tiebreak adopted and not
+  `confirmed`: a null deterministic signal with classifier confidence at
+  least 0.6, a failed tiebreak call, or `signals.overflow` true.
+- **N6, local rows.** A `local` row is counted in `monid_runs_failed` iff its
+  status starts with `LOCAL_`; a succeeded run with `run_id` null from a sync
+  endpoint is `local` with `cost_usd` 0.0 and not failed; `LOCAL_DEADLINE`
+  keeps its `run_id` and stays `unreconciled` until the listing shows it.
+- **A1, mixed-timestamp sources.** `wow_scope=false` iff every item of the
+  source for that brand lacks `published_at` (CONTRACTS' reading); in a
+  mixed source such as Instagram the null items are dropped from WoW and
+  events one by one and the source keeps `wow_scope=true`. Consistent with
+  D012 F2 ("items lacking a timestamp, not the whole source").
+- **A2, audit-only tiebreak.** Precedence rule 4: a tiebreak triggered by the
+  audit sample alone (null deterministic signal, confidence ≥ 0.6) is never
+  adopted, whether or not it agrees; the mention is `model_only`,
+  `decided_by=classifier`, counted in H3 only. This is the first N5 case.
+- **A3, H5 stratification.** Largest-remainder allocation of the 50 slots:
+  floor of `50 · n_source / N` per source, remaining slots to the largest
+  fractional remainders, ties by `Source` enum order; an allocation is
+  capped at the source's row count and the surplus reassigned by the same
+  rule.
+- **A4, banner.** PRE-REGISTRATION's banner is reworded to the mechanism
+  D012 F26 actually established: a DECISIONS entry, applied in place, plus
+  an amendment entry and a version bump; the `docs-frozen` tag marks the
+  commit that applied the latest amendment. A2 now quotes the v1.0.0 value
+  (from commit `56240f2`) for every finding it lists.
+
+None of A1–A4 contradicts N1–N6; all four are applied.
+
+**Rationale.** Every N item is a rule that two sentences of the same
+document decided differently, so an implementer would have picked one at
+random; the cheapest fix is one sentence in the contract before `stats/`
+and `ledger.py` encode either reading. `degenerate` is added rather than
+exempting the two fields from pairing so the invariant "every null has a
+row" survives as a single test.
+
+**Evidence.** The review file, line-referenced; the twenty-three findings it
+marks "implemented exactly" are untouched.
+
+**Alternatives rejected.** N2 alternative, Holm over all `2 × brands` tests
+with abstained tests entered as `p = 1`: keeps `m` fixed but penalises the
+brands that returned for the ones that did not. N4 alternative, exempting
+`design_effect` and `ci95_confirmed_only` from pairing: removes the gap but
+makes the pairing invariant field-dependent and untestable in one place.
+A1 alternative, flagging a source on any null item: drops timestamped
+Instagram items from WoW for no gain.
+
+**Reverses when.** A third review finds a contradiction in these rules, or
+the demo shows `degenerate` never fires (then the reason is dead weight and
+may be folded back into a pairing exemption). Either lands as a new entry;
+frozen text stays.
+
+---
+
+*End of decisions. Next entry would be D014.*
