@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import record_fixtures as rf
 
-FAKE_KEY = "monid_live_TESTKEY0123456789abcdefABCDEF"
+FAKE_KEY = "monid_test_KEY0123456789abcdefABCDEF"
 NOW = datetime(2026, 9, 2, 15, 30, tzinfo=UTC)
 LISTED_AT = datetime.now(UTC).replace(microsecond=0)
 REDDIT = SOURCE_PLAN["reddit"]
@@ -361,7 +361,7 @@ def test_redact_blanks_secret_keys_and_values() -> None:
     payload: dict[str, Any] = {
         "Authorization": "Bearer abc",
         "nested": [{"api_key": "x", "text": f"key {FAKE_KEY} here"}],
-        "plain": "sk-abcdefghijklmnopqrstuvwxyz0123",
+        "plain": "Bearer abcdefghijk123",
         "count": 3,
     }
     clean = rf.redact(payload, [FAKE_KEY])
