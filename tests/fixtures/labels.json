@@ -1,0 +1,36 @@
+{
+  "labels": {
+    "aaaaaaaaaaaaaaaaaaaaaaa1": {
+      "status": "ok",
+      "label": "positive",
+      "about_brand": true,
+      "confidence": 0.92,
+      "rationale": "Praises the app onboarding."
+    },
+    "aaaaaaaaaaaaaaaaaaaaaaa2": {
+      "status": "ok",
+      "label": "negative",
+      "about_brand": true,
+      "confidence": 0.81,
+      "rationale": "Complains about blocked card."
+    },
+    "aaaaaaaaaaaaaaaaaaaaaaa3": {
+      "status": "ok",
+      "label": "neutral",
+      "about_brand": true,
+      "confidence": 0.55,
+      "rationale": "Asks a factual question about fees."
+    },
+    "aaaaaaaaaaaaaaaaaaaaaaa4": {
+      "status": "ok",
+      "label": "irrelevant",
+      "about_brand": false,
+      "confidence": 0.97,
+      "rationale": "Homonym: the colour, not the bank."
+    },
+    "aaaaaaaaaaaaaaaaaaaaaaa5": {
+      "status": "refused",
+      "rationale": "model refused this content"
+    }
+  }
+}
