@@ -693,6 +693,16 @@ endpoint — ElevenLabs included — exercised through Monid on the frozen
 demo; then W6.1 runs with `SONAR_TTS_DIRECT` unset and the receipt
 carries a real `/v1/runs` voice cost.
 
+**2026-09-02 follow-up.** A live 18-char probe against the operator's
+ElevenLabs key returned HTTP 402 `paid_plan_required`: *"Free users
+cannot use library voices via the API."* The adapter handled it cleanly
+(`status=LOCAL_REJECTED_402`, `cost_source=local`, `cost_usd=0.0`, no
+crash), but the direct path needs an ElevenLabs **paid** plan to voice
+with a library voice. So D016 does not save wallet money on a free
+ElevenLabs account — voicing the brief needs either Monid credit (the
+default proxy) or an ElevenLabs upgrade. The code path stays as a
+supported option; it is not currently a free one.
+
 ---
 
 *End of decisions. Next entry would be D017.*

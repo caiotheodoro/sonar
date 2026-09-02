@@ -45,8 +45,8 @@ the job runs.
 | Job | Command | Est. Monid | Measured | Status |
 |---|---|---|---|---|
 | W3.7 smoke fixtures | `uv run python scripts/record_fixtures.py --brand Nubank --profile smoke` | 0.40 | done 2026-09-02, billed 0.25 | fixtures committed; see ledger |
-| W5.5 lite run + Avenza empty + TTS probe | `sonar run --profile lite <brand> --vs <competitor>`; `sonar run --profile lite Avenza` | 1.30 | not run | waiting on W5.1–W5.4 |
-| W6.1 full demo + empty | `sonar run --profile full <brand> --vs <c1> <c2> <c3> --resamples 10000` | 2.80 | not run | waiting on W5.5 |
+| W5.5 lite run + Avenza empty + TTS probe | `sonar run --profile lite Nubank --vs Inter`; `sonar run --profile lite Avenza` | 1.30 | `sonar plan` 2026-09-02: lite Nubank+Inter **$0.8587**, Avenza lite ≈ $0.43, TTS ≈ $0 | blocked: wallet $0.75, need top-up |
+| W6.1 full demo + empty | `sonar run --profile full Nubank --vs Inter C6 Itaú --resamples 10000` | 2.80 | `sonar plan` 2026-09-02: **$2.8168** over 4 brands | waiting on W5.5 + top-up |
 | W7.2 narration TTS | one ElevenLabs run through `voice/tts` | 0.10 | not run | waiting on W7.1 |
 | W8.2 rehearsal | `sonar run --profile lite <never-used brand>` | 0.80 | not run | waiting on W8.1 |
 
@@ -122,6 +122,23 @@ When a direct run's receipt row is committed, its HANDOFF ledger row notes
 - Do not run `agentgraph viz` from a worker; it opens windows on the
   operator's screen.
 - Do not quote a Monid cost that has not come back from `GET /v1/runs`.
+
+### 2026-09-02 — Wave 5 close-out and the credit wall
+
+- Hackathon gives **no participant credits** (`hacks.monid.ai`: "charges per
+  call. One key, no plan"). Credits are prizes only. The $1 Monid free
+  credit is standard signup dust; $0.25 spent at W3.7, $0.75 left.
+- Demo brand fixed: **Nubank vs Inter, C6, Itaú** (Brazilian fintech,
+  PT+EN). W5.5 uses Nubank + Inter; W6.1 adds C6 + Itaú.
+- `sonar doctor` green: Monid + OpenAI reachable, `GET /v1/runs` returns.
+- Offline full pipeline re-run on the W3.7 smoke fixtures after D016: all
+  artifacts written, `brief.mp3` included, verdict REPLAY, no regression.
+- Direct-TTS live probe (D016): ElevenLabs key is a **free** plan, 402
+  `paid_plan_required` on a library voice. Adapter handled it cleanly.
+  Voicing the brief needs Monid credit or an ElevenLabs upgrade.
+- **Blocked on top-up.** ~$4.90 of Monid spend left (W5.5 $1.29 + W6.1
+  $2.82 + W8.2 $0.80; W7.2 ≈ $0), plus the $1.50 judging reserve → top up
+  ~$8 at app.monid.ai and W5.5 runs first try.
 
 ## Open questions
 
