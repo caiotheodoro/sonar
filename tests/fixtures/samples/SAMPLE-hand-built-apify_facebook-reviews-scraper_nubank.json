@@ -1,0 +1,57 @@
+{
+  "runId": "run_sample_fb_0001",
+  "status": "SUCCEEDED",
+  "providerResponse": {"httpStatus": 200},
+  "output": [
+    {
+      "id": "1029384756102938",
+      "facebookUrl": "https://www.facebook.com/nubank/reviews",
+      "pageName": "Nubank",
+      "url": "https://www.facebook.com/nubank/posts/1029384756102938?fbclid=IwAR0abc",
+      "text": "Recomendo o Nubank, o app é simples e nunca tive problema com a fatura.",
+      "date": "2026-08-30T11:12:13.000Z",
+      "isRecommended": true,
+      "likesCount": 12,
+      "commentsCount": 2,
+      "user": {
+        "id": "100004455667788",
+        "name": "Juliana Ferreira",
+        "profileUrl": "https://www.facebook.com/juliana.ferreira.99"
+      }
+    },
+    {
+      "id": "1029384756102939",
+      "facebookUrl": "https://www.facebook.com/nubank/reviews",
+      "pageName": "Nubank",
+      "url": "https://www.facebook.com/nubank/posts/1029384756102939",
+      "text": "Two weeks and my transfer is still missing. Support keeps sending the same reply.",
+      "date": "2026-08-27T21:05:44.000Z",
+      "isRecommended": false,
+      "likesCount": 0,
+      "commentsCount": 0,
+      "user": {
+        "id": "100009988776655",
+        "name": "Mark Davies",
+        "profileUrl": "https://www.facebook.com/mark.davies.31"
+      }
+    },
+    {
+      "facebookUrl": "https://www.facebook.com/nubank/reviews",
+      "pageName": "Nubank",
+      "url": "https://www.facebook.com/nubank/posts/1029384756102940",
+      "text": null,
+      "date": "2026-08-26T08:00:00.000Z",
+      "isRecommended": true,
+      "user": null
+    },
+    {
+      "facebookUrl": "https://www.facebook.com/nubank/reviews",
+      "pageName": "Nubank",
+      "url": null,
+      "text": "Cartão chegou em três dias.",
+      "date": null,
+      "isRecommended": null,
+      "user": {"name": "Pedro"}
+    }
+  ]
+}

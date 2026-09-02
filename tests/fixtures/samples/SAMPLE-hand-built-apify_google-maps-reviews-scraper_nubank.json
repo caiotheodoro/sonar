@@ -1,0 +1,69 @@
+{
+  "runId": "run_sample_gmaps_0001",
+  "status": "SUCCEEDED",
+  "providerResponse": {"httpStatus": 200},
+  "output": [
+    {
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSUR4ekxHVUZ3EAE",
+      "reviewerId": "104839203847561203948",
+      "name": "Ana Paula Souza",
+      "text": "O atendimento do Nubank foi rápido e a conta não tem taxa, gostei muito.",
+      "textTranslated": null,
+      "publishedAtDate": "2026-08-28T14:03:11.402Z",
+      "stars": 5,
+      "likesCount": 3,
+      "reviewUrl": "https://www.google.com/maps/reviews/data=!4m5!14m4!1m3!1m2!1s104839203847561203948!2s0x0:0x1?utm_source=share",
+      "responseFromOwnerText": "Obrigado, Ana!",
+      "placeId": "ChIJq6qqqqqqqqqRAAAAAAAAAAA",
+      "title": "Nubank",
+      "totalScore": 4.3,
+      "url": "https://www.google.com/maps/place/Nubank/@-23.5,-46.6,17z"
+    },
+    {
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSUR4ekxHVUZ4EAE",
+      "reviewerId": "118293847561203948102",
+      "name": "Carlos Mendes",
+      "text": "Waited forty minutes on chat and nobody answered. Card blocked without warning.",
+      "textTranslated": null,
+      "publishedAtDate": "2026-08-25T09:47:52.000Z",
+      "stars": 1,
+      "likesCount": 0,
+      "reviewUrl": "https://www.google.com/maps/reviews/data=!4m5!14m4!1m3!1m2!1s118293847561203948102!2s0x0:0x1",
+      "responseFromOwnerText": null,
+      "placeId": "ChIJq6qqqqqqqqqRAAAAAAAAAAA",
+      "title": "Nubank",
+      "totalScore": 4.3,
+      "url": "https://www.google.com/maps/place/Nubank/@-23.5,-46.6,17z"
+    },
+    {
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSUR4ekxHVUZ5EAE",
+      "name": "Beatriz Lima",
+      "text": null,
+      "textTranslated": null,
+      "publishedAtDate": "2026-08-24T18:20:00.000Z",
+      "stars": 4,
+      "reviewUrl": null,
+      "responseFromOwnerText": null,
+      "placeId": "ChIJq6qqqqqqqqqRAAAAAAAAAAA",
+      "title": "Nubank",
+      "totalScore": 4.3,
+      "url": "https://www.google.com/maps/place/Nubank/@-23.5,-46.6,17z"
+    },
+    {
+      "reviewId": "ChZDSUhNMG9nS0VJQ0FnSUR4ekxHVUZ6EAE",
+      "reviewerId": null,
+      "name": "Rafael T.",
+      "text": "Ok",
+      "textTranslated": null,
+      "publishedAtDate": null,
+      "stars": 3,
+      "likesCount": 1,
+      "reviewUrl": null,
+      "responseFromOwnerText": null,
+      "placeId": "ChIJq6qqqqqqqqqRAAAAAAAAAAA",
+      "title": "Nubank",
+      "totalScore": 4.3,
+      "url": "https://www.google.com/maps/place/Nubank/@-23.5,-46.6,17z"
+    }
+  ]
+}
