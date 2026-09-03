@@ -262,10 +262,11 @@ the operator must make before W6.1:
   receipt with `totals.llm_usd` is compared against the dashboard for
   the same hour, and the method that matches is written into the rules
   above.
-- **OQ-HO-3** The event rule fired on the first offline replay with
-  `baseline_median = 0` and `baseline_mad = 0`: a window whose earlier days
-  carry no fetched mentions makes every day with five mentions an event.
-  Resolves at W5.5 on the first live lite run with two weeks of data: the
-  lead decides whether a minimum count of non-empty baseline days is
-  needed (a DECISIONS amendment to the frozen rule) or the behaviour is
-  honest for a first brief and is documented in COVERAGE.
+- **OQ-HO-3 — RESOLVED (D017).** The first live solo run showed the real
+  cause was not the event rule but a starved previous period: Reddit's
+  `time=week` capped the fetch at 7 days while the analysis window is 14,
+  so `net`/WoW abstained (`net: n=9 < 20 in previous`). Fixed by
+  `time=month` (D017); `postDateLimit` now populates both halves. The
+  event rule itself worked correctly on real data (baseline_median 2,
+  events detected). Confirm on the frozen demo; if the previous period is
+  still under n=20, revisit the `maxItems` cap.

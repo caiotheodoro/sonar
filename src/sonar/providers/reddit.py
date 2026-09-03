@@ -2,7 +2,7 @@
 
 Endpoint reference (design appendix, verified 2026-09-02): price
 ``0.0057/result + 0.02/call``; input ``searches[]``, ``sort=new``,
-``time=week``, ``maxItems``, ``maxPostCount``, ``maxComments``,
+``time=month`` (D017), ``maxItems``, ``maxPostCount``, ``maxComments``,
 ``postDateLimit``, ``includeMediaLinks=true``; output items carry
 ``dataType`` (``post`` | ``comment``), ``id``, ``body``, ``title``,
 ``createdAt``, ``upVotes``, ``communityName``, ``url``, ``username``.
@@ -221,7 +221,11 @@ class RedditProvider:
         return {
             "searches": _terms_for(query, target),
             "sort": "new",
-            "time": "week",
+            # Reddit's search recency filter must span at least the analysis
+            # window (PRE-REGISTRATION: 14 days, split 7 + 7 for WoW). "week"
+            # starves the previous 7-day period — `postDateLimit` can only trim
+            # results, never fetch past `time` (D017, resolves OQ-HO-3).
+            "time": "month",
             "maxItems": cap,
             "maxPostCount": max_posts,
             "maxComments": max_comments,

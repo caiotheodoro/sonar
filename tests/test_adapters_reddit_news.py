@@ -135,13 +135,19 @@ class TestRedditBuildInput:
         assert reddit.PROVIDER.build_input(query, now=NOW) == {
             "searches": ["Nubank", "Nu"],
             "sort": "new",
-            "time": "week",
+            "time": "month",
             "maxItems": 40,
             "maxPostCount": 15,
             "maxComments": 2,
             "postDateLimit": "2026-08-19",
             "includeMediaLinks": True,
         }
+
+    def test_recency_filter_spans_the_analysis_window(self, query: Query) -> None:
+        """`time` must cover ≥ 14 days so the WoW previous period is not starved
+        (D017). `week` would cap Reddit's search at 7 days regardless of
+        postDateLimit."""
+        assert reddit.PROVIDER.build_input(query, now=NOW)["time"] == "month"
 
     def test_competitor_searches_only_its_name(self, query: Query) -> None:
         built = reddit.PROVIDER.build_input(query, brand="Inter", now=NOW)

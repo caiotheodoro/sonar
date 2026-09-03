@@ -705,4 +705,49 @@ supported option; it is not currently a free one.
 
 ---
 
-*End of decisions. Next entry would be D017.*
+## D017 — Reddit recency filter is `time=month`, not `week` (resolves OQ-HO-3)
+
+**Decision.** `providers/reddit.py` `build_input` sends `time=month` to
+`apify/trudax/reddit-scraper-lite`, not the `time=week` written in the
+design appendix's endpoint reference. `postDateLimit` still bounds the
+start of the fetch at `now − window_days` (14 days).
+
+**Rationale.** PRE-REGISTRATION fixes the analysis window at 14 days, split
+`current = [now−7d, now)` and `previous = [now−14d, now−7d)` for the
+week-over-week delta, and the abstention rule sets `net` and `share` to
+ABSTAIN when `n < 20` in *either* period. Reddit's `time` parameter is a
+search-level recency filter: with `time=week` the actor never returns a
+post older than 7 days, so `postDateLimit` (a client-side trim) can only
+remove results, never reach back into the previous period. The first live
+solo run confirmed it: `net: n=9 < 20 in previous` — the previous 7-day
+half held almost no Reddit data while the current half held 51. Every
+Reddit-heavy brand would abstain on `net` and WoW on every first brief.
+`time=month` lets `postDateLimit` do its job; the 14-day window is
+populated on both sides.
+
+This is a bug fix to a wrong constant in the endpoint reference, not a
+change to the pre-registered estimand, window, or thresholds — those are
+untouched.
+
+**Evidence.** `out/w5.5-solo/stats.json` (`net: null`, abstention detail
+`net: n=9 < 20 in previous`). `tests/test_adapters_reddit_news.py`
+`test_recency_filter_spans_the_analysis_window`,
+`test_exact_actor_input_for_brand`. Standard Reddit `t=` values include
+`month`; the actor passes it through.
+
+**Alternatives rejected.** Widening `window_days` to 28 (post-hoc change to
+a pre-registered constant to make an abstention disappear — exactly what
+RED-TEAM flags; and it would not help while `time=week` still caps the
+fetch at 7 days). Per-period fetching (two Reddit runs per brand, double
+the cost, for a marginal coverage gain). Accepting the abstention (a demo
+whose sentiment section abstains for every brand does not show the
+product).
+
+**Reverses when.** The frozen demo's Reddit data still leaves the previous
+period under `n = 20` for the demo brand — then the `maxItems` cap (a
+`config.SOURCE_PLAN` value, its own DECISIONS entry) is revisited, or the
+window rule is amended with a minimum-baseline-days clause.
+
+---
+
+*End of decisions. Next entry would be D018.*
