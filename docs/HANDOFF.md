@@ -9,11 +9,11 @@ committed.
 
 ## Rules of the wallet
 
-- Monid workspace budget $10.00, per-run cap $3.50, both set by the W0.1
-  wizard (`MONID_WORKSPACE_BUDGET_USD`, `MONID_RUN_CAP_USD` in
-  `~/.sonar/.env`).
-- Wallet reserve $1.50 must remain for judging; the ledger total stays
-  ≤ $8.50 through W8.2.
+- Wallet **$20** on key 2 (`monid_live_DJVq…`), topped up 2026-09-03.
+  Per-run cap `MONID_RUN_CAP_USD=3.5`. `MONID_WORKSPACE_BUDGET_USD=10` in
+  `~/.sonar/.env` is a stale display hint, not enforced.
+- Reserve $1.50 stays for judging. Remaining `$` work is ≈ $6–8
+  (W6.1 full, Avenza, W7.2 TTS, W8.2 rehearsal).
 - One `$` task at a time. A second live run never starts before the
   previous session's `sonar reconcile` has written `RECONCILED`.
 - Cost figures in this file come from `GET /v1/runs` via the session
@@ -164,6 +164,28 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
   RUNNING. Consider a longer reddit deadline or a smaller cap.
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
   mentions per brand to clear the pre-registered thresholds.
+
+### 2026-09-03 — wallet topped to $20; funded push to submission
+
+- Wallet is $20 (key 2). `MONID_WORKSPACE_BUDGET_USD=10` in `~/.sonar/.env`
+  is a stale local hint only — the real caps are `MONID_RUN_CAP_USD=3.5`
+  and `--max-spend`.
+- **Bug 4 fixed (`e0814c7`):** Avenza run went `verdict PARTIAL` because
+  Monid returned 503 for two `tinyfish /search` POSTs whose bodies still
+  carried the runId Monid had created. The client dropped the id; the runs
+  completed server-side as `unmatched_remote_run_ids` (PARTIAL, no
+  reconcile can clear it). Now a 5xx-with-runId is polled, and a
+  5xx-without-runId is retried up to MAX_ATTEMPTS. 1374 tests green.
+- **Empty-run brand:** Avenza is not empty (31 fetched, 13 relevant, every
+  digest section abstains, 0 topics). Treated as the *sparse-coverage*
+  brand for `results/demo-empty/` — the receipt still lists all 11 runs
+  and their cost, the digest draws no conclusions, which is the point.
+  Video beat 5 wording changes from "zero mentions" to "barely any
+  coverage".
+- Funded run order: (1) voice probe `lite Nubank` w/ voice → validate the
+  Monid ElevenLabs path; (2) W6.1 `full Nubank --vs Itaú "C6 Bank" PicPay`
+  voice on, 10k resamples → `results/demo/`; (3) Avenza → `results/demo-empty/`;
+  (4) W6.2 freeze; (5) W7.2 narration, W7.3 casts; (6) W8.1 repro.
 
 ### 2026-09-02 — W5.5 solo run: pipeline validated end-to-end, OQ-HO-3 now actionable
 
