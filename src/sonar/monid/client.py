@@ -359,12 +359,26 @@ class MonidClient:
                 continue
             if code == 402:
                 self._breaker.trip("Monid 402: " + (_excerpt(response) or "payment required"))
+            data = _json_body(response)
+            if code >= 500:
+                recovered_id = _run_id(data)
+                if recovered_id is not None:
+                    # A 5xx whose body still carries the runId: Monid created the
+                    # run before the gateway erred. Poll it — it completes and
+                    # bills regardless, and dropping it here would orphan it
+                    # (verdict PARTIAL, unmatched_remote_run_ids).
+                    return self._poll(recovered_id, data, attempts, deadline)
+                if attempts < MAX_ATTEMPTS:
+                    wait = RATE_LIMIT_BACKOFF_S[attempts - 1]
+                    if self._clock() + wait <= deadline:
+                        self._sleep(wait)
+                        continue
             return RunOutcome(
                 run_id=None,
                 status=f"LOCAL_REJECTED_{code}",
                 http_status=code,
                 provider_http_status=None,
-                body=_json_body(response),
+                body=data,
                 attempts=attempts,
                 error=_excerpt(response) or f"HTTP {code}",
                 completed=False,

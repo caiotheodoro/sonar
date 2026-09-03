@@ -281,6 +281,83 @@ def test_async_run_polls_to_terminal_status(ledger: Ledger, clock: FakeClock) ->
     assert 3.0 in clock.sleeps, "Retry-After honoured while polling"
 
 
+def test_5xx_post_body_with_run_id_is_polled_not_orphaned(
+    ledger: Ledger, clock: FakeClock
+) -> None:
+    """Monid sometimes returns 503 with a body that still carries the runId it
+    just created. Discarding it orphans a run that completes and bills anyway
+    (verdict PARTIAL). Recover the id and poll it."""
+    script = Script(
+        {
+            ("POST", "/v1/run"): [
+                httpx.Response(
+                    503, json={"runId": "run_recovered", "provider": "tinyfish", "status": "PENDING"}
+                )
+            ],
+            ("GET", "/v1/runs/run_recovered"): [
+                httpx.Response(
+                    200,
+                    json={
+                        "runId": "run_recovered",
+                        "status": "SUCCEEDED",
+                        "providerResponse": {"httpStatus": 200},
+                        "output": [{"a": 1}],
+                    },
+                )
+            ],
+        }
+    )
+    record, outcome = ledger.submit(
+        make_client(script, clock),
+        RunRequest("tinyfish", "/search", {"q": "x"}),
+        brand="b",
+        source="news",
+        estimate_usd=0.0,
+        deadline_s=60.0,
+    )
+    assert record.run_id == "run_recovered"
+    assert outcome.completed and record.status == "SUCCEEDED"
+    assert record.cost_source == "unreconciled"
+
+
+def test_5xx_post_is_retried_then_succeeds(ledger: Ledger, clock: FakeClock) -> None:
+    script = Script(
+        {
+            ("POST", "/v1/run"): [
+                httpx.Response(503, text="gateway down"),
+                httpx.Response(200, json={"runId": "run_after_retry", "output": [1]}),
+            ]
+        }
+    )
+    record, outcome = ledger.submit(
+        make_client(script, clock),
+        RunRequest("apify", "/apidojo/tiktok-scraper", {"k": "y"}),
+        brand="b",
+        source="tiktok",
+        estimate_usd=0.01,
+        deadline_s=60.0,
+    )
+    assert len(script.posts()) == 2
+    assert record.run_id == "run_after_retry" and outcome.completed
+    assert 2.0 in clock.sleeps
+
+def test_5xx_post_without_run_id_rejects_locally_after_retries(
+    ledger: Ledger, clock: FakeClock
+) -> None:
+    script = Script({("POST", "/v1/run"): [httpx.Response(503, text="gateway down")]})
+    record, _ = ledger.submit(
+        make_client(script, clock),
+        RunRequest("apify", "/apidojo/tiktok-scraper", {"k": "y"}),
+        brand="b",
+        source="tiktok",
+        estimate_usd=0.01,
+        deadline_s=60.0,
+    )
+    assert record.status == "LOCAL_REJECTED_503"
+    assert record.run_id is None
+    assert len(script.posts()) == 5  # MAX_ATTEMPTS
+
+
 # -- reconcile --------------------------------------------------------------
 
 
