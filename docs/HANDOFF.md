@@ -166,6 +166,21 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
   mentions per brand to clear the pre-registered thresholds.
 
+### 2026-09-03 — REPRODUCTION.md offline path is broken (OQ-REP-1, for W8.1)
+
+`docs/REPRODUCTION.md` line 22 runs
+`sonar render results/demo --resamples 10000 --seed 777 --out out/repro`
+and claims render "re-runs the statistics from the frozen mentions and
+labels". The shipped `sonar render` takes `--from DIR`, has **no**
+`--resamples` / `--seed`, and only re-renders Markdown from the stored
+`receipt.json` + `digest.json` (`cli.cmd_render` → `replay_artifacts`).
+W6.1 runs don't save raw payloads, so `--fixtures` replay of `results/demo/`
+isn't possible either. Resolve in the W8.1 cycle: either add
+`sonar render --recompute` (re-run `sonar.stats` from `mentions.jsonl` +
+`labels.jsonl`, the real determinism proof) or rewrite the offline path to
+`make validate` (golden stats seed 777) + `sonar verify`. Not a W6.1
+blocker.
+
 ### 2026-09-03 ~18:00 local — Apify actors BLOCKED on Monid; W6.1 on hold
 
 A `smoke Nubank` canary ($0, both runs BLOCKED) and the voice probe show

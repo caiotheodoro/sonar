@@ -110,7 +110,7 @@ export const scenes: Scene[] = [
   },
   {
     id: "empty-run",
-    claim: "A brand with no mentions still gets a receipt, and no digest.",
+    claim: "Barely any coverage: every run still on the receipt, every estimate abstains.",
     durationInFrames: seconds(12),
     cast: { src: "avenza_empty" },
   },

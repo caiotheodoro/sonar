@@ -1,10 +1,11 @@
 /**
- * Beat 5: the empty-results run. A brand with no mentions still produces a
- * receipt that lists every run and its cost, and no digest. The final scene
- * replays public/casts/avenza_empty.cast; its numbers come from that
- * recording and the receipt under results/demo-empty, which the narration
- * task binds. This placeholder shows the demo run's own abstention record so
- * the contrast is visible: what the full run could not check either.
+ * Beat 5: the sparse-coverage run. A brand with barely any mentions still
+ * produces a receipt that lists every run and its cost, and a digest whose
+ * every estimate abstains (no conclusions drawn). The final scene replays
+ * public/casts/avenza_empty.cast; its numbers come from that recording and
+ * the receipt under results/demo-empty, which the narration task binds. This
+ * placeholder shows the demo run's own abstention record so the contrast is
+ * visible: what the full run could not check either.
  */
 import React from "react";
 import { BeatPlaceholder } from "../components/BeatPlaceholder";

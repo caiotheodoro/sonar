@@ -24,7 +24,7 @@ Target timings; they sum to 78 s, leaving 12 s under the cap for the final cut.
 | 2 | Live `POST /v1/run` | `live-trace` | 5–25 s | `sonar run --trace` on the demo brand, replayed from `public/casts/run_trace.cast`, run list beside it | cast (W7.3) and `results/demo/receipt.json` (`runs[]`, `totals.monid_runs*`) |
 | 3 | The receipt | `receipt` | 25–40 s | The receipt scrolling from `public/casts/receipt.cast`: every run including failed and empty, totals, the monthly comparison | `results/demo/receipt.json` (`totals`, `comparison`, `mentions`) |
 | 4 | `sonar ask` with citations | `ask` | 40–58 s | The assistant answering from `public/casts/ask.cast`, footnotes resolving to mention ids, the topic table | cast (W7.3) and `results/demo/digest.json` (`top_mentions[]`, `topics[]`) |
-| 5 | The empty-results run | `empty-run` | 58–70 s | Avenza: zero mentions, a receipt that still lists every run and its cost, no digest, from `public/casts/avenza_empty.cast` | cast (W7.3) and `results/demo-empty/receipt.json`, bound by W7.2 |
+| 5 | The sparse-coverage run | `empty-run` | 58–70 s | Avenza: barely any coverage — a receipt that still lists every run and its cost, a digest that draws no conclusions (every estimate abstains), from `public/casts/avenza_empty.cast` | cast (W7.3) and `results/demo-empty/receipt.json`, bound by W7.2 |
 | 6 | Outro | `outro` | 70–78 s | `github.com/caiotheodoro/sonar`, `#monid`, the price and the measured cost one last time | `results/demo/receipt.json` and `src/manifest.ts` (`PUBLISHED`) |
 
 Scene durations live in `src/manifest.ts` and are the only place timing is
