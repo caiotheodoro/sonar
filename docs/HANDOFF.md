@@ -166,6 +166,21 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
   mentions per brand to clear the pre-registered thresholds.
 
+### 2026-09-03 ~18:00 local — Apify actors BLOCKED on Monid; W6.1 on hold
+
+A `smoke Nubank` canary ($0, both runs BLOCKED) and the voice probe show
+Monid is returning `BLOCKED` for every **Apify**-backed actor right now
+(reddit, google-maps, youtube-comments, trustpilot search, g2 search),
+while non-Apify endpoints (ElevenLabs `/text-to-speech`, TinyFish
+`/search`) COMPLETE. Last 15 Monid runs: 6 BLOCKED / 9 COMPLETED, the
+BLOCKED all Apify. Transient (reddit COMPLETED ~30 min earlier). `BLOCKED`
+is a pre-registered terminal abstention — not retried.
+
+**W6.1 needs 6 Apify sources — do not run it until the canary passes.**
+Retry cadence: `sonar run --profile smoke Nubank --no-voice --max-spend 0.35`
+(≈ $0.28 if it works, $0 if BLOCKED); when reddit + google_maps both
+COMPLETE, run W6.1 immediately.
+
 ### 2026-09-03 — wallet topped to $20; funded push to submission
 
 - Wallet is $20 (key 2). `MONID_WORKSPACE_BUDGET_USD=10` in `~/.sonar/.env`
