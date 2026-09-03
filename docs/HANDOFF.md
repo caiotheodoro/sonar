@@ -166,6 +166,16 @@ The Nubank vs Inter lite run reached RECONCILED and `sonar verify` passes;
 - Sentiment + SoV abstained: after the homonym filter, too few relevant
   mentions per brand to clear the pre-registered thresholds.
 
+### 2026-09-03 — `sonar ask` validated (W5.2 / video beat 4)
+
+Ran `sonar ask` twice against `out/w5.5-solo/` ($0.0036 + $0.0019 OpenAI,
+no Monid). Cosine retrieval over 60 relevant mentions, top 20; citations
+resolve to real Google Maps / TikTok / Instagram URLs. One run came back
+`status unverified` — the model invented one citation id and the gate
+caught it (`unknown citations [...]`, the W5.2 fabricated-id path). The
+other was `status ok`, 7 verified citations. It is stochastic: for the
+W7.3 `ask` cast, retry until `status ok`, or constrain the prompt further.
+
 ### 2026-09-03 — REPRODUCTION.md offline path is broken (OQ-REP-1, for W8.1)
 
 `docs/REPRODUCTION.md` line 22 runs
