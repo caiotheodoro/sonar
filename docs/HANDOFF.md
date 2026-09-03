@@ -191,20 +191,22 @@ isn't possible either. Resolve in the W8.1 cycle: either add
 `make validate` (golden stats seed 777) + `sonar verify`. Not a W6.1
 blocker.
 
-### 2026-09-03 ~18:00 local — Apify actors BLOCKED on Monid; W6.1 on hold
+### 2026-09-03 ~18:00–18:15 local — Monid provider outage; W6.1 blocked
 
-A `smoke Nubank` canary ($0, both runs BLOCKED) and the voice probe show
-Monid is returning `BLOCKED` for every **Apify**-backed actor right now
-(reddit, google-maps, youtube-comments, trustpilot search, g2 search),
-while non-Apify endpoints (ElevenLabs `/text-to-speech`, TinyFish
-`/search`) COMPLETE. Last 15 Monid runs: 6 BLOCKED / 9 COMPLETED, the
-BLOCKED all Apify. Transient (reddit COMPLETED ~30 min earlier). `BLOCKED`
-is a pre-registered terminal abstention — not retried.
+Sustained (≥ 45 min and counting): **every Apify actor** (`trudax/reddit-`,
+`compass/google-maps-`, `streamers/youtube-`, trustpilot/g2 search) returns
+`BLOCKED` with an empty `providerResponse` — no reason given, so it is
+Monid's actor-invocation layer, not a per-request block. **TinyFish
+`/search`** returns `httpStatus 503 "Search service unavailable"`. Only
+**ElevenLabs `/text-to-speech`** completes. Apify actors last worked on
+key 2 in the 2026-09-02 21:09 UTC solo run — this is not a blip.
 
-**W6.1 needs 6 Apify sources — do not run it until the canary passes.**
-Retry cadence: `sonar run --profile smoke Nubank --no-voice --max-spend 0.35`
-(≈ $0.28 if it works, $0 if BLOCKED); when reddit + google_maps both
-COMPLETE, run W6.1 immediately.
+`BLOCKED` is a pre-registered terminal abstention (error matrix), not
+retried. **W6.1 needs 6 Apify sources + TinyFish — it cannot run until
+Monid recovers.** A persistent health monitor (`sonar run --profile smoke
+Nubank`, $0 while BLOCKED, ~$0.28 when it works) re-checks every 10 min
+and prints `APIFY HEALTHY -- fire W6.1` on recovery. Deadline is Sept 10;
+there is slack. Nothing to do but wait for Monid.
 
 ### 2026-09-03 — wallet topped to $20; funded push to submission
 
