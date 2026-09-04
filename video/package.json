@@ -17,7 +17,8 @@
     "measure": "node capture/measure-cues.mjs",
     "srt": "node capture/resolve-timeline.mjs --srt out/sonar.srt",
     "collect": "uv run python capture/sfx.py --if-missing && node capture/collect-repo-facts.mjs && node capture/emit-cast-json.mjs && node capture/collect-shots.mjs",
-    "still:social": "remotion still SocialCard ../results/social/receipt-card.png"
+    "still:social": "remotion still SocialCard ../results/social/receipt-card.png",
+    "space": "node capture/space-narration.mjs --db -40 --min-silence 600"
   },
   "dependencies": {
     "@remotion/cli": "4.0.515",

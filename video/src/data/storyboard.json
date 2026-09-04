@@ -6,14 +6,14 @@
   "snapToleranceMs": 200,
   "music": {
     "src": "music.mp3",
-    "volume": 0.3,
-    "duckTo": 0.55,
+    "volume": 0.46,
+    "duckTo": 0.45,
     "duckMs": 200,
     "fadeOutMs": 2500
   },
   "narration": {
     "src": "narration.mp3",
-    "offsetMs": 1800
+    "offsetMs": 0
   },
   "acts": [
     "brand24",
@@ -241,7 +241,7 @@
       "kind": "card",
       "card": "ratio",
       "start": {
-        "beat": 88
+        "beat": 84
       }
     },
     {

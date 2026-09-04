@@ -12,7 +12,7 @@ deliberate; `text` is what the .srt sidecar shows.
 ---
 ## narration  →  `public/narration.mp3`
 
-*161 words · 1082 chars · acts: brand24, monid, rebuild, receipt, honest, outro · voice Eva (weA4Q36twV5kwSaTEL0Q) · model eleven_multilingual_v2*
+*135 words · 906 chars · acts: brand24, monid, rebuild, receipt, honest, outro · voice Eva (weA4Q36twV5kwSaTEL0Q) · model eleven_multilingual_v2*
 
 ```text
 Brand24. Social listening. Twenty-five million sources. Mentions. Sentiment. Share of voice. Reports.
@@ -27,19 +27,11 @@ Rebuilt on Monid. One key. One balance. Seventeen hundred tools, paid per call.
 
 <break time="0.9s" />
 
-Reddit. YouTube. TikTok. Instagram. Google Maps. News. Voice, too.
-
-<break time="0.9s" />
-
 This is sonar. One brief: a brand, three competitors, fourteen days, ten sources.
 
 <break time="0.9s" />
 
 Forty-two calls. Three hundred forty-one mentions. Sentiment and share of voice, each with an interval.
-
-<break time="0.9s" />
-
-Topics. A spoken summary. Every number cited to a real post.
 
 <break time="0.9s" />
 
@@ -59,4 +51,4 @@ The receipt is the product. The code is open. Hashtag monid.
 ```
 
 ---
-**1082 characters.**
+**906 characters.**

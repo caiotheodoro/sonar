@@ -26,7 +26,7 @@ Three measured clocks, one resolver, no accumulated durations:
 | Clock | File | Written by |
 |---|---|---|
 | music beat grid | `src/data/beat-grid.json` | `capture/beat-grid.py` (numpy spectral flux; `--tap` to override) |
-| narration cues | `src/data/narration.json` (`startMs`/`endMs` are mp3-relative) | `capture/measure-cues.mjs` (ffmpeg silencedetect; N cues must give N segments) |
+| narration cues | `src/data/narration.json` (`startMs`/`endMs` are mp3-relative) | `capture/space-narration.mjs`, from the take and the holds in `spacing` |
 | the cut | `src/data/storyboard.json` (anchors: `{ms}`, `{beat:i}`, `{hit:i}`, `{cue:id}`) | by hand |
 
 `src/timeline/resolve.mjs` turns anchors into absolute milliseconds and then
@@ -106,12 +106,23 @@ each cue lands on). Seven acts, twenty-seven shots:
   `--remote-debugging-port=9222 --user-data-dir=$HOME/chrome-shoot`, sign in
   there, then `node capture/shoot.mjs --cdp http://127.0.0.1:9222 --only <name>`.
 - **Narration** — `node capture/emit-voicescript.mjs` writes
-  `VOICE-SCRIPT.md`, one paragraph per cue with a `<break>` between them.
-  Paste it into the ElevenLabs web UI (voice Eva, `weA4Q36twV5kwSaTEL0Q`,
-  Eleven Multilingual v2), download, save as `public/narration.mp3`, then
-  `pnpm measure` (the breaks are what the measurer finds; when the voice
-  also pauses that long inside a cue, the extra segments are merged back by
-  character share and the merge is printed). Library voices are
+  `VOICE-SCRIPT.md`, one paragraph per cue with an even `<break>` between
+  them. Paste it into the ElevenLabs web UI (voice Eva,
+  `weA4Q36twV5kwSaTEL0Q`, Eleven Multilingual v2), download, loudnorm to
+  −16 LUFS and save as `public/narration.raw.mp3` (tracked). Then
+  `pnpm space`, which cuts the take at those breaks and lays the lines back
+  down against `spacing.gapsMs` — long holds where a stamp or a sequence
+  should play on music alone, short ones inside an act — and writes the cue
+  times it just built. Re-timing the cut is that one command; it never needs
+  another generation. `pnpm measure` still reads a take that already has its
+  holds baked in.
+
+  An even voice bed is the thing that makes a reel feel airless: before this,
+  speech filled 78.6 % of the runtime and all ten gaps were within 0.4 s of
+  each other, so `KILLED` got 0.52 s to itself and the line about the ratio
+  landed after its card had cut away. Now speech is 69.3 %, the holds run
+  1.0–4.0 s, and every line sits on the picture it describes (check with
+  `pnpm timeline`, which prints the cue-to-shot map). Library voices are
   402 through the API on the free plan (`docs/HANDOFF.md`, W7.2), which is
   why this is a browser step.
 - **Music** — `public/music.mp3` is "Cosmic Countdown" trimmed from
@@ -131,6 +142,7 @@ pnpm shots        # the gate (below); run before every render
 pnpm preview      # out/preview.mp4 at half scale
 pnpm cuts         # one still per cut from the render → out/cuts.png
 pnpm render       # out/sonar.mp4
+pnpm space        # place the holds: narration.raw.mp3 -> narration.mp3 + cue times
 pnpm srt          # out/sonar.srt
 pnpm still:social # ../results/social/receipt-card.png (1200×630 share card, same numbers)
 ```

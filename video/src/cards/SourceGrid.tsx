@@ -28,7 +28,7 @@ export const SourceGrid: React.FC<CardProps> = () => {
       <SfxAt src="tick" frames={PLACES.map((_, i) => 2 + i * STEP)} gain={0.45} />
       <div style={{ display: "flex", alignItems: "flex-end", gap: 90 }}>
         <div>
-          <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 300, lineHeight: 0.82, color: T.plate }}>
+          <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 300, lineHeight: 1, color: T.plate }}>
             {shown.toFixed(0)}
           </div>
           <div style={{ marginTop: 18 }}>

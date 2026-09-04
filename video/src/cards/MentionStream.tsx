@@ -23,7 +23,7 @@ export const MentionStream: React.FC<CardProps> = () => {
     <Card plate={["BRAND24", "MENTIONS"]} source={["results/demo/receipt.json", "incumbent.mentions_quota"]}>
       <SfxAt src="tick" frames={Array.from({ length: 14 }, (_, i) => 1 + i * 3)} gain={0.28} />
       <div style={{ position: "absolute", left: BAND.x, top: 230 }}>
-        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 170, lineHeight: 0.9, color: T.plate }}>
+        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 170, lineHeight: 1, color: T.plate }}>
           {shown.toLocaleString("en-US")}
         </div>
         <div style={{ marginTop: 16 }}>

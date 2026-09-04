@@ -35,13 +35,13 @@ export const PriceColumn: React.FC<CardProps> = () => {
         }}
       />
       <div style={{ position: "absolute", left: COLUMN.x + COLUMN.w + 80, top: 330 }}>
-        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 330, lineHeight: 0.82, color: T.plate }}>
+        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 330, lineHeight: 1, color: T.plate }}>
           {usdWhole(shown)}
         </div>
-        <div style={{ marginTop: 22, display: "flex", gap: 64 }}>
-          <div>
-            <Label>a month, one seat</Label>
-          </div>
+        <div style={{ marginTop: 26 }}>
+          <Label>a month, one seat</Label>
+        </div>
+        <div style={{ marginTop: 30, display: "flex", gap: 72, alignItems: "baseline" }}>
           <div>
             <span style={{ fontFamily: T.mono, fontSize: TYPE.value, color: T.plate }}>{KEYWORDS.value}</span>{" "}
             <Label>keywords</Label>

@@ -45,12 +45,14 @@ export const KeyFan: React.FC<CardProps> = () => {
       <Sfx src="sweep" at={0} gain={0.5} />
       <SfxAt src="click" frames={ENDPOINT_ROWS.map((_, i) => Math.round((i / ENDPOINT_ROWS.length) * DRAW))} gain={0.4} />
       <Fan progress={f / DRAW} />
-      <div style={{ position: "absolute", left: ROW.x + 300, top: 360, width: ROW.w - 300 }}>
-        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 190, lineHeight: 0.85, color: T.plate }}>
+      <div style={{ position: "absolute", left: ROW.x + 340, top: 380, width: ROW.w - 340 }}>
+        <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 190, lineHeight: 1, color: T.plate }}>
           {f >= DRAW ? factText(TOOLS.id) : Math.round(tools).toLocaleString("en-US")}
         </div>
-        <Label>tools on one balance</Label>
-        <div style={{ marginTop: 20, fontFamily: T.mono, fontSize: TYPE.label, letterSpacing: "0.08em", color: T.engrave }}>
+        <div style={{ marginTop: 24 }}>
+          <Label>tools on one balance</Label>
+        </div>
+        <div style={{ marginTop: 14, fontFamily: T.mono, fontSize: TYPE.label, letterSpacing: "0.08em", color: T.engrave }}>
           PAID PER CALL
         </div>
       </div>
