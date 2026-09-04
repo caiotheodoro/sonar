@@ -191,7 +191,31 @@ isn't possible either. Resolve in the W8.1 cycle: either add
 `make validate` (golden stats seed 777) + `sonar verify`. Not a W6.1
 blocker.
 
-### 2026-09-03 ~18:00–18:15 local — Monid provider outage; W6.1 blocked
+### 2026-09-04 — the "outage" was a wallet mix-up; W6.1 dry run; D018
+
+- The 4.5h of `BLOCKED` was **not** a Monid outage. Raw `/v1/run` returns a
+  `reason`: *"Insufficient wallet balance: available $0.023375"*. Monid uses
+  `BLOCKED` for a wallet-block, and sonar does not surface the `reason` — so
+  an empty wallet looked identical to an outage. The $20 top-up had landed
+  on **key 1** (`monid_live_VI12…`), not key 2 (`…DJVq…`, drained to $0.02).
+  **`~/.sonar/.env` now on key 3** (`monid_live_lAzr…` (its full value is in `~/.sonar/.env`, not here),
+  ~$18 per the operator); key backups under `~/.sonar/.env.bak-*`.
+  *Follow-up:* sonar should distinguish a wallet-block `BLOCKED` (trip the
+  402 breaker) from a provider one.
+- **W6.1 dry run** (key 1, `out/w6.1/`): verdict PARTIAL (my error — I fired
+  balance-check probes mid-run, 2 unmatched at $0.09), $1.5715 Monid +
+  $0.1869 OpenAI. **287 mentions, 4 brands, 7 events, ratio 49.6× vs
+  Brand24 ($7.03/mo equiv).** But: SoV + net abstained for all 4 brands
+  (previous 7-day period had 7-13 mentions) → **D018 / PRE-REG A5**: level
+  gates on the current period only, WoW on both. Predicted clean outcome:
+  Nubank/Itaú/C6 report level SoV+sentiment, PicPay abstains (13<20 current),
+  WoW abstains for all.
+- **Bug 6 fixed:** `youtube_comments` sent `sortCommentsBy="newest"` → HTTP
+  400 on every run (allowed: `TOP_COMMENTS`/`NEWEST_FIRST`). Blocked H2.
+- **Clean W6.1 re-run** on key 3 in progress → `out/w6.1-clean/`, then
+  `results/demo/`.
+
+### 2026-09-03 ~18:00–18:15 local — Monid "outage" (was: key 2 wallet empty)
 
 Sustained (≥ 45 min and counting): **every Apify actor** (`trudax/reddit-`,
 `compass/google-maps-`, `streamers/youtube-`, trustpilot/g2 search) returns
