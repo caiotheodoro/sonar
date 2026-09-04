@@ -259,9 +259,16 @@ class TestYouTubeCommentsBuildInput:
                 {"url": "https://www.youtube.com/watch?v=mM4nN5bB6vV"},
             ],
             "maxComments": SOURCE_PLAN["youtube_comment"].caps["full"] // 3,
-            "sortCommentsBy": "newest",
+            "sortCommentsBy": "NEWEST_FIRST",
         }
         assert payload["maxComments"] * 3 <= SOURCE_PLAN["youtube_comment"].caps["full"]
+
+    def test_sort_comments_by_is_a_valid_actor_enum(self, query: m.Query) -> None:
+        """`newest` 400s on the actor; only TOP_COMMENTS / NEWEST_FIRST are allowed."""
+        payload = youtube_comments.PROVIDER.build_input(
+            query, ["https://www.youtube.com/watch?v=aB3dE5fG7hI"]
+        )
+        assert payload["sortCommentsBy"] in {"TOP_COMMENTS", "NEWEST_FIRST"}
 
     def test_max_comments_is_cap_for_one_video(self, query: m.Query) -> None:
         payload = youtube_comments.PROVIDER.build_input(

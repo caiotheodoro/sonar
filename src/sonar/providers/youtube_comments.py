@@ -41,7 +41,9 @@ from sonar.providers.youtube import (
 from sonar.text import detect_lang, match_terms, text_key
 
 PLAN: SourcePlan = SOURCE_PLAN["youtube_comment"]
-SORT_COMMENTS_BY = "newest"
+SORT_COMMENTS_BY = "NEWEST_FIRST"
+"""Actor enum — `"newest"` returns HTTP 400 `invalid-input`; allowed values are
+`"TOP_COMMENTS"` and `"NEWEST_FIRST"` (observed on every live run before this fix)."""
 
 
 def video_urls_of(videos: Sequence[Any]) -> list[str]:
