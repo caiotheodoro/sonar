@@ -1,2 +1,3 @@
 closest snapshot (checked 2026-09-02): http://web.archive.org/web/20260812155142/https://brand24.com/prices/
 save request 2026-09-02: timed out, retry at W8.1
+save request 2026-09-04: HTTP 200 accepted by web.archive.org/save; availability API still reports closest = 20260812155142 at the time of writing (crawl queued, not yet indexed)

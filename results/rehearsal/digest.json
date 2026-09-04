@@ -1,0 +1,473 @@
+{
+  "brand": "Banco Pan",
+  "competitors": [],
+  "window": {
+    "current": {
+      "start": "2026-08-28T17:41:14Z",
+      "end": "2026-09-04T17:41:14Z"
+    },
+    "previous": {
+      "start": "2026-08-21T17:41:14Z",
+      "end": "2026-08-28T17:41:14Z"
+    }
+  },
+  "share_of_voice": [
+    {
+      "brand": "Banco Pan",
+      "n": 19,
+      "n_clusters": 18,
+      "share": null,
+      "ci95": null,
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps",
+        "news"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Banco Pan",
+      "n": 19,
+      "n_confirmed": 6,
+      "pos": 8,
+      "neg": 4,
+      "neu": 7,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 2,
+      "neg": 1,
+      "neu": 2,
+      "net": 0.2,
+      "ci95": [
+        -0.5,
+        1.0
+      ],
+      "ci95_iid": [
+        -0.6,
+        1.0
+      ],
+      "design_effect": 0.87890625,
+      "wow_scope": true
+    },
+    {
+      "brand": "Banco Pan",
+      "source": "youtube_comment",
+      "n": 3,
+      "n_clusters": 2,
+      "pos": 0,
+      "neg": 0,
+      "neu": 3,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": false
+    },
+    {
+      "brand": "Banco Pan",
+      "source": "tiktok",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 2,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.25,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Banco Pan",
+      "source": "instagram",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 4,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.6,
+      "ci95": [
+        -0.3333333333333333,
+        1.0
+      ],
+      "ci95_iid": [
+        -0.3333333333333333,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Banco Pan",
+      "source": "google_maps",
+      "n": 1,
+      "n_clusters": 1,
+      "pos": 0,
+      "neg": 1,
+      "neu": 0,
+      "net": -1.0,
+      "ci95": [
+        -1.0,
+        -1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        -1.0
+      ],
+      "design_effect": null,
+      "wow_scope": true
+    },
+    {
+      "brand": "Banco Pan",
+      "source": "news",
+      "n": 1,
+      "n_clusters": 1,
+      "pos": 0,
+      "neg": 0,
+      "neu": 1,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": false
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "banco-pan-01",
+      "brand": "Banco Pan",
+      "name": "Financial Products and Planning Guidance",
+      "n": 5,
+      "n_clusters": 5,
+      "share": 0.2631578947368421,
+      "net": 0.2,
+      "ci95": [
+        -0.4,
+        0.8
+      ],
+      "exemplar_mention_ids": [
+        "e92a2a7fb892b85ac73e038b",
+        "026a626230cbb812041f470c",
+        "d6bc351dac831f2c037adf07"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "banco-pan-02",
+      "brand": "Banco Pan",
+      "name": "Black Feirão Dealer Partnership Promotion",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.15789473684210525,
+      "net": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "08e75b211bd103c49df3399a",
+        "1d822bb95a56501ae58daeaa",
+        "8bfc4fae18a9709a8009dac7"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "banco-pan-03",
+      "brand": "Banco Pan",
+      "name": "Motorcycle Financing Offers",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.15789473684210525,
+      "net": 0.6666666666666666,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "7a8abae2c108b3f2fd9b9fa1",
+        "27b17e11419f02eb074d1a8f",
+        "8513e5641f0cb7bd24f7a3d5"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    }
+  ],
+  "events": [],
+  "top_mentions": [
+    {
+      "mention_id": "0a4b88140a6335d0f57d281f",
+      "brand": "Banco Pan",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@advgregorypimentel/video/7673678194448403720",
+      "quote": "Banco Pan CONDENADO por empréstimo consignado com assinatura que a aposentada não reconhece. ⚖️ A Justiça de MG fixou R$ 10 mil de dano moral + devolução em dobro. O dever de checar quem assina é do BANCO. #bancopan #consignado #aposentados",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-14T00:30:32Z",
+      "engagement_score": 90688
+    },
+    {
+      "mention_id": "7a8abae2c108b3f2fd9b9fa1",
+      "brand": "Banco Pan",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@judsoncarvalhotv/video/7672151890150395157",
+      "quote": "❌ ATENÇÃO, RAPAZIADA! ❌ QUER COMPRAR SUA MOTO SEM ENTRADA? E está com o score baixo? Então essa oportunidade é para você! No Feirão do @shinerayalemanha , o Banco PAN está facilitando as condições para você  sair de moto nova.  SEM ENTRADA ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-09T21:47:53Z",
+      "engagement_score": 12495
+    },
+    {
+      "mention_id": "27b17e11419f02eb074d1a8f",
+      "brand": "Banco Pan",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@shineray.motos/video/7680176322404355335",
+      "quote": "🏍 Sua CNH pode ser o primeiro passo para a sua moto nova! Em parceria com o Banco PAN, você conta com facilidade para simular seu financiamento e encontrar uma condição que combine com o seu momento. É hora de transformar a vontade de ter u",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-31T12:46:28Z",
+      "engagement_score": 6052
+    },
+    {
+      "mention_id": "026a626230cbb812041f470c",
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=K-aS9tjcH78",
+      "quote": "Como usar o simulador de empréstimo no app do PAN?\n\nPrecisando de uma ajuda financeira e quer entender quanto pode contratar e quanto vai pagar por mês? Neste vídeo, mostramos como simular um empréstimo pessoal pelo app do PAN de forma simp",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-13T14:56:48Z",
+      "engagement_score": 5522
+    },
+    {
+      "mention_id": "d6bc351dac831f2c037adf07",
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=sap7YBm1kek",
+      "quote": "Como a organização financeira realmente melhora a sua qualidade de vida?\n\nOrganização financeira pode parecer um assunto complicado, mas é muito simples do que parece.\n\nNa prática, organizar o seu dinheiro é ter mais clareza sobre o que ent",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-20T21:24:27Z",
+      "engagement_score": 3611
+    },
+    {
+      "mention_id": "8513e5641f0cb7bd24f7a3d5",
+      "brand": "Banco Pan",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@felipedesordi.adv/video/7678134556968406280",
+      "quote": "Moto financiada banco pan ",
+      "lang": "unknown",
+      "label": "neutral",
+      "published_at": "2026-08-26T00:43:48Z",
+      "engagement_score": 1187
+    },
+    {
+      "mention_id": "e92a2a7fb892b85ac73e038b",
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=5EGGnpKum8Y",
+      "quote": "O BANCO PAN MUDOU AS REGRAS! NOVO CONTRATO cartão de crédito.\n\nE aí, meus queridos e queridas da Atualizo! Vinícius Cardozo na área com um alerta urgente para quem tem dinheiro guardado ou limite aprovado nas contas digitais! 📉☕ Canequinha ",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-25T13:30:18Z",
+      "engagement_score": 1121
+    },
+    {
+      "mention_id": "9e67edb78939d827250f67ca",
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=Lq63Hs_YKxk",
+      "quote": "COMO CRIAR UM CARTÃO VIRTUAL NO Banco PAN (PASSO A PASSO)\n\nCOMO CRIAR UM CARTÃO VIRTUAL NO Banco PAN (PASSO A PASSO)\n\n\nAprenda o passo a passo de como gerar e ativar o seu cartão virtual no aplicativo do Banco PAN de forma rápida, prática e",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-22T11:00:05Z",
+      "engagement_score": 131
+    },
+    {
+      "mention_id": "576e22ff285cde618fc1c335",
+      "brand": "Banco Pan",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=DX_AQBTuQOU",
+      "quote": "📞 Telefone do Banco PAN | Como Falar com Atendente, SAC, WhatsApp e Atendimento\n\n📞TELEFONE https://cupompromocional.com/bv\n🟠Banco Inter Convite para Bonus https://cupompromocional.com/inter\n🔴Santender Abertura Conta https://cupompromocional",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-18T12:46:34Z",
+      "engagement_score": 118
+    },
+    {
+      "mention_id": "0d9364fd9ac2829a56762288",
+      "brand": "Banco Pan",
+      "source": "instagram",
+      "url": "https://www.instagram.com/p/Dc0_YpfkdTU",
+      "quote": "🏍️❤️ Mais um sonho realizado!\n\nHoje foi dia de entregar essa linda Bros 160 ABS vermelha para a minha cliente @jayrla_cristiane 🔥🏍️ parabéns pela conquista e muito obrigada pela preferência e confiança em meu trabalho🤝\n\nE o melhor: pelo Ban",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-09-03T14:08:06Z",
+      "engagement_score": 57
+    }
+  ],
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Banco Pan",
+      "source": "reddit",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Banco Pan",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 6: 1 item(s), all provider errors: no_items"
+    },
+    {
+      "scope": "source",
+      "brand": "Banco Pan",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Banco Pan",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "brand",
+      "brand": "Banco Pan",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=6 < 20 in current; n=4 < 20 in previous; n_clusters=4 < 5 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Banco Pan",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=6 < 20 in current; n=4 < 20 in previous; n_clusters=4 < 5 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Banco Pan",
+      "source": "youtube_comment",
+      "reason": "degenerate",
+      "detail": "by_source youtube_comment net design_effect: iid ci95 has zero width"
+    },
+    {
+      "scope": "brand",
+      "brand": "Banco Pan",
+      "source": "google_maps",
+      "reason": "degenerate",
+      "detail": "by_source google_maps net design_effect: iid ci95 has zero width"
+    },
+    {
+      "scope": "brand",
+      "brand": "Banco Pan",
+      "source": "news",
+      "reason": "degenerate",
+      "detail": "by_source news net design_effect: iid ci95 has zero width"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "source": "x",
+      "reason": "unavailable",
+      "note": "X/Twitter has no Monid endpoint (verified 2026-09-02)"
+    }
+  ],
+  "cost": {
+    "verdict": "RECONCILED",
+    "totals": {
+      "monid_usd": 0.315325,
+      "monid_runs": 12,
+      "monid_runs_billed": 10,
+      "monid_runs_zero_results": 2,
+      "monid_runs_failed": 0,
+      "llm_usd": 0.01990996,
+      "llm_calls": {
+        "classify": 2,
+        "tiebreak": 5,
+        "embed": 1,
+        "name_topic": 3,
+        "narrate": 1,
+        "ask": 0
+      },
+      "llm_tokens": 25471,
+      "elevenlabs_usd": 0.0276,
+      "total_usd": 0.33523496
+    }
+  },
+  "narration": {
+    "text": "For Banco Pan, the digest captured 19 mentions across 18 clusters. Brand-level share of voice is not enough data, and its week-over-week verdict is abstain. Sentiment is also not enough data for a week-over-week verdict, which is abstain; the sample includes 8 positive, 4 negative, and 7 neutral mentions, with 6 confirmed. The top topic is Financial Products and Planning Guidance, with 5 mentions, a 0.26 share, and a 0.20 net sentiment. The reconciled cost was 0.31 dollars, including 0.29 dollars for Monid and 0.02 dollars for the language model.",
+    "chars": 552,
+    "numbers_verified": false,
+    "mp3_path": "brief.mp3",
+    "local_seq": 12
+  }
+}

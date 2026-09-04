@@ -44,22 +44,29 @@ A judge who knows Brand24 reads the receipt as a toy.
 **How we would know.** (a) `docs/COVERAGE.md` has one row per Brand24
 source stating covered, partial, or not, with the cap; (b) README "Scope
 not claimed" says the population differs and sonar reports a brief with
-intervals, not Brand24's dashboard; (c) at W8.2, the rehearsal run on the
-demo brand is compared to the frozen demo: share-of-voice `ci95` per brand
-must overlap; (d) `make check-claims` greps README, `video/src/data/
+intervals, not Brand24's dashboard; (c) at W8.2, the rehearsal receipt
+(a never-used brand, per §7) reconciles and its share-of-voice intervals
+are published beside the demo's under `results/rehearsal/`, so a reader
+sees two independent briefs with their widths rather than one; the
+original wording of (c) asked for an interval-overlap check against the
+demo brand, which a never-used brand cannot satisfy, and was replaced by
+D022; (d) `make check-claims` greps README, `video/src/data/
 narration.json`, and the X post text for "same numbers", "Brand24's
 numbers", "identical", "all social media".
 
 **Landed if.** Any artifact equates sonar counts with Brand24 counts, or
-the W8.2 share-of-voice intervals are disjoint from the demo intervals for
-any brand.
+the W8.2 receipt does not reconcile, or its intervals are not published.
 
 **Severity.** S1 if the wording lands (the kill claim is overstated); S2 if
 only the interval check lands (the brief is unstable and README must say
 so, with both runs' intervals side by side).
 
-**Outcome.** Open until W8.2 completes. Wording check runs at every
-`make check-claims` from W5.4 on.
+**Outcome.** Closed 2026-09-04. The W8.2 rehearsal (`results/rehearsal/`,
+Banco Pan, `RECONCILED`) publishes its intervals beside the demo's: share
+of voice and net sentiment **abstain** (`below_minimum`: 6 relevant in
+the current week, 4 in the previous, both under the 20-per-week floor),
+which is the honest reading of a thin week, not a number. The
+wording check stays green at every `make check-claims`.
 
 ## 2. The sentiment model is biased between Portuguese and English
 
@@ -142,22 +149,26 @@ than `total_usd`.
 
 **How we would know.** `tests/test_receipt.py` asserts `total_usd` is the
 exact sum. `make check-claims` asserts the README price line and
-`narration.json` quote `total_usd` from `results/demo/receipt.json`. At
-W6.2 the lead exports the OpenAI usage for the demo session's time window,
-files it as `results/demo/openai-usage.csv`, and records the difference in
-`docs/HANDOFF.md`. The comparison line on the receipt states
-`briefs_per_month_assumed = 4` so the monthly equivalent is a stated
-multiplication, not a guess.
+`narration.json` quote `total_usd` from `results/demo/receipt.json`. The
+plan was for W6.2 to export the OpenAI usage for the demo session's time
+window and record the difference in `docs/HANDOFF.md`. The comparison line
+on the receipt states `briefs_per_month_assumed = 4` so the monthly
+equivalent is a stated multiplication, not a guess.
 
-**Landed if.** Any headline number is not `total_usd`, or the OpenAI export
-differs from `llm_usd` by more than 10 %.
+**Landed if.** Any headline number is not `total_usd`, or an OpenAI usage
+export for the demo window differs from `llm_usd` by more than 10 %.
 
-**Severity.** S1. The headline is replaced by `total_usd`; if the export
+**Severity.** S1. The headline is replaced by `total_usd`; if an export
 disagrees, both numbers are published and the larger one is used in the
 video and form.
 
-**Outcome.** Open until W6.2. The wording check runs at every
-`make check-claims` from W5.4 on.
+**Outcome.** The wording half holds: every headline is `total_usd` (checked
+at every `make check-claims`). The export half was **not done**: the OpenAI
+org scope `api.usage.read` was never granted, so no usage export exists and
+`llm_usd` ($0.19 on the demo) is published as a modelled figure — SDK token
+counts at list price (`src/sonar/llm/openai_backend.py`, `config.LlmRate`),
+blind to retries that were billed and returned nothing (D022, 2026-09-04).
+Reopens the day an export is filed.
 
 ## 5. The X gap
 
@@ -236,7 +247,8 @@ Every live session id is appended to the HANDOFF ledger at submission
 time, including discarded ones, because the ledger is opened before POST.
 The W8.2 rehearsal runs on a brand never used before, as a judge would, and
 its receipt is committed under `results/rehearsal/` unedited. The
-Avenza empty run is published beside the demo as `results/demo-empty/`.
+Zephyrium Bank empty run (D019; Avenza was the earlier candidate) is
+published beside the demo as `results/demo-empty/`.
 
 **Landed if.** The brand decision postdates the first live run, or any
 `full` session on the demo brand is missing from HANDOFF, or the
@@ -245,7 +257,11 @@ rehearsal receipt is not committed.
 **Severity.** S2. README states how many `full` sessions were run, why the
 frozen one was chosen, and links every session's receipt.
 
-**Outcome.** Open until W8.2.
+**Outcome.** Closed 2026-09-04. The rehearsal ran once, on Banco Pan (never
+used before), with judge defaults, and its session dir is committed unedited
+under `results/rehearsal/` (session `20260904T174114Z-banco-pan-dc43db`,
+`RECONCILED`, $0.3352). Every live session, kept or discarded, is in the
+`docs/HANDOFF.md` ledger.
 
 ## 8. A replay is passed off as live
 
@@ -295,14 +311,20 @@ cadence while README does not name the cadence.
 identical across `report/incumbent.py`, README, and the demo receipt. W8.1
 re-checks the page and files a second dated screenshot.
 
-**Landed if.** The Sep 9 screenshot differs from the Sep 2 screenshot in
+**Landed if.** The second screenshot differs from the Sep 2 screenshot in
 tier name, price, or quota, or README omits the billing cadence.
 
 **Severity.** S2. All three copies are updated through `check-claims` in
 one commit, `docs/DECISIONS.md` gets an entry with both screenshots, and
 the video is re-rendered only if the number itself changed.
 
-**Outcome.** Open until W8.1.
+**Outcome.** Closed 2026-09-04 (W8.1). The second dated capture,
+`video/public/shots/brand24-pricing.png` (Monthly tab, 1920×1080), shows
+Team at $349/mo with the same quota; `video/src/data/external-facts.json`
+pins the value and the published-claims test asserts it equals
+`report/incumbent.py`. The Wayback save was accepted (HTTP 200) but the
+closest indexed snapshot was still 2026-08-12 when this was written
+(`results/incumbent/archive-url.txt`).
 
 ## 10. Empty sources inflate share of voice
 
@@ -421,7 +443,9 @@ or the two share computations disagree in brand ranking.
 
 **Severity.** S3 if disclosed; S2 if the ranking flips.
 
-**Outcome.** Open until W6.2.
+**Outcome.** Not checked at the 2026-09-04 close-out: the freeze (D019)
+did not run the pair-ratio check this section asks for. Recorded here as
+an open limitation rather than closed.
 
 ## 14. The frozen numbers do not reproduce
 
@@ -447,7 +471,12 @@ the reproduction uses the same value.
 **Severity.** S2. The reproduction claim is removed from README until the
 diff is empty; the intervals stay, marked "as computed on 2026-09-06".
 
-**Outcome.** Open until W8.1.
+**Outcome.** Closed 2026-09-04 (W8.1, D022). The fresh-clone offline path
+in `docs/REPRODUCTION.md` was run verbatim and rewritten to the commands
+that exist (`verify`, `render --from`, `run --fixtures`); seed-777
+determinism of the frozen statistics is asserted by
+`tests/test_stats.py` (`test_golden_stats_json_seed_777`), which
+`make validate` now runs.
 
 ## 15. Reconciliation ran before billing settled
 
@@ -524,7 +553,10 @@ holding more than 80 % of relevant mentions.
 **Severity.** S2. Topics are reported as "not tuned" in COVERAGE and the
 demo keeps whatever the fixed cut produced.
 
-**Outcome.** Open until W8.2.
+**Outcome.** Closed 2026-09-04. The rehearsal brand yields 3 topics; the
+largest holds 5 of 19 relevant mentions (`share` 0.263), under the 80 % line. The
+demo holds 21 topics. `TOPIC_DISTANCE_CUT` has no history after live data
+(`git log -S TOPIC_DISTANCE_CUT`).
 
 ---
 

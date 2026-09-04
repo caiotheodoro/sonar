@@ -4,6 +4,8 @@
 Word-bounded, like the claims gate: a Portuguese "TODOS" or a fixture id is
 data, not a placeholder. Recorded provider payloads (fixtures and the frozen
 demo's mention/label files) are third-party text and are exempt outright.
+Binary files (a NUL byte in the first 8 KiB) are skipped: an mp4 that happens
+to contain the bytes "TBD" is not a placeholder.
 """
 from __future__ import annotations
 
@@ -34,9 +36,12 @@ def main() -> int:
         if path.startswith("results/") and path.endswith(exclude_suffixes):
             continue
         try:
-            with open(path, errors="ignore") as fh:
-                text = fh.read()
-        except (OSError, UnicodeDecodeError):
+            with open(path, "rb") as fh:
+                head = fh.read(8192)
+                if b"\0" in head:
+                    continue  # binary (mp4, png, mp3, npy): bytes, not prose
+                text = (head + fh.read()).decode("utf-8", errors="ignore")
+        except OSError:
             continue
         found = {m.group(0) for m in _MARKER.finditer(text)}
         for needle in sorted(found):

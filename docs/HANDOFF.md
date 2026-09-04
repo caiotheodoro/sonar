@@ -34,6 +34,7 @@ committed.
 | 2026-09-04 | **W7.3 `run_trace` cast (kept)** | session `20260904T140346Z-nubank-31a81e` → `video/public/captures/run_trace/` (22 run ids in its runs.jsonl) | 0.6088 | 0.0705 | `sonar run --trace --profile lite --no-voice Nubank --vs Itaú`, single attempt after archiving the mishap above and confirming no other process running. **verdict RECONCILED**, 155 fetched / 145 deduped / 145 labelled, 22 runs / 18 billed / 4 zero-result / 0 failed. `video/public/casts/run_trace.cast` (99 events, 236 s). Not a numeric source for the video — `RESULTS` still binds to `results/demo/`; this cast is terminal flavor only. |
 | 2026-09-04 | W7.3 `ask` cast | none (OpenAI only) | 0.00 | 0.0027 | `sonar ask Nubank "What do people complain about most?" --session results/demo` — reads the frozen demo session, writes `results/demo/answers.jsonl` (kept, CONTRACTS §Answer) and results/demo/embeddings.npy (retrieval cache, gitignored, not evidence). 6 citations, real mention URLs. `video/public/casts/ask.cast` (5 events, 9.4 s). |
 | 2026-09-04 | W7.3 `empty_run` cast | session `20260904T140844Z-zephyrium-bank-2e23b9` → `video/public/captures/empty_run/` (9 run ids) | 0.2219 | 0.0003 | `sonar run --trace --profile lite --no-voice "Zephyrium Bank"` (brand read from `results/demo-empty/receipt.json`). **verdict RECONCILED**, 2 fetched (both `not_about_brand`, excluded), 9 runs / 8 billed / 3 zero-result / 0 failed. `video/public/casts/empty_run.cast` (37 events, 271 s). Numeric source for the beat is still `results/demo-empty/` (`RESULTS_EMPTY`), not this cast's own receipt. |
+| 2026-09-04 | W8.2 rehearsal (`results/rehearsal/`) | session `20260904T174114Z-banco-pan-dc43db`: 01M1PR5AEDTR3ZR0M5966YPRCD, 01M1PR5ACC0AFBTN93YFR6XXYN, 01M1PR5AE8QT6BTTGW0VXAV7ND, 01M1PR5ADNN013NH2W51N02TK7, 01M1PR5ACXYRA0HVKDBZC49942, 01M1PR5AC5JFZG053NW91YNYKX, 01M1PR5V3ZQTJC2MY922SXC06K, 01M1PR5V6EWMAH091H47Q2NVX5, 01M1PR63C7C9TT6B1VGJHKJX5P, 01M1PR69RFTQ7WJJAYQYHTNX4D, 01M1PR6S8RKGFV1D3H3B3JGY62, 01M1PR9QE3CY5Y3F2NH64TPTDA | 0.3153 | 0.0199 | `sonar run --trace --profile lite "Banco Pan" --out results/rehearsal --max-spend 1.50`, key 3, one attempt, as a judge would (never-used brand, voice on). Verdict `RECONCILED`, `sonar verify` exit 0; 12 runs, 10 billed, 2 zero-result, 0 failed; 22 fetched / 21 deduped / 21 labelled (youtube 5, youtube_comment 3, tiktok 4, instagram 5, google_maps 3, news 1; reddit and the rest empty); share of voice and sentiment **abstain** (`below_minimum`: 6 relevant in the current week and 4 in the previous, both under the 20-per-week floor; 19 relevant across the 14-day window); 3 topics, largest 5 of 19 relevant (26 %, `share` 0.263); ElevenLabs voice $0.0276 inside the Monid figure; total $0.3352. Committed unedited. Cumulative Monid ≈ **$9.4**: the task graph's "ledger ≤ $8.5" done-check was already exceeded before this run (≈ $9.1 after the W7.3 mishap) and is reported here, not amended (D022). |
 | 2026-09-04 | W7.6 video v2 (hard-cut rebuild) | none | 0.00 | 0.00 | No Monid or OpenAI spend. Screenshots of brand24.com and monid.ai captured with `video/capture/shoot.mjs` (Playwright, public pages; `app.monid.ai` was not logged in on this machine, so the runs page is not in the cut). Music replaced: `video/public/music.mp3` is now "Cosmic Countdown" (user-supplied file from `~/Downloads`; licence/provenance not recorded in the repo — record before publishing), trimmed from 19.187 s, loudnorm −20 LUFS; the Pixabay track is gone. Narration: ElevenLabs "Eva" (`weA4Q36twV5kwSaTEL0Q`, Eleven Multilingual v2) generated in the ElevenLabs web UI on the free plan (1,082 characters of the 10k monthly quota; library voices are 402 through the API, see W7.2), downloaded, loudnorm −16 LUFS, 69.6 s; cues measured by `video/capture/measure-cues.mjs` (15 silence segments merged into 11 cues by character share). The voice sets the length: the cut is 74.4 s, over the 60 s target and under the 90 s cap. The W7.2 Rachel take stays as ledger evidence in `narration.runs.jsonl`. |
 | 2026-09-04 | **W6.1 demo (frozen)** | session 20260904T033800Z-nubank-53455a → `results/demo/` (42 run ids in its runs.jsonl) | 2.0088 | 0.1944 | `sonar run --profile full Nubank --vs Itaú "C6 Bank" PicPay --resamples 10000`, key 3, budget cap raised. **verdict RECONCILED, `sonar verify` ok, 0 failed runs.** 348 fetched / 341 deduped / 341 labelled. Nubank SoV 0.291 net +0.092; Itaú SoV 0.269 net +0.159; C6 Bank SoV 0.158 net −0.079; PicPay abstains (12 current). 21 topics, 11 events, WoW abstains all. total $2.2032 → $8.81/mo → 39.6× vs $349. elevenlabs voice run $0.0265. H1 pass, H3 0.84 (not cleared), H2 partial. **A `sonar reconcile` foot-gun:** ran demo-empty probes/runs before reconciling this → its window polluted → restored with a 5s-slack bounded `reconcile_session`. |
 | 2026-09-04 | demo-empty candidate A: Avenza | session 20260904T035121Z-avenza-ff217c, `out/demo-empty/` | 0.3127 | 0.0178 | `sonar run --profile full Avenza --no-voice`. RECONCILED. **Not empty** — 59 fetched, SoV 1.0 (only brand), net 0.66. Discarded as demo-empty; kept for reference that Avenza has real coverage. |
@@ -50,14 +51,15 @@ committed.
 
 Running totals (one shared workspace across all 3 keys). Real Monid spend
 that landed on a kept artifact: W3.7 smoke $0.25 + voice probe $0.0817 +
-W5.5 runs (exploratory, key 2, ~$1.0) + **W6.1 demo $2.0088** +
+W5.5 runs (exploratory, key 2, $1.41 across five sessions) + **W6.1 demo $2.0088** +
 **demo-empty (Zephyrium) $0.2282** + Avenza (discarded) $0.3127 +
 W6.1-clean/dry/v3 (superseded) ~$2.8 + probes/canaries ~$0.5 +
 **W7.2 narration $0.0448** + **W7.3 casts $0.6088 + $0.2219** (kept) +
-**W7.3 duplicate-run mishap ~$0.58** (discarded, operator error) ≈ **$9.5
-Monid** to date. OpenAI ≈ **$0.63** total. The $3/day workspace budget
-cap (control `01M1GB8M12…`) was the evening's blocker; the operator raised
-it, then topped up to $20. Remaining `$` work: W8.2 rehearsal (~$0.8).
+**W7.3 duplicate-run mishap ~$0.58** (discarded, operator error) +
+**W8.2 rehearsal $0.3153** ≈ **$9.4 Monid** to date (the listed terms sum to $9.36). OpenAI ≈ **$0.65**
+total. The $3/day workspace budget cap (control `01M1GB8M12…`) was the
+evening's blocker; the operator raised it, then topped up to $20. No `$`
+work remains; the $1.50 judging reserve is intact.
 
 Row format: one row per session id. `Run ids` lists every Monid run id
 the receipt contains, including `run_id=null` rows written as
@@ -78,8 +80,8 @@ the job runs.
 | W6.1 full demo + empty | `sonar run --profile full Nubank --vs "Itaú" "C6 Bank" PicPay --resamples 10000`; `sonar run --profile full "Zephyrium Bank"` | 2.80 | **demo $2.0088 + empty $0.2282 = $2.24 billed** | **done 2026-09-04, RECONCILED, frozen to `results/demo/` + `results/demo-empty/`** (D019) |
 | W7.2 narration TTS | one ElevenLabs run through Monid `voice/tts` | 0.10 | done 2026-09-04, billed 0.0448 | `video/public/narration.mp3`; direct ElevenLabs (D016) blocked on the operator's free plan, routed through Monid |
 | W7.3 casts (`run_trace`, `ask`, `empty_run`) | `sonar run --trace --profile lite …`, `sonar ask …` | 0.70 | done 2026-09-04, billed 0.6088 + 0.00 + 0.2219 = 0.8307 (+ ~0.58 lost to a duplicate-run operator error, archived) | `video/public/casts/*.cast` recorded; see spend ledger rows above |
-| W7.5 music + render | Pixabay search (no Monid spend) + `pnpm render` | 0.00 | done 2026-09-04, $0.00 | "Minimal Techno Background" by MKGomez, Pixabay Content License (no attribution required), trimmed to `video/public/music.mp3`; `video/out/sonar.mp4` 1920×1080 82.2s; `results/social/{receipt-card.png,x-post.txt}` |
-| W8.2 rehearsal | `sonar run --profile lite <never-used brand>` | 0.80 | not run | after W8.1 |
+| W7.5 music + render | `pnpm render` | 0.00 | done 2026-09-04, $0.00 | Superseded by W7.6: the Pixabay track was replaced by "Cosmic Countdown" and the cut re-rendered at 74.4 s; the shipped files are `results/video/sonar.mp4`, `results/video/sonar.srt`, `results/video/cuts.png`, `results/social/{receipt-card.png,x-post.txt}` |
+| W8.2 rehearsal | `sonar run --trace --profile lite "Banco Pan" --out results/rehearsal --max-spend 1.50` | 0.80 | done 2026-09-04, $0.3153 Monid + $0.0199 OpenAI | `RECONCILED`, 21 mentions, SoV/sentiment abstain (6 and 4 per week, under 20), 3 topics; see the ledger row |
 
 Recurring operator jobs, all free:
 
@@ -202,6 +204,11 @@ other was `status ok`, 7 verified citations. It is stochastic: for the
 W7.3 `ask` cast, retry until `status ok`, or constrain the prompt further.
 
 ### 2026-09-03 — REPRODUCTION.md offline path is broken (OQ-REP-1, for W8.1)
+
+**Resolved 2026-09-04 (W8.1):** the offline block now runs `verify`,
+`render --from`, and `run --fixtures --profile smoke` (the recorded-fixture
+replay, verdict `REPLAY`); the seed-777 claim points at `tests/test_stats.py`;
+`make validate` runs mypy and pytest as the docs said it did.
 
 `docs/REPRODUCTION.md` line 22 runs
 `sonar render results/demo --resamples 10000 --seed 777 --out out/repro`
@@ -355,15 +362,22 @@ the operator must make before W6.1:
 
 ## Open questions
 
-- **OQ-HO-1** The Monid dashboard menu names for workspace budget and run
-  cap were not verified before the wizard was written. Resolves when W0.1
-  is run by a human; the wizard prompts for where the setting was found
-  and the answer is recorded in the W0.1 ledger row notes.
-- **OQ-HO-2** Whether OpenAI cost per session is read from the SDK usage
-  fields or from the OpenAI dashboard. Resolves at W3.7: the first
-  receipt with `totals.llm_usd` is compared against the dashboard for
-  the same hour, and the method that matches is written into the rules
-  above.
+- **OQ-HO-1 — RESOLVED (2026-09-04).** The control is a *rule*, not a
+  workspace setting: `https://app.monid.ai/rules`, type `WORKSPACE_BUDGET`,
+  `period: DAY`, `limitAmount` (ships at $3), `windowStart` 00:00 UTC,
+  control id `01M1GB8M12ZEDM99NS357K29NQ`, shared by every API key in the
+  workspace (see the 2026-09-04 root-cause entry below). There is no Monid
+  per-run cap; `MONID_RUN_CAP_USD` is enforced by sonar itself
+  (`src/sonar/config.py`). `scripts/setup-wizard.sh` now says so.
+- **OQ-HO-2 — RESOLVED (D022).** SDK usage fields. `totals.llm_usd` is
+  `usage.prompt_tokens` / `completion_tokens` (cached prompt tokens at the
+  cached rate) priced at the list rates in `src/sonar/config.py`
+  (`LlmRate`, D003), summed in `src/sonar/report/receipt.py`. No OpenAI
+  dashboard export was obtained (the org scope `api.usage.read` was never
+  granted; results/demo/openai-usage.csv was never filed), so the
+  comparison RED-TEAM §4 asked for did not happen and the figure is
+  published as modelled, not billed. SDK retries that were billed but
+  returned nothing are invisible to it.
 - **OQ-HO-3 — RESOLVED (D017).** The first live solo run showed the real
   cause was not the event rule but a starved previous period: Reddit's
   `time=week` capped the fetch at 7 days while the analysis window is 14,

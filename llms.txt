@@ -21,6 +21,7 @@ Not claimed: X coverage (no Monid endpoint), influencer scoring, email alerts.
 - [Demo receipt](results/demo/receipt.json): frozen live run, verdict RECONCILED; `sonar verify` checks it
 - [Coverage](docs/COVERAGE.md): each Brand24 source, covered or not, and why
 - [Reproduction](docs/REPRODUCTION.md): commands from a fresh clone
+- [The cut](results/video/README.md): `results/video/sonar.mp4`, 74 s, every frame traced to a file; built by `video/`
 
 ## Run
 

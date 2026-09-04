@@ -1,5 +1,9 @@
-A social-listening seat is $349/mo. One full sonar brief measured $2.20 — 39.6x cheaper at four briefs a month, on real Monid calls.
+Post 1 (native video attached: results/video/sonar.mp4)
 
-But the receipt is the small part. sonar refuses to guess: PicPay's share of voice abstains for lack of data, and our own label audit — 0.84 — shipped flagged, not hidden.
+Brand24 sells social listening at $349 a month. I rebuilt the brief on Monid: 10 sources, sentiment, share of voice, topics, a spoken summary. One brief: $2.20, on a receipt that reconciles every call. #monid
 
-Built for #monid. github.com/caiotheodoro/sonar
+github.com/caiotheodoro/sonar
+
+Post 2 (reply)
+
+The receipt is the product. When data is thin it abstains (PicPay's share of voice: not enough data, so it says so). Our own label audit came in at 0.84, under the bar we set, printed on the receipt, not hidden.

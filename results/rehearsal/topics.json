@@ -1,0 +1,77 @@
+[
+  {
+    "topic_id": "banco-pan-01",
+    "brand": "Banco Pan",
+    "name": "Financial Products and Planning Guidance",
+    "n": 5,
+    "n_clusters": 5,
+    "share": 0.2631578947368421,
+    "net": 0.2,
+    "ci95": [
+      -0.4,
+      0.8
+    ],
+    "exemplar_mention_ids": [
+      "e92a2a7fb892b85ac73e038b",
+      "026a626230cbb812041f470c",
+      "d6bc351dac831f2c037adf07"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "banco-pan-02",
+    "brand": "Banco Pan",
+    "name": "Black Feirão Dealer Partnership Promotion",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.15789473684210525,
+    "net": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "08e75b211bd103c49df3399a",
+      "1d822bb95a56501ae58daeaa",
+      "8bfc4fae18a9709a8009dac7"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "banco-pan-03",
+    "brand": "Banco Pan",
+    "name": "Motorcycle Financing Offers",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.15789473684210525,
+    "net": 0.6666666666666666,
+    "ci95": [
+      0.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "7a8abae2c108b3f2fd9b9fa1",
+      "27b17e11419f02eb074d1a8f",
+      "8513e5641f0cb7bd24f7a3d5"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  }
+]

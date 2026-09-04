@@ -20,6 +20,16 @@ one brand and up to three competitors over the last 14 days, with share of
 voice, sentiment, week-over-week change, topics, and spike detection. You pay
 per Monid call, once per brief, instead of $349 per month for a seat.
 
+## Watch
+
+[![27 cuts, one still each](results/video/cuts.png)](results/video/sonar.mp4)
+
+`results/video/sonar.mp4` (74 s, 1080p): Brand24 as a product in its own
+screenshots, then `KILLED`, then Monid, then the same brief rebuilt on
+Monid with every number read from `results/demo/`. Spoken lines are in
+`results/video/sonar.srt`; the strip above is one still per cut, and every
+frame traces to a file (`results/video/README.md`).
+
 ## The receipt is the product
 
 Listening tools sell a dashboard. Sonar sells the bill. Each run writes
@@ -174,6 +184,10 @@ whether or not it clears the 0.85 threshold of hypothesis H5.
 | `results/incumbent/` | Brand24 price evidence |
 | `results/demo/` | frozen demo artifacts: receipt, digest, stats, topics, narration |
 | `results/demo-empty/` | the zero-mention brand's receipt |
+| `results/rehearsal/` | the W8.2 rehearsal: a never-used brand, run as a judge would, committed unedited |
+| `results/video/` | the cut, its captions, and one still per hard cut |
+| `results/social/` | the share card and the X post text |
+| `video/` | the Remotion project, its storyboard, gate and capture scripts |
 | `tests/` | offline tests on recorded fixtures; `make validate` runs everything |
 
 ## License

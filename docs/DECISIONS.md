@@ -890,4 +890,81 @@ unconditional second reconcile can fold back into that ordering.
 
 ---
 
-*End of decisions. Next entry would be D021.*
+## D021 — The video is a hard-cut reel, and third-party numbers need a screenshot
+
+**Decision.** The hackathon cut (`results/video/sonar.mp4`, 74.4 s) is
+rebuilt as hard cuts on the music's beat grid: Brand24 shown as a product in
+its own pages, a `KILLED` stamp, Monid in its own pages, then the brief
+rebuilt on Monid with every figure read from `results/demo/` and
+`results/demo-empty/`. The cut is data (`video/src/data/storyboard.json`),
+resolved by one function that Remotion and the gate both import
+(`video/src/timeline/resolve.mjs`). A number quoted from a third party
+(Brand24's tier prices, Monid's tool count) lives in
+`video/src/data/external-facts.json` and is admitted by the gate only while
+the screenshot it was read from is tracked, sized, dated and reviewed
+(`video/public/shots/<name>.{png,json}`); `tests/test_published_claims.py`
+mirrors that rule and asserts `brand24.price.team` equals
+`report/incumbent.py`.
+
+**Voice and music.** ElevenLabs "Eva" (`weA4Q36twV5kwSaTEL0Q`, Eleven
+Multilingual v2) generated in the ElevenLabs web UI, because library
+voices return 402 through the API on the free plan (W7.2); $0 Monid. Cues
+are measured from the mp3 (`video/capture/measure-cues.mjs`), never typed.
+Music is "Cosmic Countdown" (user-supplied), which replaces the Pixabay
+track; its licence is not recorded here (2026-09-04).
+
+**Amends.** The W7.5 done-check "captions burned in" is replaced by an
+`.srt` sidecar (`results/video/sonar.srt`): the type on screen carries every
+spoken line. The 60 s storyboard target gave way to the voice: 74.4 s, under
+the 90 s cap. Nothing negative is said about the incumbent; the gate greps
+for it.
+
+**Evidence.** Commit `ca987fd`; `video/README.md`; `pnpm shots` green;
+`results/video/cuts.png` (one still per cut).
+
+**Reverses when.** The hackathon rules require burned-in captions (one
+overlay component, no timing work), or a 60 s cut is wanted (drop ~25
+words, regenerate Eva, `pnpm measure`).
+
+---
+
+## D022 — W8 close-out: what was checked, what was not
+
+**Decision.** Four published checks are amended or closed on the evidence,
+dated 2026-09-04.
+
+- **RED-TEAM §1(c)** asked the W8.2 rehearsal to run on the demo brand so
+  share-of-voice intervals could be compared; §7 and the task graph require
+  a never-used brand. The never-used brand wins (it is the stronger check
+  against cherry-picking); §1(c) now requires the rehearsal receipt to
+  reconcile and its intervals to be published beside the demo's.
+- **Ledger gate.** The task graph's W8.2 done-check "spend ledger ≤ $8.5"
+  was exceeded before the rehearsal ran (≈ $9.1 after the W7.3
+  duplicate-run mishap, ≈ $9.4 after W8.2). It is reported in
+  `docs/HANDOFF.md`, not amended; the $1.50 judging reserve is intact.
+- **OQ-HO-2 / RED-TEAM §4.** `totals.llm_usd` is SDK usage
+  (`prompt_tokens`, `completion_tokens`, cached prompt tokens at the cached
+  rate) priced at the list rates in `src/sonar/config.py`; no OpenAI usage
+  export was obtained (org scope `api.usage.read` never granted), so the
+  10 % comparison did not happen and the figure is published as modelled,
+  blind to billed retries that returned nothing.
+- **Reproduction.** `make validate` now runs mypy and pytest as
+  `docs/REPRODUCTION.md` and `AGENTS.md` had claimed; the offline path is
+  `verify`, `render --from`, `run --fixtures` (OQ-REP-1). Deferred citation
+  prefixes that have landed (`results/demo/`, `results/demo-empty/`,
+  `results/rehearsal/`, `skill/`, `video/`) are now hard-checked.
+
+**Evidence.** `results/rehearsal/receipt.json` (session
+`20260904T174114Z-banco-pan-dc43db`, `RECONCILED`, $0.3352, share of voice
+and sentiment abstain at 6 and 4 relevant mentions per week under the 20
+floor, 3 topics, largest 5 of 19 relevant); `docs/HANDOFF.md` ledger and open questions; `docs/RED-TEAM.md`
+§1, §4, §7, §9, §17 outcomes; `docs/REPRODUCTION.md`.
+
+**Reverses when.** An OpenAI usage export for the demo window is filed
+(then RED-TEAM §4's 10 % comparison runs and `llm_usd` is either confirmed
+or both figures are published), or a second rehearsal on the demo brand is
+funded (then §1(c)'s original interval-overlap check applies).
+
+---
+
+*End of decisions. Next entry would be D023.*

@@ -56,7 +56,8 @@ The receipt is the deliverable. Everything else exists to make it true.
 ## Commands
 
 ```bash
-make validate          # sync, lint, typecheck, tests, privacy gate, placeholders, claims
+make validate          # mypy, pytest, privacy gate, placeholders, published-claims gate
+make video             # lint, gates, render; copies the cut into results/video/
 uv run sonar doctor    # keys, endpoints, wallet
 uv run sonar plan --profile lite <brand> --vs <competitor>   # estimate, no spend
 uv run sonar render --from results/demo                       # replay, no key

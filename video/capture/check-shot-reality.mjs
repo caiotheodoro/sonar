@@ -192,6 +192,9 @@ else if (sha(music) !== grid.trackSha256) fail(`beat-grid.json was built from a 
 const mp3 = join(VIDEO, "public", storyboard.narration.src);
 if (!existsSync(mp3)) fail(`public/${storyboard.narration.src} is missing`);
 else if (narrationFile.measured?.mp3Sha256 && sha(mp3) !== narrationFile.measured.mp3Sha256) fail(`narration.json was measured against a different ${storyboard.narration.src}; re-run capture/measure-cues.mjs`);
+const repoFacts = readJson(join(DATA, "repo-facts.json"));
+const headRev = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: REPO, encoding: "utf8" }).trim();
+if (repoFacts.sonarRev !== headRev) notes.push(`repo-facts.json was collected at ${repoFacts.sonarRev}, HEAD is ${headRev}; run capture/collect-repo-facts.mjs before the final render`);
 const shotsJson = readJson(join(DATA, "shots.json"));
 if (JSON.stringify(shotsJson) !== JSON.stringify(shots)) fail("src/data/shots.json is stale; run capture/collect-shots.mjs");
 

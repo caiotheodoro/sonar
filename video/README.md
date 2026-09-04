@@ -93,7 +93,12 @@ pnpm preview      # out/preview.mp4 at half scale
 pnpm cuts         # one still per cut from the render → out/cuts.png
 pnpm render       # out/sonar.mp4
 pnpm srt          # out/sonar.srt
+pnpm still:social # ../results/social/receipt-card.png (1200×630 share card, same numbers)
 ```
+
+`make video` from the repo root runs the whole chain and copies
+`sonar.mp4`, `sonar.srt` and `cuts.png` into `results/video/`, which is
+what the README links.
 
 ## The gate
 

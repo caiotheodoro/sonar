@@ -16,7 +16,8 @@
     "shoot": "node capture/shoot.mjs",
     "measure": "node capture/measure-cues.mjs",
     "srt": "node capture/resolve-timeline.mjs --srt out/sonar.srt",
-    "collect": "node capture/collect-repo-facts.mjs && node capture/emit-cast-json.mjs && node capture/collect-shots.mjs"
+    "collect": "node capture/collect-repo-facts.mjs && node capture/emit-cast-json.mjs && node capture/collect-shots.mjs",
+    "still:social": "remotion still SocialCard ../results/social/receipt-card.png"
   },
   "dependencies": {
     "@remotion/cli": "4.0.515",
