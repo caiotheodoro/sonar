@@ -37,23 +37,30 @@ to describe it.
 `TOTAL_FRAMES` is derived from the scene durations and the manifest throws if
 the sum passes ninety seconds.
 
-## What is scaffolded and what is not
+## What is built
 
-Present: the composition `Sonar`, the manifest, the typed results loader, six
-placeholder scenes that already render the bound figures, caption overlay,
-cast replay, the capture scripts, and the narration placeholder.
+The cut is finished: `out/sonar.mp4`, 1920×1080, 82.2 s, captions burned in,
+`#monid` and the repo in the outro. `results/social/receipt-card.png` (the
+`SocialCard` composition, 1200×630) and `results/social/x-post.txt` are cut
+alongside it.
 
-Filled by later tasks:
-
-- W7.2 writes `src/data/narration.json` (cues with a `scene` tag, absolute
-  `startMs`/`endMs`), speaks it through sonar's own voice path so the
-  ElevenLabs run lands on the receipt, and saves `public/narration.mp3`. Then
-  `narrationSrc` in the manifest points at it.
-- W7.3 records the casts with `capture/record-casts.mjs` into `public/casts/`
-  (`doctor`, `run_trace`, `ask`, `empty_run`). Runs that spend credit require
-  `SONAR_CAPTURE_SPEND=1`.
-- W7.4 replaces the placeholder scenes under `src/scenes/`.
-- W7.5 cuts to length, burns captions, exports 1080p.
+- W7.2 wrote `src/data/narration.json` and spoke it through Monid's
+  ElevenLabs proxy (direct ElevenLabs was rejected — free-plan accounts
+  can't call library voices via the API, D016's theoretical path doesn't
+  apply here) — `public/narration.mp3`, `narrationSrc` in the manifest.
+  Rachel runs slower than the 130 wpm the storyboard assumed (127 wpm,
+  76.7 s of voice), so scene durations are derived from the timed
+  narration (`sceneDurationsFrames` in `manifest.ts`) rather than the
+  original 64 s target.
+- W7.3 recorded the casts with `capture/record-casts.mjs` into
+  `public/casts/` (`run_trace`, `ask`, `empty_run`), then
+  `capture/emit-cast-json.mjs` pre-parses them into `src/data/casts/*.json`
+  so `TerminalCast` has nothing to fetch at render time.
+- W7.4 replaced the placeholder scenes under `src/scenes/` with the dark
+  tape system: `ReadLine`, receipt rows, the SoV/sentiment static group,
+  PicPay's animated abstain, `RESULTS_EMPTY` for the zero-mention beat.
+- W7.5 picked the music (Pixabay Content License, no attribution required —
+  `public/music.mp3`), rendered, and ran the verification checks below.
 
 ## Commands
 
@@ -68,7 +75,15 @@ node capture/generate-voice.mjs        # public/narration.txt for sonar's TTS pa
 node capture/record-casts.mjs [id ...] # doctor run_trace ask empty_run
 pnpm dev                               # Remotion studio; needs results/demo
 pnpm render                            # out/sonar.mp4; needs results/demo
+pnpm still SocialCard ../results/social/receipt-card.png  # 1200×630 share card
 ```
+
+## Verification (as cut)
+
+- `ffprobe out/sonar.mp4`: 1920×1080, 82.2 s (60–90 s window), audio track present.
+- `grep -Ei "same numbers|brand24's numbers|identical|all social media|every platform|everything brand24 monitors" src/data/narration.json README.md`: no hits.
+- `pnpm lint`, `pnpm shots`, `make validate` (repo root): green.
+- `results/social/receipt-card.png` and `results/social/x-post.txt` cut alongside the video.
 
 `pnpm lint` passes on a tree without `results/demo` because the three files
 are imported through the `@results` alias, which falls back to an `unknown`

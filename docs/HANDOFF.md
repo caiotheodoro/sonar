@@ -77,6 +77,7 @@ the job runs.
 | W6.1 full demo + empty | `sonar run --profile full Nubank --vs "Itaú" "C6 Bank" PicPay --resamples 10000`; `sonar run --profile full "Zephyrium Bank"` | 2.80 | **demo $2.0088 + empty $0.2282 = $2.24 billed** | **done 2026-09-04, RECONCILED, frozen to `results/demo/` + `results/demo-empty/`** (D019) |
 | W7.2 narration TTS | one ElevenLabs run through Monid `voice/tts` | 0.10 | done 2026-09-04, billed 0.0448 | `video/public/narration.mp3`; direct ElevenLabs (D016) blocked on the operator's free plan, routed through Monid |
 | W7.3 casts (`run_trace`, `ask`, `empty_run`) | `sonar run --trace --profile lite …`, `sonar ask …` | 0.70 | done 2026-09-04, billed 0.6088 + 0.00 + 0.2219 = 0.8307 (+ ~0.58 lost to a duplicate-run operator error, archived) | `video/public/casts/*.cast` recorded; see spend ledger rows above |
+| W7.5 music + render | Pixabay search (no Monid spend) + `pnpm render` | 0.00 | done 2026-09-04, $0.00 | "Minimal Techno Background" by MKGomez, Pixabay Content License (no attribution required), trimmed to `video/public/music.mp3`; `video/out/sonar.mp4` 1920×1080 82.2s; `results/social/{receipt-card.png,x-post.txt}` |
 | W8.2 rehearsal | `sonar run --profile lite <never-used brand>` | 0.80 | not run | after W8.1 |
 
 Recurring operator jobs, all free:

@@ -1,0 +1,5 @@
+A social-listening seat is $349/mo. One full sonar brief measured $2.20 — 39.6x cheaper at four briefs a month, on real Monid calls.
+
+But the receipt is the small part. sonar refuses to guess: PicPay's share of voice abstains for lack of data, and our own label audit — 0.84 — shipped flagged, not hidden.
+
+Built for #monid. github.com/caiotheodoro/sonar

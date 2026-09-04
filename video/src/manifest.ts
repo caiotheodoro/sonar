@@ -211,7 +211,7 @@ export const voiceOffset = 15;
 /** The narration mp3 under public/, produced by sonar's own TTS path. Null until it exists. */
 export const narrationSrc: string | null = "narration.mp3";
 
-export const musicSrc: string | null = null;
+export const musicSrc: string | null = "music.mp3";
 export const musicVolume = 0.22;
 
 export const PUBLISHED = {
