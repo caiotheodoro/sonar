@@ -26,6 +26,8 @@ export interface ReadLineProps {
   width?: number;
   abstainNote?: string;
   emphasis?: boolean;
+  /** A static reference tick on the same domain (e.g. the acceptance bar an audit is judged against). */
+  mark?: { value: number; label: string };
 }
 
 const ease = (f: number, a: number, b: number, from: number, to: number): number =>
@@ -45,6 +47,7 @@ export const ReadLine: React.FC<ReadLineProps> = ({
   width = 900,
   abstainNote = "not enough data",
   emphasis = false,
+  mark,
 }) => {
   const f = Math.max(0, useCurrentFrame() - startFrame);
   const [lo, hi] = domain;
@@ -115,6 +118,22 @@ export const ReadLine: React.FC<ReadLineProps> = ({
             strokeLinecap="round"
           />
           <circle cx={lineX2} cy={baseline} r={3.5} fill={abstained ? T.abstain : T.accent} opacity={dotOpacity} />
+
+          {mark ? (
+            <g>
+              <line
+                x1={x(mark.value)}
+                y1={baseline - 14}
+                x2={x(mark.value)}
+                y2={baseline + 5}
+                stroke={T.textFaint}
+                strokeWidth={1.5}
+              />
+              <text x={x(mark.value)} y={baseline - 20} fill={T.textFaint} fontSize={17} textAnchor="middle">
+                {mark.label}
+              </text>
+            </g>
+          ) : null}
         </svg>
 
         {!abstained ? (

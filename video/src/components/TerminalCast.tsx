@@ -10,16 +10,20 @@
  *
  * Supports asciicast v2 (absolute event times) and v3 (intervals between
  * events); the header's `version` picks the reader.
+ *
+ * Cast data is imported from src/data/casts/<id>.json (capture/emit-cast-json.mjs),
+ * not fetched at render time: a `<Sequence premountFor>` window — exactly the
+ * frames the camera's shove between beats covers — does not reliably block on
+ * a `delayRender` started during premount, so a runtime fetch left the
+ * incoming beat blank for the length of the shove. A synchronous import has
+ * nothing to wait for.
  */
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  continueRender,
-  delayRender,
-  staticFile,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import React, { useMemo } from "react";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 import { T } from "../theme";
+import askCastJson from "../data/casts/ask.json";
+import emptyRunCastJson from "../data/casts/empty_run.json";
+import runTraceCastJson from "../data/casts/run_trace.json";
 
 const ESC = "\x1b";
 
@@ -43,22 +47,11 @@ export interface Cast {
   duration: number;
 }
 
-export const parseCast = (text: string): Cast => {
-  const lines = text.split("\n").filter((l) => l.trim().length > 0);
-  const header = JSON.parse(lines[0]!) as CastHeader;
-  const events: CastEvent[] = [];
-  let clock = 0;
-  for (const line of lines.slice(1)) {
-    const row = JSON.parse(line) as [number, string, string];
-    // v2 stores absolute times; v3 stores the interval since the last event.
-    clock = header.version >= 3 ? clock + row[0] : row[0];
-    events.push({ t: clock, kind: row[1], data: row[2] });
-  }
-  return {
-    header,
-    events,
-    duration: events.length ? events[events.length - 1]!.t : 0,
-  };
+/** Pre-parsed by capture/emit-cast-json.mjs; add a new id to both places. */
+const CASTS: Record<string, Cast> = {
+  ask: askCastJson as Cast,
+  empty_run: emptyRunCastJson as Cast,
+  run_trace: runTraceCastJson as Cast,
 };
 
 /**
@@ -213,25 +206,13 @@ export const TerminalCast: React.FC<TerminalCastProps> = ({
 }) => {
   const frame = useCurrentFrame() - startFrame;
   const { fps } = useVideoConfig();
-  const [cast, setCast] = useState<Cast | null>(null);
-  const [handle] = useState(() => delayRender(`cast ${src}`));
-
-  useEffect(() => {
-    fetch(staticFile(`casts/${src}.cast`))
-      .then((r) => r.text())
-      .then((t) => {
-        setCast(parseCast(t));
-        continueRender(handle);
-      })
-      .catch((e) => {
-        throw new Error(`could not read casts/${src}.cast: ${String(e)}`);
-      });
-  }, [src, handle]);
+  const cast = CASTS[src];
+  if (!cast) {
+    throw new Error(`no src/data/casts/${src}.json — run capture/emit-cast-json.mjs`);
+  }
 
   const castTime = Math.max(0, (frame / fps) * speed);
-  const grid = useMemo(() => (cast ? screenAt(cast, castTime) : null), [cast, castTime]);
-
-  if (!cast || !grid) return null;
+  const grid = useMemo(() => screenAt(cast, castTime), [cast, castTime]);
 
   const height = rows ?? usedRows(grid);
   const shown = grid.slice(0, height);

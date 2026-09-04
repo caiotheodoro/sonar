@@ -1,31 +1,63 @@
 /**
- * Beat 6: the outro. Repository URL and the `#monid` hashtag, with the price
- * that died and the measured cost beside it one last time.
+ * Beat 6: the outro. Beat 1's two read-lines, replayed verbatim — the same
+ * axis, the same gesture, no arrow and no strikethrough standing in for the
+ * argument. Then the repository and the hashtag.
  */
 import React from "react";
-import { interpolate, useCurrentFrame } from "remotion";
-import { BeatPlaceholder } from "../components/BeatPlaceholder";
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { ReadLine } from "../components/ReadLine";
 import { usd, usdWhole } from "../data/results";
-import { PUBLISHED, RESULTS } from "../manifest";
+import { PUBLISHED, RESULTS, cueFrame } from "../manifest";
 import { T } from "../theme";
 
 const { incumbent, totals } = RESULTS.receipt;
+const DOMAIN: [number, number] = [0, incumbent.priceUsdMonth];
 
 export const SceneOutro: React.FC = () => {
   const frame = useCurrentFrame();
-  const links = interpolate(frame, [20, 42], [0, 1], {
+  const linksAt = cueFrame("outro", 0) + 30;
+  const links = interpolate(frame, [linksAt, linksAt + 22], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
   return (
-    <BeatPlaceholder id="outro">
-      <div style={{ fontFamily: T.mono, fontSize: 44, color: T.text }}>
-        {usdWhole(incumbent.priceUsdMonth)} a month, replaced for {usd(totals.totalUsd)}.
+    <AbsoluteFill style={{ padding: "0 140px", justifyContent: "center" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 56 }}>
+        <div style={{ opacity: 0.55 }}>
+          <ReadLine
+            label={`${incumbent.name}, per month`}
+            value={incumbent.priceUsdMonth}
+            domain={DOMAIN}
+            format={usdWhole}
+            startFrame={cueFrame("outro", 0)}
+            width={1300}
+          />
+        </div>
+        <ReadLine
+          label="replaced by this brief"
+          value={totals.totalUsd}
+          domain={DOMAIN}
+          format={usd}
+          startFrame={cueFrame("outro", 0)}
+          width={1300}
+          emphasis
+        />
       </div>
-      <div style={{ opacity: links, marginTop: 60, display: "flex", gap: 60, fontFamily: T.mono, fontSize: 30 }}>
+
+      <div
+        style={{
+          opacity: links,
+          transform: `translateY(${(1 - links) * 10}px)`,
+          marginTop: 70,
+          display: "flex",
+          gap: 60,
+          fontFamily: T.mono,
+          fontSize: 30,
+        }}
+      >
         <span style={{ color: T.text }}>{PUBLISHED.code}</span>
         <span style={{ color: T.accent }}>{PUBLISHED.hashtag}</span>
       </div>
-    </BeatPlaceholder>
+    </AbsoluteFill>
   );
 };

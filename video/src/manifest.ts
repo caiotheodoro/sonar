@@ -190,6 +190,21 @@ if (TOTAL_FRAMES > MAX_FRAMES) {
   );
 }
 
+/**
+ * The scene-local frame at which the `index`-th cue of `sceneId` starts.
+ * Scenes run inside a `<Sequence from={from(i)})>`, which rebases
+ * `useCurrentFrame()` to 0 at the scene's own start; a scene's own
+ * animations key off this, in cue order, rather than a typed offset, so
+ * a re-timed narration reflows sub-beat timing along with the scene cut.
+ */
+export const cueFrame = (sceneId: SceneId, index: number): number => {
+  const cues = captions.filter((c) => c.scene === sceneId);
+  const cue = cues[index];
+  if (!cue) throw new Error(`src/data/narration.json: scene "${sceneId}" has no cue ${index}`);
+  const sceneIndex = scenes.findIndex((s) => s.id === sceneId);
+  return Math.round((cue.startMs / 1000) * FPS) - from(sceneIndex);
+};
+
 /** Frames into the video at which the narration starts. */
 export const voiceOffset = 15;
 

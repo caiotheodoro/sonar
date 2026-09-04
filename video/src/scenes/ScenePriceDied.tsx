@@ -1,47 +1,44 @@
 /**
- * Beat 1, the first five seconds: what died. The incumbent's monthly list
- * price on the left, the receipt's measured total on the right, both read off
- * results/demo/receipt.json. The hackathon requires exactly this pairing on
- * screen; it is the first thing a judge sees.
+ * Beat 1, the first five-odd seconds: what died. Two read-lines on the same
+ * axis — the incumbent's monthly list price drawn full width, then this
+ * brief's measured total, which barely leaves zero. No verdict word here; it
+ * is earned in the receipt beat. The camera never cuts to get here: this is
+ * simply the top of the tape.
  */
 import React from "react";
-import { BeatPlaceholder } from "../components/BeatPlaceholder";
+import { AbsoluteFill } from "remotion";
+import { ReadLine } from "../components/ReadLine";
 import { Source } from "../components/DataPanel";
 import { usd, usdWhole } from "../data/results";
-import { RESULTS } from "../manifest";
-import { T, VERDICT } from "../theme";
+import { RESULTS, cueFrame } from "../manifest";
 
-const { incumbent, totals, verdict } = RESULTS.receipt;
-
-const Figure: React.FC<{ label: string; value: string; colour: string }> = ({
-  label,
-  value,
-  colour,
-}) => (
-  <div style={{ flex: 1 }}>
-    <div style={{ fontFamily: T.font, fontSize: 28, color: T.textMuted }}>{label}</div>
-    <div
-      style={{
-        fontFamily: T.mono,
-        fontSize: 140,
-        fontWeight: 700,
-        letterSpacing: "-0.03em",
-        lineHeight: 1,
-        color: colour,
-        marginTop: 12,
-      }}
-    >
-      {value}
-    </div>
-  </div>
-);
+const { incumbent, totals } = RESULTS.receipt;
+const DOMAIN: [number, number] = [0, incumbent.priceUsdMonth];
 
 export const ScenePriceDied: React.FC = () => (
-  <BeatPlaceholder id="price-died">
-    <div style={{ display: "flex", gap: 80, alignItems: "flex-end", width: 1600 }}>
-      <Figure label={`${incumbent.name}, per month`} value={usdWhole(incumbent.priceUsdMonth)} colour={T.textFaint} />
-      <Figure label="this brief, measured" value={usd(totals.totalUsd)} colour={VERDICT.RECONCILED} />
+  <AbsoluteFill style={{ padding: "0 140px", justifyContent: "center" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 70 }}>
+      <ReadLine
+        label={`${incumbent.name}, per month`}
+        value={incumbent.priceUsdMonth}
+        domain={DOMAIN}
+        format={usdWhole}
+        startFrame={cueFrame("price-died", 0)}
+        width={1500}
+      />
+      <ReadLine
+        label="this brief, measured"
+        value={totals.totalUsd}
+        domain={DOMAIN}
+        format={usd}
+        startFrame={cueFrame("price-died", 1)}
+        width={1500}
+        emphasis
+      />
     </div>
-    <Source file="results/demo/receipt.json" detail={`incumbent.price_usd_month · totals.total_usd · verdict ${verdict}`} />
-  </BeatPlaceholder>
+    <Source
+      file="results/demo/receipt.json"
+      detail="incumbent.price_usd_month · totals.total_usd"
+    />
+  </AbsoluteFill>
 );
