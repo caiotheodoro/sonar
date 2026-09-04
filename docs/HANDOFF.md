@@ -204,9 +204,16 @@ key 2 in the 2026-09-02 21:09 UTC solo run — this is not a blip.
 `BLOCKED` is a pre-registered terminal abstention (error matrix), not
 retried. **W6.1 needs 6 Apify sources + TinyFish — it cannot run until
 Monid recovers.** A persistent health monitor (`sonar run --profile smoke
-Nubank`, $0 while BLOCKED, ~$0.28 when it works) re-checks every 10 min
+Nubank`, $0 while BLOCKED, ~$0.28 when it works) re-checks every 20 min
 and prints `APIFY HEALTHY -- fire W6.1` on recovery. Deadline is Sept 10;
 there is slack. Nothing to do but wait for Monid.
+
+Update: the outage was still ongoing at **21:00 UTC 2026-09-03 (~3h20m)**.
+One brief flicker to gateway `502` around 22:53 UTC, otherwise clean
+`BLOCKED` throughout. If Monid is still down on the next operator session,
+just re-run the two staged commands (W6.1 + Avenza) once the smoke canary
+passes — everything else (5 bug fixes, D017, voice/ask validation) is
+already committed and green.
 
 ### 2026-09-03 — wallet topped to $20; funded push to submission
 
