@@ -49,6 +49,8 @@ DOCS_THAT_CITE_PATHS = (
 # Artifacts later waves produce. A citation under one of these is checked the
 # moment the directory exists; until then the gate skips and says so.
 DEFERRED_PREFIXES: dict[str, str] = {
+    "results/demo/openai-usage.csv": "operator exports from platform.openai.com/usage for "
+    "the demo window (RED-TEAM 4); needs org api.usage.read scope, W6.2",
     "results/demo/": "frozen demo run, W6.1",
     "results/demo-empty/": "zero-mention brand receipt, W6.1",
     "results/handcheck/": "blind hand check, W6.3",

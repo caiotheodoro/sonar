@@ -1,0 +1,732 @@
+{
+  "share_of_voice": [
+    {
+      "brand": "Nubank",
+      "n": 68,
+      "n_clusters": 60,
+      "share": 0.2905982905982906,
+      "ci95": [
+        0.22566042176614576,
+        0.3603238866396761
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 63,
+      "n_clusters": 54,
+      "share": 0.2692307692307692,
+      "ci95": [
+        0.20434782608695654,
+        0.33760683760683763
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "C6 Bank",
+      "n": 37,
+      "n_clusters": 35,
+      "share": 0.1581196581196581,
+      "ci95": [
+        0.11016949152542373,
+        0.2109383241033755
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "PicPay",
+      "n": 66,
+      "n_clusters": 47,
+      "share": null,
+      "ci95": null,
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Nubank",
+      "n": 87,
+      "n_confirmed": 30,
+      "pos": 25,
+      "neg": 17,
+      "neu": 45,
+      "net": 0.09195402298850575,
+      "ci95": [
+        -0.06493506493506493,
+        0.24530478955007226
+      ],
+      "ci95_iid": [
+        -0.056338028169014086,
+        0.23809523809523808
+      ],
+      "design_effect": 1.1102516377686622,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 82,
+      "n_confirmed": 38,
+      "pos": 29,
+      "neg": 16,
+      "neu": 37,
+      "net": 0.15853658536585366,
+      "ci95": [
+        -0.011497594226142712,
+        0.3218390804597701
+      ],
+      "ci95_iid": [
+        0.0,
+        0.3181818181818182
+      ],
+      "design_effect": 1.097527671964907,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "C6 Bank",
+      "n": 38,
+      "n_confirmed": 29,
+      "pos": 12,
+      "neg": 15,
+      "neu": 11,
+      "net": -0.07894736842105263,
+      "ci95": [
+        -0.35899999999999976,
+        0.20454545454545456
+      ],
+      "ci95_iid": [
+        -0.34486074270557004,
+        0.19444444444444445
+      ],
+      "design_effect": 1.0919146867786718,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "PicPay",
+      "n": 66,
+      "n_confirmed": 29,
+      "pos": 31,
+      "neg": 6,
+      "neu": 29,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Nubank",
+      "source": "youtube",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 4,
+      "neg": 1,
+      "neu": 5,
+      "net": 0.3,
+      "ci95": [
+        -0.13357142857142645,
+        0.7142857142857143
+      ],
+      "ci95_iid": [
+        -0.14285714285714285,
+        0.7142857142857143
+      ],
+      "design_effect": 0.9784506944444396,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube_comment",
+      "n": 10,
+      "n_clusters": 6,
+      "pos": 5,
+      "neg": 2,
+      "neu": 3,
+      "net": 0.3,
+      "ci95": [
+        -0.3333333333333333,
+        0.8
+      ],
+      "ci95_iid": [
+        -0.25,
+        0.8
+      ],
+      "design_effect": 1.165028974552784,
+      "wow_scope": false
+    },
+    {
+      "brand": "Nubank",
+      "source": "tiktok",
+      "n": 29,
+      "n_clusters": 26,
+      "pos": 3,
+      "neg": 6,
+      "neu": 20,
+      "net": -0.10344827586206896,
+      "ci95": [
+        -0.3157894736842105,
+        0.12
+      ],
+      "ci95_iid": [
+        -0.3076923076923077,
+        0.10344827586206896
+      ],
+      "design_effect": 1.1234992212751602,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "instagram",
+      "n": 17,
+      "n_clusters": 16,
+      "pos": 5,
+      "neg": 2,
+      "neu": 10,
+      "net": 0.17647058823529413,
+      "ci95": [
+        -0.15789473684210525,
+        0.5
+      ],
+      "ci95_iid": [
+        -0.13333333333333333,
+        0.47058823529411764
+      ],
+      "design_effect": 1.186729513696003,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "google_maps",
+      "n": 2,
+      "n_clusters": 2,
+      "pos": 1,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.0,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube",
+      "n": 8,
+      "n_clusters": 8,
+      "pos": 3,
+      "neg": 1,
+      "neu": 4,
+      "net": 0.25,
+      "ci95": [
+        -0.25,
+        0.75
+      ],
+      "ci95_iid": [
+        -0.2727272727272727,
+        0.75
+      ],
+      "design_effect": 0.9560493827160493,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube_comment",
+      "n": 6,
+      "n_clusters": 3,
+      "pos": 1,
+      "neg": 3,
+      "neu": 2,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -0.5,
+        0.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        0.4
+      ],
+      "design_effect": 0.12755102040816327,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "tiktok",
+      "n": 25,
+      "n_clusters": 19,
+      "pos": 12,
+      "neg": 4,
+      "neu": 9,
+      "net": 0.32,
+      "ci95": [
+        -0.045454545454545456,
+        0.6111111111111112
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6111111111111112
+      ],
+      "design_effect": 1.1542927395669693,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "instagram",
+      "n": 20,
+      "n_clusters": 20,
+      "pos": 9,
+      "neg": 3,
+      "neu": 8,
+      "net": 0.3,
+      "ci95": [
+        -0.040041666666666295,
+        0.6086956521739131
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6111111111111112
+      ],
+      "design_effect": 1.126931200574332,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "google_maps",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 2,
+      "neg": 2,
+      "neu": 0,
+      "net": 0.0,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "n": 7,
+      "n_clusters": 7,
+      "pos": 2,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.2857142857142857,
+      "ci95": [
+        0.0,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6666666666666666
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "youtube_comment",
+      "n": 4,
+      "n_clusters": 3,
+      "pos": 3,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.5,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "tiktok",
+      "n": 1,
+      "n_clusters": 1,
+      "pos": 0,
+      "neg": 0,
+      "neu": 1,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "instagram",
+      "n": 11,
+      "n_clusters": 10,
+      "pos": 6,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.5454545454545454,
+      "ci95": [
+        0.2222222222222222,
+        0.9
+      ],
+      "ci95_iid": [
+        0.23076923076923078,
+        0.8461538461538461
+      ],
+      "design_effect": 1.2130574845679014,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "google_maps",
+      "n": 14,
+      "n_clusters": 14,
+      "pos": 1,
+      "neg": 13,
+      "neu": 0,
+      "net": -0.8571428571428571,
+      "ci95": [
+        -1.0,
+        -0.5
+      ],
+      "ci95_iid": [
+        -1.0,
+        -0.5
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "youtube",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 6,
+      "neg": 3,
+      "neu": 1,
+      "net": 0.3,
+      "ci95": [
+        -0.3333333333333333,
+        0.875
+      ],
+      "ci95_iid": [
+        -0.3333333333333333,
+        0.875
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "youtube_comment",
+      "n": 23,
+      "n_clusters": 9,
+      "pos": 10,
+      "neg": 1,
+      "neu": 12,
+      "net": 0.391304347826087,
+      "ci95": [
+        0.045454545454545456,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.14285714285714285,
+        0.6206896551724138
+      ],
+      "design_effect": 1.6901624531384236,
+      "wow_scope": false
+    },
+    {
+      "brand": "PicPay",
+      "source": "tiktok",
+      "n": 5,
+      "n_clusters": 4,
+      "pos": 3,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.4,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -0.5,
+        1.0
+      ],
+      "design_effect": 1.7777777777777777,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "instagram",
+      "n": 25,
+      "n_clusters": 21,
+      "pos": 10,
+      "neg": 0,
+      "neu": 15,
+      "net": 0.4,
+      "ci95": [
+        0.13043478260869565,
+        0.625
+      ],
+      "ci95_iid": [
+        0.21052631578947367,
+        0.6
+      ],
+      "design_effect": 1.6124672440731231,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "google_maps",
+      "n": 3,
+      "n_clusters": 3,
+      "pos": 2,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.3333333333333333,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    }
+  ],
+  "events": [
+    {
+      "brand": "C6 Bank",
+      "date": "2026-08-31",
+      "n": 8,
+      "n_clusters": 7,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.youtube.com/watch?v=-8uL4lxCMxU"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-01",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.instagram.com/p/DcwYckpm1PY"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-02",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.youtube.com/watch?v=QGRawLXqQ4Q"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-03",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Alymente Acquisition for Corporate Benefits",
+      "exhibit_url": "https://www.instagram.com/p/Dc0_F5dllXc"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-01",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Trainee Program Opportunities",
+      "exhibit_url": "https://www.tiktok.com/@stavoale_/video/7680683087230995733"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-02",
+      "n": 19,
+      "n_clusters": 18,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Career Milestones at Itaú",
+      "exhibit_url": "https://www.tiktok.com/@bruamilli/video/7679567956648545543"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-03",
+      "n": 20,
+      "n_clusters": 16,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Private Pension Investment Benefits",
+      "exhibit_url": "https://www.tiktok.com/@quintavisiontv/video/7681107095902604561"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-02",
+      "n": 10,
+      "n_clusters": 10,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Nubank Parque Naming Campaign",
+      "exhibit_url": "https://www.youtube.com/watch?v=q6BKFUT6tpk"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-03",
+      "n": 29,
+      "n_clusters": 23,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Concerns About Financial Changes",
+      "exhibit_url": "https://www.tiktok.com/@movimento.financeiro/video/7681451885395512597"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-04",
+      "n": 5,
+      "n_clusters": 3,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.reddit.com/r/farialimabets/comments/1w6pr4g/vou_ficar_com_nome_sujo_por_causa_do_cartão_de"
+    },
+    {
+      "brand": "PicPay",
+      "date": "2026-08-24",
+      "n": 6,
+      "n_clusters": 6,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Second-Quarter Profit Growth",
+      "exhibit_url": "https://www.tiktok.com/@joaopblanco/video/7677589543440239879"
+    }
+  ],
+  "window": {
+    "current": {
+      "start": "2026-08-28T03:38:00Z",
+      "end": "2026-09-04T03:38:00Z"
+    },
+    "previous": {
+      "start": "2026-08-21T03:38:00Z",
+      "end": "2026-08-28T03:38:00Z"
+    }
+  }
+}

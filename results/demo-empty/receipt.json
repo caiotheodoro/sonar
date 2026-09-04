@@ -1,0 +1,353 @@
+{
+  "schema_rev": "1.1.2",
+  "sonar_rev": "0.1.0+3e78c61",
+  "session_id": "20260904T035438Z-zephyrium-bank-3a3600",
+  "timestamps": {
+    "started_at": "2026-09-04T03:54:38Z",
+    "finished_at": "2026-09-04T03:56:34Z",
+    "reconciled_at": "2026-09-04T03:56:34Z"
+  },
+  "replay": false,
+  "verdict": "RECONCILED",
+  "query": {
+    "brand": "Zephyrium Bank",
+    "brand_aliases": [],
+    "brand_hint": null,
+    "competitors": [],
+    "window_days": 14,
+    "profile": "full",
+    "sources": [
+      "reddit",
+      "youtube",
+      "youtube_comment",
+      "tiktok",
+      "instagram",
+      "google_maps",
+      "facebook",
+      "trustpilot",
+      "g2",
+      "news"
+    ]
+  },
+  "runs": [
+    {
+      "local_seq": 1,
+      "run_id": "01M1N8VRMSQM66BX2WV4F1JAS1",
+      "provider": "apify",
+      "endpoint": "/trudax/reddit-scraper-lite",
+      "brand": "Zephyrium Bank",
+      "source": "reddit",
+      "input_digest": "11f07daf89f3c652ee23998c",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:56:32Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 19,
+      "estimate_usd": 0.248,
+      "cost_usd": 0.1483,
+      "billed_units": 19,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 2,
+      "run_id": "01M1N8VRN7HQHW8PT168TKAG0K",
+      "provider": "apify",
+      "endpoint": "/streamers/youtube-scraper",
+      "brand": "Zephyrium Bank",
+      "source": "youtube",
+      "input_digest": "56ff15a109da35902d6ca5ca",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:54:46Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 1,
+      "estimate_usd": 0.045,
+      "cost_usd": 0.0045,
+      "billed_units": 1,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 3,
+      "run_id": "01M1N8VRN85GR86PC5HCA4WZNJ",
+      "provider": "apify",
+      "endpoint": "/apidojo/tiktok-scraper",
+      "brand": "Zephyrium Bank",
+      "source": "tiktok",
+      "input_digest": "34000e87da52439a7e417069",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:54:55Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 40,
+      "estimate_usd": 0.018,
+      "cost_usd": 0.018,
+      "billed_units": 40,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 4,
+      "run_id": "01M1N8VRMTRETET6JAZCTF7QMA",
+      "provider": "apify",
+      "endpoint": "/apify/instagram-hashtag-scraper",
+      "brand": "Zephyrium Bank",
+      "source": "instagram",
+      "input_digest": "6e2f89dc8280f4fc66033d58",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:54:46Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 1,
+      "estimate_usd": 0.00345,
+      "cost_usd": 0.00345,
+      "billed_units": 1,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 5,
+      "run_id": "01M1N8VRN60BZAS473ZSJ0KG1D",
+      "provider": "apify",
+      "endpoint": "/compass/google-maps-reviews-scraper",
+      "brand": "Zephyrium Bank",
+      "source": "google_maps",
+      "input_digest": "b1c01bbf2596f1eef2d11f58",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:55:05Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 0,
+      "estimate_usd": 0.03375,
+      "cost_usd": 0.0,
+      "billed_units": 0,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 6,
+      "run_id": "01M1N8VRNAB3XZ0S6C8WC8WYMK",
+      "provider": "apify",
+      "endpoint": "/apify/facebook-reviews-scraper",
+      "brand": "Zephyrium Bank",
+      "source": "facebook",
+      "input_digest": "835f85f2a0f3c84674da2cf6",
+      "submitted_at": "2026-09-04T03:54:38Z",
+      "completed_at": "2026-09-04T03:54:46Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 1,
+      "estimate_usd": 0.091,
+      "cost_usd": 0.004,
+      "billed_units": 1,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 7,
+      "run_id": "01M1N8W0PF9CZQEBYXPFMQ497W",
+      "provider": "trustpilot",
+      "endpoint": "/search_companies",
+      "brand": "Zephyrium Bank",
+      "source": "trustpilot",
+      "input_digest": "e21ff106f366e13f4c53440b",
+      "submitted_at": "2026-09-04T03:54:46Z",
+      "completed_at": "2026-09-04T03:54:54Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 0,
+      "estimate_usd": 0.03,
+      "cost_usd": 0.03,
+      "billed_units": 1,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 8,
+      "run_id": "01M1N8W0TDC40CZ0RQZS2X10RB",
+      "provider": "g2",
+      "endpoint": "/search_software",
+      "brand": "Zephyrium Bank",
+      "source": "g2",
+      "input_digest": "f9febf4291a15be47c14644f",
+      "submitted_at": "2026-09-04T03:54:46Z",
+      "completed_at": "2026-09-04T03:54:55Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 0,
+      "estimate_usd": 0.02,
+      "cost_usd": 0.02,
+      "billed_units": 1,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    },
+    {
+      "local_seq": 9,
+      "run_id": "01M1N8W0WKNRD23RDE1BX127DV",
+      "provider": "tinyfish",
+      "endpoint": "/search",
+      "brand": "Zephyrium Bank",
+      "source": "news",
+      "input_digest": "b3eaeb8cb7c0bcdbb9e2a31e",
+      "submitted_at": "2026-09-04T03:54:46Z",
+      "completed_at": "2026-09-04T03:54:53Z",
+      "status": "COMPLETED",
+      "provider_http_status": 200,
+      "n_results": 0,
+      "estimate_usd": 0.0,
+      "cost_usd": 0.0,
+      "billed_units": 0,
+      "cost_source": "/v1/runs",
+      "attempts": 1,
+      "error": null
+    }
+  ],
+  "totals": {
+    "monid_usd": 0.22824999999999998,
+    "monid_runs": 9,
+    "monid_runs_billed": 7,
+    "monid_runs_zero_results": 4,
+    "monid_runs_failed": 0,
+    "llm_usd": 0.0,
+    "llm_calls": {
+      "classify": 0,
+      "tiebreak": 0,
+      "embed": 0,
+      "name_topic": 0,
+      "narrate": 0,
+      "ask": 0
+    },
+    "llm_tokens": 0,
+    "elevenlabs_usd": 0.0,
+    "total_usd": 0.22824999999999998
+  },
+  "reconciliation": {
+    "fetched_at": "2026-09-04T03:56:34Z",
+    "n_listed_in_window": 9,
+    "unmatched_remote_run_ids": [],
+    "unreconciled_local_seqs": []
+  },
+  "incumbent": {
+    "name": "Brand24 Team",
+    "price_usd_month": 349,
+    "url": "https://brand24.com/prices",
+    "checked_at": "2026-09-02",
+    "mentions_quota": 10000
+  },
+  "comparison": {
+    "briefs_per_month_assumed": 4,
+    "sonar_usd_month_equiv": 0.9129999999999999,
+    "ratio": 382.2562979189486,
+    "mentions_this_brief": 0
+  },
+  "mentions": {
+    "fetched": 0,
+    "deduped": 0,
+    "labelled": 0,
+    "excluded_with_reason": {
+      "not_about_brand": 0,
+      "irrelevant_label": 0,
+      "refused": 0,
+      "unparseable": 0,
+      "error": 0,
+      "dedup_native_id": 0,
+      "dedup_url": 0,
+      "dedup_text": 0
+    },
+    "by_source": {},
+    "by_brand": {}
+  },
+  "audit": {
+    "n_sample": 0,
+    "n_agree": 0,
+    "agreement": null,
+    "tiebreak_calls": 0,
+    "tiebreak_overflow": 0
+  },
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "reddit",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "youtube",
+      "reason": "empty",
+      "detail": "local_seq 2: 1 item(s), all provider errors: NO_VIDEOS"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "youtube_comment",
+      "reason": "empty",
+      "detail": "no videos to fetch comments for"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "tiktok",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "instagram",
+      "reason": "schema_drift",
+      "detail": "local_seq 4: apify /apify/instagram-hashtag-scraper: item 0: required key 'caption' absent; raw saved 4.json"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "google_maps",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 6: 1 item(s), all provider errors: not_available"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "news",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    }
+  ],
+  "what_could_not_be_checked": [
+    "X/Twitter: no Monid endpoint",
+    "reddit: 19 result(s) skipped, no brand match"
+  ],
+  "content_digest": "72f602efcd3750a4970967ced4e103af143bde9309161635cf508469791dc3ef"
+}

@@ -1,0 +1,527 @@
+[
+  {
+    "topic_id": "c6-bank-01",
+    "brand": "C6 Bank",
+    "name": "CDB and Investment Withdrawals",
+    "n": 4,
+    "n_clusters": 4,
+    "share": 0.10526315789473684,
+    "net": 0.5,
+    "ci95": [
+      0.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "2d13e2a04794999458d2b2a2",
+      "0b72cfbd3613490eedaa34e9",
+      "7372c2cefb764aae5c9617d7"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "c6-bank-02",
+    "brand": "C6 Bank",
+    "name": "Alymente Acquisition for Corporate Benefits",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.07894736842105263,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "deda574c88a67d4ab9b5addb",
+      "4aa3f2e8861a19042a368347",
+      "c59e5fab167df85d3f9a0f80"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "c6-bank-03",
+    "brand": "C6 Bank",
+    "name": "Banking Service and App Issues",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.07894736842105263,
+    "net": -1.0,
+    "ci95": [
+      -1.0,
+      -1.0
+    ],
+    "exemplar_mention_ids": [
+      "a0d6d0536d22747801ff4203",
+      "a4df44bd132a130acba7d672",
+      "fed40bb2619f4fef2aeec2a3"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-01",
+    "brand": "Itaú",
+    "name": "Itaú Personnalité Credit Cards",
+    "n": 4,
+    "n_clusters": 4,
+    "share": 0.04878048780487805,
+    "net": 0.0,
+    "ci95": [
+      -0.75,
+      0.75
+    ],
+    "exemplar_mention_ids": [
+      "8f612cbd03f77fee08a72ce4",
+      "c0dbb06e5fb1a82aa0303f6b",
+      "8408c0dd4133793c95db419f"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-02",
+    "brand": "Itaú",
+    "name": "Valparaíso Branch Robbery",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.036585365853658534,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "ef5e7078b1fa6f5feb3917c8",
+      "f8fccc11f967a887773c897d",
+      "3c81e0cfc41ca0479b9b59e0"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-03",
+    "brand": "Itaú",
+    "name": "Career Milestones at Itaú",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.036585365853658534,
+    "net": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "52de08067efb5eaa88bd50b0",
+      "9bc45fa3bb008196c3c6891e",
+      "caa4a4145525238bc64bd91d"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-04",
+    "brand": "Itaú",
+    "name": "Corporate Internship Applications",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.036585365853658534,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "f90e14902c26e60768fd47a6",
+      "5b466dde0e3deee7e1dea064",
+      "59801f14391d70ec0daaf113"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-05",
+    "brand": "Itaú",
+    "name": "Trainee Program Opportunities",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.036585365853658534,
+    "net": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "cbad536b67740d1eb1ccd097",
+      "569e50c1ac894bd9a71ec81d",
+      "b03257fa5c706120304599ce"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "itau-06",
+    "brand": "Itaú",
+    "name": "Private Pension Investment Benefits",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.036585365853658534,
+    "net": 0.3333333333333333,
+    "ci95": [
+      0.0,
+      0.5
+    ],
+    "exemplar_mention_ids": [
+      "d358a10e17d54db850a1e845",
+      "9077dd18ecc597270aacc9a5",
+      "fba4ba758b0f20ede488b04a"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-01",
+    "brand": "Nubank",
+    "name": "Nubank's Billion-Dollar Profit Growth",
+    "n": 4,
+    "n_clusters": 4,
+    "share": 0.04597701149425287,
+    "net": 0.5,
+    "ci95": [
+      0.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "d39438a335b55075a8b3cb47",
+      "5a9283d41c338892cc2a0f37",
+      "713a8ea5896b0e477af56eeb"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-02",
+    "brand": "Nubank",
+    "name": "Nubank Parque Naming Campaign",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.034482758620689655,
+    "net": 0.3333333333333333,
+    "ci95": [
+      0.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "d5d2e603bfb96e3631cdba2f",
+      "8953b5a81e20eedcc612101b",
+      "01f4b1c1f323c265490df9ab"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-03",
+    "brand": "Nubank",
+    "name": "Nubank Account Usage",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.034482758620689655,
+    "net": 0.6666666666666666,
+    "ci95": [
+      0.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "b7a18b34a4ac6350234032e1",
+      "0b4d2a544cea32efd6de3c49",
+      "504134b4232f8fa79b37af40"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-04",
+    "brand": "Nubank",
+    "name": "Investing Through Nubank",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.034482758620689655,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "ad39e6c499e7329fdbb12e50",
+      "443a3bcdfeafc2eb1e39d758",
+      "10c62df3c83c924260301621"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-05",
+    "brand": "Nubank",
+    "name": "Nubank Credit Card Debt and Details",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.034482758620689655,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "9fdbf9ca3e61d12d3b3770aa",
+      "2989467d136de2c475511cc7",
+      "6411f4af333050c2f071e705"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-06",
+    "brand": "Nubank",
+    "name": "Concerns About Financial Changes",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.034482758620689655,
+    "net": -0.6666666666666666,
+    "ci95": [
+      -1.0,
+      -0.5
+    ],
+    "exemplar_mention_ids": [
+      "852c68e0a32df53330c9ca10",
+      "12057feeb08994a6af2ec178",
+      "869a013ebf67a852f1be9fff"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-07",
+    "brand": "Nubank",
+    "name": "Editable Fake Banking Interface",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.034482758620689655,
+    "net": -1.0,
+    "ci95": [
+      -1.0,
+      -1.0
+    ],
+    "exemplar_mention_ids": [
+      "a0ee1e2612fb139056778e2c",
+      "4587b0c0cea0519cd719fd8f",
+      "49357c93d9cbb002f4fbaa58"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-08",
+    "brand": "Nubank",
+    "name": "Nubank Loan Simulations and Rates",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.034482758620689655,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "a5a55a21cfad72bb6b532414",
+      "b2f28aadd3438ea91a349790",
+      "a3a3aba86f3ac192b006e143"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "picpay-01",
+    "brand": "PicPay",
+    "name": "Credit Approval and Terms Updates",
+    "n": 16,
+    "n_clusters": 8,
+    "share": 0.24242424242424243,
+    "net": 0.375,
+    "ci95": [
+      0.05555555555555555,
+      0.7333333333333333
+    ],
+    "exemplar_mention_ids": [
+      "12cb65bcfb8b3361a54e96cd",
+      "34c3fd19afe79e3148c13e90",
+      "0666f520a043179fcc9cce8d"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "picpay-02",
+    "brand": "PicPay",
+    "name": "New Features and Black Card",
+    "n": 9,
+    "n_clusters": 9,
+    "share": 0.13636363636363635,
+    "net": 0.2222222222222222,
+    "ci95": [
+      -0.4444444444444444,
+      0.7777777777777778
+    ],
+    "exemplar_mention_ids": [
+      "0c4c906ea24a84e379517af1",
+      "010a086555df1a3fc0e887c4",
+      "50d63f07182f75704fd4bbdc"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "picpay-03",
+    "brand": "PicPay",
+    "name": "Second-Quarter Profit Growth",
+    "n": 5,
+    "n_clusters": 5,
+    "share": 0.07575757575757576,
+    "net": 0.2,
+    "ci95": [
+      0.0,
+      0.6
+    ],
+    "exemplar_mention_ids": [
+      "47cb75168c398676707c8088",
+      "6ccbc46a00af6a41fc8b2d12",
+      "0cdd65034b51c77262e7575f"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "picpay-04",
+    "brand": "PicPay",
+    "name": "Credit Card Use and Billing",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.045454545454545456,
+    "net": 0.3333333333333333,
+    "ci95": [
+      -1.0,
+      1.0
+    ],
+    "exemplar_mention_ids": [
+      "22bd4b030fd01c2675a950cf",
+      "2f72656daf2f34ccfaea5cc4",
+      "f0fe3a193787df16cbd7c1fe"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  }
+]

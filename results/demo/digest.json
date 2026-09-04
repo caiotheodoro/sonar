@@ -1,0 +1,1913 @@
+{
+  "brand": "Nubank",
+  "competitors": [
+    "Itaú",
+    "C6 Bank",
+    "PicPay"
+  ],
+  "window": {
+    "current": {
+      "start": "2026-08-28T03:38:00Z",
+      "end": "2026-09-04T03:38:00Z"
+    },
+    "previous": {
+      "start": "2026-08-21T03:38:00Z",
+      "end": "2026-08-28T03:38:00Z"
+    }
+  },
+  "share_of_voice": [
+    {
+      "brand": "Nubank",
+      "n": 68,
+      "n_clusters": 60,
+      "share": 0.2905982905982906,
+      "ci95": [
+        0.22566042176614576,
+        0.3603238866396761
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 63,
+      "n_clusters": 54,
+      "share": 0.2692307692307692,
+      "ci95": [
+        0.20434782608695654,
+        0.33760683760683763
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "C6 Bank",
+      "n": 37,
+      "n_clusters": 35,
+      "share": 0.1581196581196581,
+      "ci95": [
+        0.11016949152542373,
+        0.2109383241033755
+      ],
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "PicPay",
+      "n": 66,
+      "n_clusters": 47,
+      "share": null,
+      "ci95": null,
+      "basis_sources": [
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Nubank",
+      "n": 87,
+      "n_confirmed": 30,
+      "pos": 25,
+      "neg": 17,
+      "neu": 45,
+      "net": 0.09195402298850575,
+      "ci95": [
+        -0.06493506493506493,
+        0.24530478955007226
+      ],
+      "ci95_iid": [
+        -0.056338028169014086,
+        0.23809523809523808
+      ],
+      "design_effect": 1.1102516377686622,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 82,
+      "n_confirmed": 38,
+      "pos": 29,
+      "neg": 16,
+      "neu": 37,
+      "net": 0.15853658536585366,
+      "ci95": [
+        -0.011497594226142712,
+        0.3218390804597701
+      ],
+      "ci95_iid": [
+        0.0,
+        0.3181818181818182
+      ],
+      "design_effect": 1.097527671964907,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "C6 Bank",
+      "n": 38,
+      "n_confirmed": 29,
+      "pos": 12,
+      "neg": 15,
+      "neu": 11,
+      "net": -0.07894736842105263,
+      "ci95": [
+        -0.35899999999999976,
+        0.20454545454545456
+      ],
+      "ci95_iid": [
+        -0.34486074270557004,
+        0.19444444444444445
+      ],
+      "design_effect": 1.0919146867786718,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "PicPay",
+      "n": 66,
+      "n_confirmed": 29,
+      "pos": 31,
+      "neg": 6,
+      "neu": 29,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Nubank",
+      "source": "youtube",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 4,
+      "neg": 1,
+      "neu": 5,
+      "net": 0.3,
+      "ci95": [
+        -0.13357142857142645,
+        0.7142857142857143
+      ],
+      "ci95_iid": [
+        -0.14285714285714285,
+        0.7142857142857143
+      ],
+      "design_effect": 0.9784506944444396,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube_comment",
+      "n": 10,
+      "n_clusters": 6,
+      "pos": 5,
+      "neg": 2,
+      "neu": 3,
+      "net": 0.3,
+      "ci95": [
+        -0.3333333333333333,
+        0.8
+      ],
+      "ci95_iid": [
+        -0.25,
+        0.8
+      ],
+      "design_effect": 1.165028974552784,
+      "wow_scope": false
+    },
+    {
+      "brand": "Nubank",
+      "source": "tiktok",
+      "n": 29,
+      "n_clusters": 26,
+      "pos": 3,
+      "neg": 6,
+      "neu": 20,
+      "net": -0.10344827586206896,
+      "ci95": [
+        -0.3157894736842105,
+        0.12
+      ],
+      "ci95_iid": [
+        -0.3076923076923077,
+        0.10344827586206896
+      ],
+      "design_effect": 1.1234992212751602,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "instagram",
+      "n": 17,
+      "n_clusters": 16,
+      "pos": 5,
+      "neg": 2,
+      "neu": 10,
+      "net": 0.17647058823529413,
+      "ci95": [
+        -0.15789473684210525,
+        0.5
+      ],
+      "ci95_iid": [
+        -0.13333333333333333,
+        0.47058823529411764
+      ],
+      "design_effect": 1.186729513696003,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "google_maps",
+      "n": 2,
+      "n_clusters": 2,
+      "pos": 1,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.0,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube",
+      "n": 8,
+      "n_clusters": 8,
+      "pos": 3,
+      "neg": 1,
+      "neu": 4,
+      "net": 0.25,
+      "ci95": [
+        -0.25,
+        0.75
+      ],
+      "ci95_iid": [
+        -0.2727272727272727,
+        0.75
+      ],
+      "design_effect": 0.9560493827160493,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube_comment",
+      "n": 6,
+      "n_clusters": 3,
+      "pos": 1,
+      "neg": 3,
+      "neu": 2,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -0.5,
+        0.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        0.4
+      ],
+      "design_effect": 0.12755102040816327,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "tiktok",
+      "n": 25,
+      "n_clusters": 19,
+      "pos": 12,
+      "neg": 4,
+      "neu": 9,
+      "net": 0.32,
+      "ci95": [
+        -0.045454545454545456,
+        0.6111111111111112
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6111111111111112
+      ],
+      "design_effect": 1.1542927395669693,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "instagram",
+      "n": 20,
+      "n_clusters": 20,
+      "pos": 9,
+      "neg": 3,
+      "neu": 8,
+      "net": 0.3,
+      "ci95": [
+        -0.040041666666666295,
+        0.6086956521739131
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6111111111111112
+      ],
+      "design_effect": 1.126931200574332,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "google_maps",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 2,
+      "neg": 2,
+      "neu": 0,
+      "net": 0.0,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "n": 7,
+      "n_clusters": 7,
+      "pos": 2,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.2857142857142857,
+      "ci95": [
+        0.0,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6666666666666666
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "youtube_comment",
+      "n": 4,
+      "n_clusters": 3,
+      "pos": 3,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.5,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "tiktok",
+      "n": 1,
+      "n_clusters": 1,
+      "pos": 0,
+      "neg": 0,
+      "neu": 1,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "instagram",
+      "n": 11,
+      "n_clusters": 10,
+      "pos": 6,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.5454545454545454,
+      "ci95": [
+        0.2222222222222222,
+        0.9
+      ],
+      "ci95_iid": [
+        0.23076923076923078,
+        0.8461538461538461
+      ],
+      "design_effect": 1.2130574845679014,
+      "wow_scope": true
+    },
+    {
+      "brand": "C6 Bank",
+      "source": "google_maps",
+      "n": 14,
+      "n_clusters": 14,
+      "pos": 1,
+      "neg": 13,
+      "neu": 0,
+      "net": -0.8571428571428571,
+      "ci95": [
+        -1.0,
+        -0.5
+      ],
+      "ci95_iid": [
+        -1.0,
+        -0.5
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "youtube",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 6,
+      "neg": 3,
+      "neu": 1,
+      "net": 0.3,
+      "ci95": [
+        -0.3333333333333333,
+        0.875
+      ],
+      "ci95_iid": [
+        -0.3333333333333333,
+        0.875
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "youtube_comment",
+      "n": 23,
+      "n_clusters": 9,
+      "pos": 10,
+      "neg": 1,
+      "neu": 12,
+      "net": 0.391304347826087,
+      "ci95": [
+        0.045454545454545456,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.14285714285714285,
+        0.6206896551724138
+      ],
+      "design_effect": 1.6901624531384236,
+      "wow_scope": false
+    },
+    {
+      "brand": "PicPay",
+      "source": "tiktok",
+      "n": 5,
+      "n_clusters": 4,
+      "pos": 3,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.4,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -0.5,
+        1.0
+      ],
+      "design_effect": 1.7777777777777777,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "instagram",
+      "n": 25,
+      "n_clusters": 21,
+      "pos": 10,
+      "neg": 0,
+      "neu": 15,
+      "net": 0.4,
+      "ci95": [
+        0.13043478260869565,
+        0.625
+      ],
+      "ci95_iid": [
+        0.21052631578947367,
+        0.6
+      ],
+      "design_effect": 1.6124672440731231,
+      "wow_scope": true
+    },
+    {
+      "brand": "PicPay",
+      "source": "google_maps",
+      "n": 3,
+      "n_clusters": 3,
+      "pos": 2,
+      "neg": 1,
+      "neu": 0,
+      "net": 0.3333333333333333,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "c6-bank-01",
+      "brand": "C6 Bank",
+      "name": "CDB and Investment Withdrawals",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.10526315789473684,
+      "net": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "2d13e2a04794999458d2b2a2",
+        "0b72cfbd3613490eedaa34e9",
+        "7372c2cefb764aae5c9617d7"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "c6-bank-02",
+      "brand": "C6 Bank",
+      "name": "Alymente Acquisition for Corporate Benefits",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.07894736842105263,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "deda574c88a67d4ab9b5addb",
+        "4aa3f2e8861a19042a368347",
+        "c59e5fab167df85d3f9a0f80"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "c6-bank-03",
+      "brand": "C6 Bank",
+      "name": "Banking Service and App Issues",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.07894736842105263,
+      "net": -1.0,
+      "ci95": [
+        -1.0,
+        -1.0
+      ],
+      "exemplar_mention_ids": [
+        "a0d6d0536d22747801ff4203",
+        "a4df44bd132a130acba7d672",
+        "fed40bb2619f4fef2aeec2a3"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-01",
+      "brand": "Itaú",
+      "name": "Itaú Personnalité Credit Cards",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.04878048780487805,
+      "net": 0.0,
+      "ci95": [
+        -0.75,
+        0.75
+      ],
+      "exemplar_mention_ids": [
+        "8f612cbd03f77fee08a72ce4",
+        "c0dbb06e5fb1a82aa0303f6b",
+        "8408c0dd4133793c95db419f"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-02",
+      "brand": "Itaú",
+      "name": "Valparaíso Branch Robbery",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.036585365853658534,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "ef5e7078b1fa6f5feb3917c8",
+        "f8fccc11f967a887773c897d",
+        "3c81e0cfc41ca0479b9b59e0"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-03",
+      "brand": "Itaú",
+      "name": "Career Milestones at Itaú",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.036585365853658534,
+      "net": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "52de08067efb5eaa88bd50b0",
+        "9bc45fa3bb008196c3c6891e",
+        "caa4a4145525238bc64bd91d"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-04",
+      "brand": "Itaú",
+      "name": "Corporate Internship Applications",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.036585365853658534,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "f90e14902c26e60768fd47a6",
+        "5b466dde0e3deee7e1dea064",
+        "59801f14391d70ec0daaf113"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-05",
+      "brand": "Itaú",
+      "name": "Trainee Program Opportunities",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.036585365853658534,
+      "net": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "cbad536b67740d1eb1ccd097",
+        "569e50c1ac894bd9a71ec81d",
+        "b03257fa5c706120304599ce"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "itau-06",
+      "brand": "Itaú",
+      "name": "Private Pension Investment Benefits",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.036585365853658534,
+      "net": 0.3333333333333333,
+      "ci95": [
+        0.0,
+        0.5
+      ],
+      "exemplar_mention_ids": [
+        "d358a10e17d54db850a1e845",
+        "9077dd18ecc597270aacc9a5",
+        "fba4ba758b0f20ede488b04a"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-01",
+      "brand": "Nubank",
+      "name": "Nubank's Billion-Dollar Profit Growth",
+      "n": 4,
+      "n_clusters": 4,
+      "share": 0.04597701149425287,
+      "net": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "d39438a335b55075a8b3cb47",
+        "5a9283d41c338892cc2a0f37",
+        "713a8ea5896b0e477af56eeb"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-02",
+      "brand": "Nubank",
+      "name": "Nubank Parque Naming Campaign",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.034482758620689655,
+      "net": 0.3333333333333333,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "d5d2e603bfb96e3631cdba2f",
+        "8953b5a81e20eedcc612101b",
+        "01f4b1c1f323c265490df9ab"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-03",
+      "brand": "Nubank",
+      "name": "Nubank Account Usage",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.034482758620689655,
+      "net": 0.6666666666666666,
+      "ci95": [
+        0.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "b7a18b34a4ac6350234032e1",
+        "0b4d2a544cea32efd6de3c49",
+        "504134b4232f8fa79b37af40"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-04",
+      "brand": "Nubank",
+      "name": "Investing Through Nubank",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.034482758620689655,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "ad39e6c499e7329fdbb12e50",
+        "443a3bcdfeafc2eb1e39d758",
+        "10c62df3c83c924260301621"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-05",
+      "brand": "Nubank",
+      "name": "Nubank Credit Card Debt and Details",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.034482758620689655,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "9fdbf9ca3e61d12d3b3770aa",
+        "2989467d136de2c475511cc7",
+        "6411f4af333050c2f071e705"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-06",
+      "brand": "Nubank",
+      "name": "Concerns About Financial Changes",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.034482758620689655,
+      "net": -0.6666666666666666,
+      "ci95": [
+        -1.0,
+        -0.5
+      ],
+      "exemplar_mention_ids": [
+        "852c68e0a32df53330c9ca10",
+        "12057feeb08994a6af2ec178",
+        "869a013ebf67a852f1be9fff"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-07",
+      "brand": "Nubank",
+      "name": "Editable Fake Banking Interface",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.034482758620689655,
+      "net": -1.0,
+      "ci95": [
+        -1.0,
+        -1.0
+      ],
+      "exemplar_mention_ids": [
+        "a0ee1e2612fb139056778e2c",
+        "4587b0c0cea0519cd719fd8f",
+        "49357c93d9cbb002f4fbaa58"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-08",
+      "brand": "Nubank",
+      "name": "Nubank Loan Simulations and Rates",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.034482758620689655,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "a5a55a21cfad72bb6b532414",
+        "b2f28aadd3438ea91a349790",
+        "a3a3aba86f3ac192b006e143"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "picpay-01",
+      "brand": "PicPay",
+      "name": "Credit Approval and Terms Updates",
+      "n": 16,
+      "n_clusters": 8,
+      "share": 0.24242424242424243,
+      "net": 0.375,
+      "ci95": [
+        0.05555555555555555,
+        0.7333333333333333
+      ],
+      "exemplar_mention_ids": [
+        "12cb65bcfb8b3361a54e96cd",
+        "34c3fd19afe79e3148c13e90",
+        "0666f520a043179fcc9cce8d"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "picpay-02",
+      "brand": "PicPay",
+      "name": "New Features and Black Card",
+      "n": 9,
+      "n_clusters": 9,
+      "share": 0.13636363636363635,
+      "net": 0.2222222222222222,
+      "ci95": [
+        -0.4444444444444444,
+        0.7777777777777778
+      ],
+      "exemplar_mention_ids": [
+        "0c4c906ea24a84e379517af1",
+        "010a086555df1a3fc0e887c4",
+        "50d63f07182f75704fd4bbdc"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "picpay-03",
+      "brand": "PicPay",
+      "name": "Second-Quarter Profit Growth",
+      "n": 5,
+      "n_clusters": 5,
+      "share": 0.07575757575757576,
+      "net": 0.2,
+      "ci95": [
+        0.0,
+        0.6
+      ],
+      "exemplar_mention_ids": [
+        "47cb75168c398676707c8088",
+        "6ccbc46a00af6a41fc8b2d12",
+        "0cdd65034b51c77262e7575f"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "picpay-04",
+      "brand": "PicPay",
+      "name": "Credit Card Use and Billing",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.045454545454545456,
+      "net": 0.3333333333333333,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "exemplar_mention_ids": [
+        "22bd4b030fd01c2675a950cf",
+        "2f72656daf2f34ccfaea5cc4",
+        "f0fe3a193787df16cbd7c1fe"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    }
+  ],
+  "events": [
+    {
+      "brand": "C6 Bank",
+      "date": "2026-08-31",
+      "n": 8,
+      "n_clusters": 7,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.youtube.com/watch?v=-8uL4lxCMxU"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-01",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.instagram.com/p/DcwYckpm1PY"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-02",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "CDB and Investment Withdrawals",
+      "exhibit_url": "https://www.youtube.com/watch?v=QGRawLXqQ4Q"
+    },
+    {
+      "brand": "C6 Bank",
+      "date": "2026-09-03",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Alymente Acquisition for Corporate Benefits",
+      "exhibit_url": "https://www.instagram.com/p/Dc0_F5dllXc"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-01",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Trainee Program Opportunities",
+      "exhibit_url": "https://www.tiktok.com/@stavoale_/video/7680683087230995733"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-02",
+      "n": 19,
+      "n_clusters": 18,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Career Milestones at Itaú",
+      "exhibit_url": "https://www.tiktok.com/@bruamilli/video/7679567956648545543"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-03",
+      "n": 20,
+      "n_clusters": 16,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Private Pension Investment Benefits",
+      "exhibit_url": "https://www.tiktok.com/@quintavisiontv/video/7681107095902604561"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-02",
+      "n": 10,
+      "n_clusters": 10,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Nubank Parque Naming Campaign",
+      "exhibit_url": "https://www.youtube.com/watch?v=q6BKFUT6tpk"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-03",
+      "n": 29,
+      "n_clusters": 23,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Concerns About Financial Changes",
+      "exhibit_url": "https://www.tiktok.com/@movimento.financeiro/video/7681451885395512597"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-04",
+      "n": 5,
+      "n_clusters": 3,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.reddit.com/r/farialimabets/comments/1w6pr4g/vou_ficar_com_nome_sujo_por_causa_do_cartão_de"
+    },
+    {
+      "brand": "PicPay",
+      "date": "2026-08-24",
+      "n": 6,
+      "n_clusters": 6,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Second-Quarter Profit Growth",
+      "exhibit_url": "https://www.tiktok.com/@joaopblanco/video/7677589543440239879"
+    }
+  ],
+  "top_mentions": [
+    {
+      "mention_id": "5ad5164cb9ba8cab90f55158",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=-CJ1ydkcVZA",
+      "quote": "O segmento que faz valer a sua jornada.\n\nAproveite benefícios pensados para fazer suas escolhas e seu dinheiro valerem ainda mais. \n\n-----------------------------------------------------------------------------------------------------------",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-18T19:21:49Z",
+      "engagement_score": 36544183
+    },
+    {
+      "mention_id": "01f4b1c1f323c265490df9ab",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=q6BKFUT6tpk",
+      "quote": "Nubank Parque\n\nO estádio mudou de nome e Fred foi contratado para não deixar ninguém confundir.\n\n---------------------------------------------------------------------------------------------------------------------------\nQuer acompanhar tod",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T13:25:38Z",
+      "engagement_score": 4623785
+    },
+    {
+      "mention_id": "e13a7c151f1f38342f40bd8e",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=zNfT4bW2eH0",
+      "quote": "A ideia por trás do Nubank\n\nAntes de criar o Nubank, David Vélez já sabia que queria começar o próprio negócio. Ele veio de uma família de empreendedores na Colômbia, se apaixonou por tecnologia ainda adolescente, estudou no Vale do Silício",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-04T21:17:27Z",
+      "engagement_score": 871627
+    },
+    {
+      "mention_id": "a5a55a21cfad72bb6b532414",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@henri_invest/video/7680938396931427605",
+      "quote": "Olha só essa simulação #emprestimo #nubank #banco ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T14:03:56Z",
+      "engagement_score": 249605
+    },
+    {
+      "mention_id": "0dbd1fb8c2370ac560c6a68c",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@dinerofeliz/video/7670943850260729106",
+      "quote": "🚨 ¡Ya es oficial! Nu dejó de ser Sofipo y ahora opera como banco en México. Esto abre la puerta a nuevos productos como tarjetas premium, cashback, más beneficios e incluso categorías como Nu Croma o Nu Ultravioleta, tal como ya existen en ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-06T15:40:00Z",
+      "engagement_score": 187171
+    },
+    {
+      "mention_id": "e8e0cdfbd06f5fb50e34f103",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@luanacabral.daily/video/7677655653065723143",
+      "quote": "Esse vídeo é apenas um desabafo e um alerta pra quem tem conta na Nubank",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-24T17:45:14Z",
+      "engagement_score": 160416
+    },
+    {
+      "mention_id": "cf30627c3fa772cda515946f",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@nubank/video/7678777678958234887",
+      "quote": "#publi // vc já recebeu um e-mail suspeito? 🎣📧 #nubank #golpe #furada #phishing",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-27T18:19:17Z",
+      "engagement_score": 37255
+    },
+    {
+      "mention_id": "ba1d8e1336fa8be9e40f302a",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@bruamilli/video/7671431437676989703",
+      "quote": "Nubank Croma #nubank #investidoriniciante #finanças ",
+      "lang": "other",
+      "label": "neutral",
+      "published_at": "2026-08-08T10:00:00Z",
+      "engagement_score": 35808
+    },
+    {
+      "mention_id": "6c2ecf3b4c9b4022056ac865",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@inversiones.ald/video/7681021446860049685",
+      "quote": "NuBank México vuelve a autorizar NUEVOS aumentos",
+      "lang": "other",
+      "label": "neutral",
+      "published_at": "2026-09-02T19:26:18Z",
+      "engagement_score": 33688
+    },
+    {
+      "mention_id": "ad39e6c499e7329fdbb12e50",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=Q1LjS-oNAfE",
+      "quote": "🚨 NUBANK MUDOU: O QUE ACONTECE AGORA? (e o risco que ninguém falou)\n\n💰 Desafio Como investir em 2026. Mesmo Começando do Zero.\n📽️ | 3 Aulas ao Vivo aqui no Youtube\n📆 | 15 a 17 de SETEMBRO\n👇 | Inscreva-se grátis.\nhttps://bit.ly/l45-desafio-y",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-25T23:00:33Z",
+      "engagement_score": 30185
+    },
+    {
+      "mention_id": "8822c13ba0cb4734bb833927",
+      "brand": "Itaú",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=a0miwt8v18U",
+      "quote": "Para ser cliente Itaú solo necesitas de algunos minutos | Itaú Chile 🧡\n\nEstás a un par de minutos de obtener los beneficios del banco Itaú ⏱️. Haz el proceso completo desde tu celular ingresando awww.itau.cl. 🧡 No necesitas ir a una sucursa",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-05T23:52:43Z",
+      "engagement_score": 11670250
+    },
+    {
+      "mention_id": "d0488a94e83b9d09843dd764",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@ifoodbrasil/video/7679223214828162325",
+      "quote": "iFood + Itaú estão em uma turnê super exclusiva para te ajudar a registrar o melhores momentos do festival de um jeito super inesquecível. Só fica de olho para não perder! #iFoodNoRockinRio2026 *Exclusivo para assinantes Clube iFood e sujei",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-28T23:08:14Z",
+      "engagement_score": 9478524
+    },
+    {
+      "mention_id": "4590d7fd4fc0c6eb658a2f43",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@itau/video/7678080041435122965",
+      "quote": "Às vezes, tudo o que a criatividade precisa é de um empurrãozinho. Por isso, convidamos o @gabrielsa.art para conhecer a Pinacoteca. Para clientes Itaú, essa experiência fica ainda mais acessível, com 50% de desconto no ingresso. ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-25T21:12:05Z",
+      "engagement_score": 9178529
+    },
+    {
+      "mention_id": "a3d577293a44c09dcf7f5bb6",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@advogado_eduardo/video/7673874819821128967",
+      "quote": "Tentou sacar R$50 mil no Itaú e o gerente perguntou o que ia fazer com o dinheiro ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-14T13:13:42Z",
+      "engagement_score": 261391
+    },
+    {
+      "mention_id": "edef79653508819c7035c23f",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@excelencecod/video/7675155914093120788",
+      "quote": "Erro de digitação que virou bilhão: um número a mais transformou 6 milhões no Itaú em um valor bilionário. Não foi fraude, foi engano na hora de digitar — e o valor correto (bem menor) foi subido logo em seguida. #itau #bancos #historiareal",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-18T00:05:03Z",
+      "engagement_score": 128337
+    },
+    {
+      "mention_id": "b03257fa5c706120304599ce",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@itau/video/7678727768800038152",
+      "quote": "Plot twist de carreira: seu diploma não precisa definir o seu caminho. No Trainee Itaú, todas as graduações são bem-vindas. Inscreva-se! ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-27T15:05:34Z",
+      "engagement_score": 106645
+    },
+    {
+      "mention_id": "7f5b6b9d6119827d5ef06204",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@facu.mazzilli/video/7679611938745175316",
+      "quote": "Que pasó Itaú? Antes eras piola #itau #banco #uruguay #tarjeta #descuentos ",
+      "lang": "other",
+      "label": "negative",
+      "published_at": "2026-08-30T00:16:40Z",
+      "engagement_score": 96929
+    },
+    {
+      "mention_id": "733ce7963d9d42a1836f8931",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@tarjetasenuruguay/video/7678900548631842069",
+      "quote": "Malas noticias para algunos clientes de Itaú! 😬🤦‍♂️ #itau #uruguay #descuentos ",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-28T02:16:08Z",
+      "engagement_score": 71497
+    },
+    {
+      "mention_id": "3d059d995c5e5f1d2c581739",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@lucashensou/video/7676133485840485640",
+      "quote": "Tudo que o Cliente Itaú tem de Benefício no Rock in Rio! Você é cliente @Itaú ? Me segue pra mais dica!  #rockinrio #rockinrio2026 #festivalnotiktok #shows #fyp | Rock in Rio | Line-up RIR 2026 | Stray Kids no Brasil | Stray Kids no Rock in",
+      "lang": "other",
+      "label": "positive",
+      "published_at": "2026-08-20T15:18:26Z",
+      "engagement_score": 65010
+    },
+    {
+      "mention_id": "3a55a74e7ac8609ec18d6a91",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@rafaelamolas/video/7672885414885133589",
+      "quote": "Qual o melhor cartão de crédito do banco ITAÚ? Meu destaque vai para o Itaú The One - e o Azul Visa Infinite!  . Pontos que levei em consideração: pontuação, acesso a sala vip, anuidade e benefícios!  . . #itau #azul #cartaodecredito #ciaae",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-11T21:14:25Z",
+      "engagement_score": 36825
+    },
+    {
+      "mention_id": "15691afb7f40311bcd79b143",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=B5-TS-NtvRI",
+      "quote": "VISÃO GLOBAL | A CORRIDA DA IA E AS PERSPECTIVAS PARA OS MERCADOS\n\nAinda vale a pena investir em Inteligência Artificial (IA)? Onde estão hoje as principais oportunidades relacionadas à tecnologia e inovação? \n\nNeste episódio do Visão Globa",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-04T19:35:14Z",
+      "engagement_score": 6253
+    },
+    {
+      "mention_id": "0b72cfbd3613490eedaa34e9",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=-8uL4lxCMxU",
+      "quote": "C6 BANK| CDB CARTÃO DO CREDITO Do C6 BANK | Veja Tudo Sobre Essas mudanças!\n\nO C6 Bank vem trazendo mudanças importantes relacionadas ao CDB e ao cartão de crédito, e isso pode afetar a forma como clientes utilizam seus investimentos para c",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-31T21:00:37Z",
+      "engagement_score": 3786
+    },
+    {
+      "mention_id": "d223a2788c52ca0c00dc67eb",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=VZ3zmemo9IY",
+      "quote": "ONDE INVESTIR EM AGOSTO | ESTRATÉGIA MENSAL\n\nOs especialistas do C6 Bank se reuniram para montar a Estratégia Mensal. Esse é um conteúdo mensal para ajudar você a construir uma estratégia de investimentos diversificada a partir do cenário m",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-12T13:30:27Z",
+      "engagement_score": 704
+    },
+    {
+      "mention_id": "2d13e2a04794999458d2b2a2",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=3BjSQf8pVlo",
+      "quote": "CDB C6 Bank Vale a Pena? É Seguro investir no CDB do Banco C6?\n\nSerá que o CDB do C6 Bank que rende 102% do CDI é realmente seguro? Nesta análise completa, eu, Valder Rocha, mostro os números atualizados do banco, incluindo lucro recorrente",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-07T21:08:11Z",
+      "engagement_score": 612
+    },
+    {
+      "mention_id": "6d4969e4cc87765bfcc4b3d5",
+      "brand": "C6 Bank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@rm_milhas/video/7675316379276283143",
+      "quote": "💳 C6 Platinum: será que vale a pena? O C6 Platinum pode ser interessante para quem quer um cartão sem anuidade, com benefícios Mastercard Platinum e acúmulo de pontos Átomos. Mas atenção: para turbinar o acúmulo, existe o Plano C6 Platinum,",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-18T10:27:39Z",
+      "engagement_score": 303
+    },
+    {
+      "mention_id": "ec8cb301dcb71956a86d1a08",
+      "brand": "C6 Bank",
+      "source": "instagram",
+      "url": "https://www.instagram.com/p/DcwYckpm1PY",
+      "quote": "A família cresceu e uma nova história começou!\n \nHoje damos boas-vindas e celebramos a inauguração da carteira C6 Bank, a primeira carteira do segmento de Vendas da Siscom.\nUm passo importante que reforça nossa expansão, abre novos caminhos",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-09-01T19:10:54Z",
+      "engagement_score": 244
+    },
+    {
+      "mention_id": "d29f8538e248cddba19d014a",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=cJ1WV728PJs",
+      "quote": "EXCLUSIVO: Como ATIVAR A ISENÇÃO DE IMPOSTO da sua CONTA CDE - C6 BANK\n\nTrago de maneira EXCLUSIVA o passo a passo para conseguir ativar todos os seus investimentos da sua conta CDE do C6 Bank. Tesouro direto, ações e FII isento de Imposto ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-09-01T00:13:25Z",
+      "engagement_score": 187
+    },
+    {
+      "mention_id": "f8814c1d45f5eee67e375829",
+      "brand": "C6 Bank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=DqzwNl0WDYY",
+      "quote": "COMO CANCELAR CARTÃO NO C6 BANK – 2026\n\nComo cancelar cartão no C6 Bank em 2026? Neste tutorial completo e atualizado, você vai aprender como cancelar ou bloquear um cartão do C6 Bank pelo aplicativo. Veja como acessar a área de cartões, en",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-14T14:00:11Z",
+      "engagement_score": 156
+    },
+    {
+      "mention_id": "a26464500290558add693371",
+      "brand": "C6 Bank",
+      "source": "instagram",
+      "url": "https://www.instagram.com/p/Dcry857kfjR",
+      "quote": "Onboard Gestão | São Paulo – C6 Bank\n\nUma experiência incrível de muito aprendizado, troca e conexão!\n\nForam dias de imersão, fortalecendo conhecimentos sobre gestão de pessoas, liderança e cultura, além da oportunidade de ampliar o network",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-31T00:26:18Z",
+      "engagement_score": 50
+    },
+    {
+      "mention_id": "deda574c88a67d4ab9b5addb",
+      "brand": "C6 Bank",
+      "source": "instagram",
+      "url": "https://www.instagram.com/p/Dc0_F5dllXc",
+      "quote": "C6 BANK ESTREIA NO MERCADO DE BENEFÍCIOS\n\nO C6 Bank anunciou nesta quinta-feira (3) acordo para comprar a startup Alymente, movimento que marca a entrada do banco no mercado de benefícios corporativos, em linha com a estratégia de ampliar a",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-03T14:05:36Z",
+      "engagement_score": 48
+    },
+    {
+      "mention_id": "0d38bc1748338a263ee7cb17",
+      "brand": "PicPay",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@joaopblanco/video/7677589543440239879",
+      "quote": "Já pensou? Até 70 milhões de pessoas de olho no seu negócio 👀  @PicPay 💚 #PicPayEmpresas_c06c #PicPay #PicPayEmpresas publi ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-24T13:28:43Z",
+      "engagement_score": 2756077
+    },
+    {
+      "mention_id": "3aa50362767a2f9d51baf469",
+      "brand": "PicPay",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=47pfymKdljw",
+      "quote": "Ei, PJ. Quer até 70 milhões de potenciais clientes?\n\nAbra sua conta PJ no PicPay Empresas. Aqui você pode divulgar seu negócio de graça para os clientes PicPay. Baixe o aplicativo e comece a vender a mais.",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-19T18:16:53Z",
+      "engagement_score": 2494698
+    },
+    {
+      "mention_id": "c56d97188226f8ca7547ceea",
+      "brand": "PicPay",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@miriangizelle/video/7673870293995195656",
+      "quote": "você ativou a skin PJ e descobriu que o expediente não tem fim 💻😂 @PicPay  #PicPay_7a58 #PicPay #PicPayEmpresas",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-14T12:56:09Z",
+      "engagement_score": 2223672
+    },
+    {
+      "mention_id": "38debaf2212985ad8025b2b4",
+      "brand": "PicPay",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@ohigorbecker/video/7673685533171748104",
+      "quote": "VEMCOMIGOR??? Um dia na vida de um criador de conteúdo! Obrigado @PicPay pela parceria!  #PicPay_7a58 #PicPay #PicPayEmpresas",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-14T00:59:17Z",
+      "engagement_score": 1979722
+    },
+    {
+      "mention_id": "8cc48c6cee75e33970c8ca41",
+      "brand": "PicPay",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=Wh3M1IKLLwI",
+      "quote": "PicPay Tá Liberando Cartão BLACK! O Detalhe Você Só Descobre Depois!\n\nO PicPay está liberando o Cartão Black Epic para muitos clientes. Mas será que o PicPay Black Epic vale a pena? Neste vídeo eu mostro a oferta que apareceu no meu aplicat",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-20T22:01:36Z",
+      "engagement_score": 17633
+    },
+    {
+      "mention_id": "50d63f07182f75704fd4bbdc",
+      "brand": "PicPay",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=UUfi2jdEBDU",
+      "quote": "PicPay ENLOUQUECEU: Cartão BLACK que Humilha Nubank, Itaú e C6 Bank\n\nNão é patrocinado, mas o PicPay me ofereceu o cartão Black Epic e sinceramente, eu fiquei impressionado. Neste vídeo eu reajo aos benefícios desse cartão novo, comparo com",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-14T20:00:34Z",
+      "engagement_score": 10621
+    },
+    {
+      "mention_id": "86245ec310a60a42a95934c3",
+      "brand": "PicPay",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@habito.financeiro/video/7673669581398920468",
+      "quote": "COM APENAS R$500,00 REAIS POR MÊS NA PICPAY EU CONSEGUI CONQUISTAR MINHA APOSENTADORIA. #primopobre #investimentos #foryoupage❤️❤️ #liberdadefinanceira #controlefinanceiro ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-13T23:57:18Z",
+      "engagement_score": 5238
+    },
+    {
+      "mention_id": "338aa4c5524cfcdae721f2bf",
+      "brand": "PicPay",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=UEQBXw14SD4",
+      "quote": "O NOVO CONTRATO CARTÃO CRÉDITO PICPAY: Por que eles podem raspar sua conta agora!\n\nE aí, meus queridos e queridas da Atualizo! Vinícius Cardozo na área com um alerta gravíssimo para quem usa carteiras digitais! 📉☕ Canequinha na mão, porque ",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-09T15:00:14Z",
+      "engagement_score": 4220
+    },
+    {
+      "mention_id": "0c4c906ea24a84e379517af1",
+      "brand": "PicPay",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=ngCFlFwlkBA",
+      "quote": "😲 PICPAY ENLOQUECEU? Ele Conseguiu ISSO Na Conta Mesmo NEGATIVADO e deixou Todo Mundo Sem Entender!\n\nNeste vídeo, trago uma atualização impressionante sobre o PicPay que pegou todo mundo de surpresa! Um inscrito do canal compartilhou uma no",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-10T23:46:53Z",
+      "engagement_score": 3885
+    },
+    {
+      "mention_id": "193136ef86208092a278884f",
+      "brand": "PicPay",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@habito.financeiro/video/7680350031404190996",
+      "quote": "EU VI QUE A CAIXINHA DA NUBANK E O PICPAY É MELHOR QUE A POUPANÇA É VERDADE? #liberdadefinanceira #controlefinanceiro #primopobre #investimentos #foryoupage❤️❤️ ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-01T00:00:54Z",
+      "engagement_score": 3833
+    }
+  ],
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Nubank",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Nubank",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 18: 1 item(s), all provider errors: not_available"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "news",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "C6 Bank",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 27: 1 item(s), all provider errors: no_items"
+    },
+    {
+      "scope": "source",
+      "brand": "C6 Bank",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "C6 Bank",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "C6 Bank",
+      "source": "news",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "PicPay",
+      "source": "reddit",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "PicPay",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 38: 1 item(s), all provider errors: not_available"
+    },
+    {
+      "scope": "source",
+      "brand": "PicPay",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "PicPay",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "PicPay",
+      "source": "news",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=12 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=11 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Itaú",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=10 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Itaú",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=10 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "C6 Bank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=5 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "C6 Bank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=5 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "C6 Bank",
+      "source": "tiktok",
+      "reason": "degenerate",
+      "detail": "by_source tiktok net design_effect: iid ci95 has zero width"
+    },
+    {
+      "scope": "brand",
+      "brand": "PicPay",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=12 < 20 in current"
+    },
+    {
+      "scope": "brand",
+      "brand": "PicPay",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=12 < 20 in current"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "source": "x",
+      "reason": "unavailable",
+      "note": "X/Twitter has no Monid endpoint (verified 2026-09-02)"
+    }
+  ],
+  "cost": {
+    "verdict": "RECONCILED",
+    "totals": {
+      "monid_usd": 2.008775,
+      "monid_runs": 42,
+      "monid_runs_billed": 37,
+      "monid_runs_zero_results": 11,
+      "monid_runs_failed": 0,
+      "llm_usd": 0.19442277999999993,
+      "llm_calls": {
+        "classify": 6,
+        "tiebreak": 80,
+        "embed": 4,
+        "name_topic": 21,
+        "narrate": 1,
+        "ask": 0
+      },
+      "llm_tokens": 116171,
+      "elevenlabs_usd": 0.0265,
+      "total_usd": 2.20319778
+    }
+  },
+  "narration": {
+    "text": "Nubank led share of voice at 0.29, followed by Itaú at 0.27 and C6 Bank at 0.16. PicPay’s share is not enough data. Sentiment was positive for Nubank at a net 0.09 and Itaú at 0.16, while C6 Bank was negative at -0.08. PicPay sentiment is not enough data. All week-over-week verdicts abstained, so there is not enough data to call a change. The top topic was PicPay’s Credit Approval and Terms Updates, with a share of 0.24 and net sentiment of 0.38. Cost was 2.17 USD, marked partial: 1.98 USD for Monid and 0.19 USD for the LLM.",
+    "chars": 530,
+    "numbers_verified": false,
+    "mp3_path": "brief.mp3",
+    "local_seq": 42
+  }
+}
