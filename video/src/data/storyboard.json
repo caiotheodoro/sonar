@@ -1,5 +1,5 @@
 {
-  "_comment": "The cut, as data. Shots are contiguous hard cuts on the music's beat grid (src/data/beat-grid.json, 100 BPM = 600 ms a beat, 4 beats a bar); shot i ends where shot i+1 starts. Anchors resolve through src/timeline/resolve.mjs, which the gate imports too. Never type startMs by hand; use an anchor. Bars fall on beat indices 4k; act changes sit on bars, voice-led cuts may sit on the half-bar. narration.offsetMs places the Eva take so cue a2 (the seat price) ends just before KILLED and c1 (\"Rebuilt on Monid\") starts over the stamp. Text here is data-free: every figure on screen is read from results/ or external-facts.json by the component that draws it. Act A opens with a photo burst: six tight crops of the tracked Brand24 captures at one beat each, `flash: true` (one-frame plate flash, shutter). `sfx.volume` is the bus for every synthesised effect under public/sfx/.",
+  "_comment": "The cut, as data. Shots are contiguous hard cuts on the music's beat grid (src/data/beat-grid.json, 100 BPM = 600 ms a beat, 4 beats a bar); shot i ends where shot i+1 starts. Anchors resolve through src/timeline/resolve.mjs, which the gate imports too. Never type startMs by hand; use an anchor. Text here is data-free: every figure on screen is read from results/ or external-facts.json by the component that draws it. Acts A and C are drawn, not screenshotted: the shapes carry across the cuts (src/motion/geometry.ts holds the positions both sides share), and KILLED grows out of the price column the shot before it leaves standing.",
   "targetMs": 75000,
   "capMs": 90000,
   "minShotMs": 400,
@@ -36,246 +36,52 @@
         "SOCIAL LISTENING"
       ],
       "start": {
-        "ms": 0
+        "beat": 0
       }
     },
     {
       "id": "a1",
       "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-home",
-      "move": "push",
-      "facts": [
-        "brand24.sources"
-      ],
-      "plate": [
-        "BRAND24",
-        "HOME"
-      ],
+      "kind": "card",
+      "card": "source-grid",
       "start": {
         "beat": 2
       }
     },
     {
-      "id": "p1",
+      "id": "a2",
       "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-home",
-      "crop": {
-        "x": 600,
-        "y": 550,
-        "w": 800,
-        "h": 392
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "DASHBOARD"
-      ],
-      "start": {
-        "beat": 4
-      }
-    },
-    {
-      "id": "p2",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-sov",
-      "crop": {
-        "x": 870,
-        "y": 180,
-        "w": 560,
-        "h": 275
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "MENTIONS",
-        "REACH"
-      ],
-      "start": {
-        "beat": 5
-      }
-    },
-    {
-      "id": "p3",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-sov",
-      "crop": {
-        "x": 870,
-        "y": 320,
-        "w": 560,
-        "h": 275
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "SENTIMENT"
-      ],
+      "kind": "card",
+      "card": "mention-stream",
       "start": {
         "beat": 6
       }
     },
     {
-      "id": "p4",
+      "id": "a3",
       "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-ai",
-      "crop": {
-        "x": 610,
-        "y": 580,
-        "w": 600,
-        "h": 294
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "AI INSIGHTS"
-      ],
-      "start": {
-        "beat": 7
-      }
-    },
-    {
-      "id": "p5",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-ai",
-      "crop": {
-        "x": 1130,
-        "y": 590,
-        "w": 560,
-        "h": 275
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "POSITIVES"
-      ],
-      "start": {
-        "beat": 8
-      }
-    },
-    {
-      "id": "p6",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-pricing",
-      "crop": {
-        "x": 580,
-        "y": 300,
-        "w": 520,
-        "h": 255
-      },
-      "move": "hold",
-      "flash": true,
-      "plate": [
-        "BRAND24",
-        "TEAM SEAT"
-      ],
-      "start": {
-        "beat": 9
-      }
-    },
-    {
-      "id": "a2",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-mentions",
-      "move": "pan-down",
-      "plate": [
-        "BRAND24",
-        "MENTIONS"
-      ],
+      "kind": "card",
+      "card": "sentiment-split",
       "start": {
         "beat": 10
       }
     },
     {
-      "id": "a5",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-ai",
-      "move": "push",
-      "plate": [
-        "BRAND24",
-        "AI INSIGHTS"
-      ],
-      "start": {
-        "beat": 12
-      }
-    },
-    {
       "id": "a4",
       "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-sov",
-      "move": "hold",
-      "plate": [
-        "BRAND24",
-        "REACH",
-        "SENTIMENT"
-      ],
+      "kind": "card",
+      "card": "share-bars",
       "start": {
         "beat": 14
       }
     },
     {
-      "id": "a7",
+      "id": "a5",
       "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-pricing",
-      "move": "hold",
-      "plate": [
-        "BRAND24",
-        "PRICING"
-      ],
-      "start": {
-        "beat": 16
-      }
-    },
-    {
-      "id": "a6",
-      "act": "brand24",
-      "kind": "shot",
-      "src": "brand24-pricing",
-      "move": "zoom",
-      "zoom": [
-        1.0,
-        1.06
-      ],
-      "focus": {
-        "x": 700,
-        "y": 370
-      },
-      "highlight": {
-        "x": 592,
-        "y": 222,
-        "w": 250,
-        "h": 388
-      },
-      "facts": [
-        "brand24.price.team"
-      ],
-      "plate": [
-        "BRAND24",
-        "PRICING",
-        "TEAM SEAT"
-      ],
+      "kind": "card",
+      "card": "price-column",
       "start": {
         "beat": 18
-      },
-      "crop": {
-        "x": 320,
-        "y": 215,
-        "w": 780,
-        "h": 400
       }
     },
     {
@@ -290,6 +96,12 @@
         "2026-09"
       ],
       "statusStrip": false,
+      "wipe": {
+        "x": 64,
+        "y": 326,
+        "w": 300,
+        "h": 620
+      },
       "start": {
         "beat": 24
       }
@@ -297,92 +109,37 @@
     {
       "id": "c1",
       "act": "monid",
-      "kind": "shot",
-      "src": "monid-home",
-      "move": "push",
-      "facts": [
-        "monid.tools"
-      ],
-      "plate": [
-        "MONID",
-        "HOME"
-      ],
+      "kind": "card",
+      "card": "key-fan",
       "start": {
         "beat": 28
       }
     },
     {
-      "id": "c3",
+      "id": "c2",
       "act": "monid",
-      "kind": "shot",
-      "src": "monid-tools-social",
-      "move": "zoom",
-      "plate": [
-        "MONID",
-        "TOOLS",
-        "SOCIAL MEDIA"
-      ],
+      "kind": "card",
+      "card": "endpoint-fan",
       "start": {
         "beat": 32
-      },
-      "crop": {
-        "x": 360,
-        "y": 520,
-        "w": 1220,
-        "h": 625
-      },
-      "zoom": [
-        1.0,
-        1.08
-      ],
-      "focus": {
-        "x": 1000,
-        "y": 760
       }
     },
     {
-      "id": "c4",
+      "id": "c3",
       "act": "monid",
-      "kind": "shot",
-      "src": "monid-docs-run",
-      "move": "hold",
-      "plate": [
-        "MONID",
-        "DOCS",
-        "POST /v1/run"
-      ],
+      "kind": "card",
+      "card": "per-call-ledger",
       "start": {
         "beat": 38
       }
     },
     {
-      "id": "c5",
+      "id": "c4",
       "act": "monid",
-      "kind": "shot",
-      "src": "monid-tool-reddit",
-      "move": "zoom",
-      "plate": [
-        "MONID",
-        "TOOL",
-        "REDDIT",
-        "PER CALL"
-      ],
+      "kind": "card",
+      "card": "run-request",
       "start": {
         "beat": 42
-      },
-      "zoom": [
-        1.0,
-        1.06
-      ],
-      "focus": {
-        "x": 900,
-        "y": 700
-      },
-      "crop": {
-        "x": 360,
-        "y": 400,
-        "w": 1200,
-        "h": 615
       }
     },
     {

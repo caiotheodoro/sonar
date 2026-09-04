@@ -7,6 +7,7 @@ import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { displayFamily } from "../fonts";
 import { LAYOUT, MOTION, T, TYPE } from "../theme";
+import { ease } from "../motion/geometry";
 import { Plate } from "./Plate";
 import { Sfx } from "./Sfx";
 
@@ -16,7 +17,9 @@ export const Stamp: React.FC<{
   variant: "killed" | "title" | "ratio" | "outro" | "plate";
   text: string;
   plate?: string[];
-}> = ({ variant, text, plate }) => {
+  /** Rectangle the fill grows out of, so the cut continues the last shape. */
+  wipe?: { x: number; y: number; w: number; h: number };
+}> = ({ variant, text, plate, wipe }) => {
   const frame = useCurrentFrame();
   if (frame === 0 && variant !== "plate") return <AbsoluteFill style={{ background: T.ink }} />;
   const f = frame - 1;
@@ -32,12 +35,27 @@ export const Stamp: React.FC<{
   }
 
   const killed = variant === "killed";
+  const grow = wipe ? ease(f / 5) : 1;
   return (
     <>
     <Sfx src={killed ? "hit" : "stamp"} at={1} gain={killed ? 1 : 0.8} />
+    {killed && wipe && grow < 1 ? (
+      <AbsoluteFill style={{ background: T.ink }}>
+        <div
+          style={{
+            position: "absolute",
+            left: wipe.x * (1 - grow),
+            top: wipe.y * (1 - grow),
+            width: wipe.w + (1920 - wipe.w) * grow,
+            height: wipe.h + (1080 - wipe.h) * grow,
+            background: T.signal,
+          }}
+        />
+      </AbsoluteFill>
+    ) : null}
     <AbsoluteFill
       style={{
-        background: killed ? T.signal : T.ink,
+        background: killed ? (grow < 1 ? "transparent" : T.signal) : T.ink,
         transform: `translate(${shake}px, ${-shake / 2}px)`,
         padding: LAYOUT.margin,
         justifyContent: "space-between",

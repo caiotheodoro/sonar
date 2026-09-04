@@ -17,7 +17,7 @@ export const ShotView: React.FC<{ shot: ResolvedShot }> = ({ shot }) => {
     case "shot":
       return <Screenshot shot={s} durationInFrames={shot.durationInFrames} />;
     case "stamp":
-      return <Stamp variant={s.variant} text={s.text} plate={s.plate} />;
+      return <Stamp variant={s.variant} text={s.text} plate={s.plate} wipe={s.wipe} />;
     case "card": {
       const Card = CARDS[s.card as CardId];
       if (!Card) throw new Error(`storyboard shot "${s.id}": no card "${s.card}" in src/cards`);

@@ -60,6 +60,16 @@ outro. `components/CutTrack.tsx` adds a tick on every hard cut and a whoosh
 on every act change, from `TIMELINE`. One sound per visual event, none
 under a still frame.
 
+Acts A and C are drawn, not screenshotted. A shape survives each cut by
+being drawn at the same place on both sides of it, so the band the dots
+settle into is the band that splits, and the rows the fan lands on are the
+rows that grow prices; `src/motion/geometry.ts` holds every position both
+sides share, and `KILLED` grows out of the price column the shot before it
+leaves standing. The captures under `public/shots/` stay in the tree as the
+evidence behind the quoted third-party numbers (the gate still checks each
+is tracked, sized and reviewed), and `kind: "shot"` still works if a page
+ever needs to be shown again.
+
 Moves on a screenshot: `hold`, `push` (1 → 1.03), `pan-down`, `zoom`
 (`zoom: [from, to]` toward `focus`), `punch` (instant cut-in at `at`), and
 `flash` (one-frame plate flash with a shutter, for the photo burst). Act A
@@ -77,9 +87,9 @@ each cue lands on). Seven acts, twenty-seven shots:
 
 | Act | Shots | Shows | Source of every number |
 |---|---|---|---|
-| brand24 | `a0`–`a7`, `p1`–`p6` | plate `SUBJECT / BRAND24`; brand24.com home; a six-shot photo burst (dashboard, reach numbers, sentiment chart, AI insights panel, positives gauge, Team card) with shutters; features, AI insights, reach + sentiment panel; pricing wide, then a zoom onto the Team seat with its chip | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
+| brand24 | `a0`–`a5` | plate `SUBJECT / BRAND24`, then the product drawn rather than screenshotted: the source count striking on over a rule, mentions arriving as a field of dots to the Team seat's monthly quota, that field splitting into positive / neutral / negative lanes, the lanes standing up into share-of-voice columns, the columns collapsing into the seat price beside its keyword and mention limits | `results/demo/receipt.json` (`incumbent.price_usd_month`, `incumbent.mentions_quota`), `external-facts.json` (`brand24.sources`, `brand24.keywords.team`) | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
 | killed | `b1` | full-bleed `KILLED` on the bar line, `WE KILL / MONID HACKATHON` | — |
-| monid | `c1`, `c3`–`c5` | monid.ai home (tool-count chip), the tools catalogue filtered to social media and cropped to the platform cards sonar fetches, `POST /v1/run` in the API reference, the Reddit tool page cropped to its per-call prices | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
+| monid | `c1`–`c4` | one key throwing a fan of lines out to every endpoint the brief called; the fan landing on those endpoints with their result counts; the same rows growing their real billed cost to the Monid total; the call itself typed out, request, run id, verdict and price | `results/demo/receipt.json` (`runs[].endpoint`, `runs[].cost_usd`, `totals.monid_usd`), `external-facts.json` (`monid.tools`) | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
 | rebuild | `d0`–`d6` | `SONAR` stamp with the session id; the brief (brand, competitors, window, sources); the real `run_trace` cast at ×6; mentions by source; share of voice + sentiment with intervals; topics + two real citations + the X gap; the voice line | `results/demo/receipt.json`, `stats.json`, `digest.json`, `public/casts/run_trace.cast` |
 | receipt | `e1`–`e3` | receipt rows (runs, came-back-empty, failed, Monid, model, voice, total); the seat and the brief on one axis; the ratio, giant, with the 4-brief monthly figure | `results/demo/receipt.json` (`totals`, `comparison`, `incumbent`) |
 | honest | `f1`–`f2` | PicPay's share of voice abstains (grey dash, same gesture); the label audit read against the bar from `src/sonar/config.py` | `results/demo/stats.json`, `receipt.json` (`audit`), `src/data/repo-facts.json` (`auditBar`) |

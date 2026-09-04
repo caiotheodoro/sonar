@@ -70,6 +70,8 @@ export type ShotSpec =
       text: string;
       variant: "killed" | "title" | "ratio" | "outro" | "plate";
       plate?: string[];
+      /** The rectangle a `killed` fill grows out of; matches the last shot's shape. */
+      wipe?: { x: number; y: number; w: number; h: number };
     }
   | { kind: "card"; card: string }
   | {

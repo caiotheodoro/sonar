@@ -51,6 +51,12 @@ export const Card: React.FC<{
 /** Frames since `at`, clamped at 0; stagger helper. */
 export const useSince = (at: number): number => Math.max(0, useCurrentFrame() - at);
 
+/** A figure counting up over `frames`, eased. */
+export const useCountOver = (target: number, at: number, frames: number): number => {
+  const f = useSince(at);
+  return target * (1 - Math.pow(1 - Math.min(1, f / frames), 3));
+};
+
 /** A figure counting up over MOTION.countFrames. */
 export const useCount = (target: number, at = 0): number => {
   const f = useSince(at);
