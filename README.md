@@ -127,22 +127,31 @@ receipt under a `REPLAY` banner. Fresh-clone reproduction steps are in
 
 ## Price versus measured cost
 
-The side-by-side below is filled from `results/demo/receipt.json` once the
-demo run is frozen. Until then the sonar column is an open question.
+The side-by-side below is the frozen demo (`results/demo/receipt.json`,
+session `20260904T033800Z-nubank`, verdict `RECONCILED`): Nubank against
+Itaú, C6 Bank and PicPay, one `full` brief, 10,000 bootstrap resamples.
 
 | | Brand24 Team | sonar, one `full` brief |
 |---|---|---|
-| Price | $349 per month | measured in `results/demo/receipt.json`, totals block |
-| Mentions | 10,000 per month quota | `mentions.deduped` in the same receipt |
-| Failed and empty runs | not itemised | listed in `runs`, each with its cost |
-| Interval on every number | none published | 95% cluster bootstrap, 10,000 resamples |
-| Verdict | none | `RECONCILED`, or `sonar verify` fails |
+| Price | **$349 per month** | **$2.20** measured (`totals.total_usd`: $2.01 Monid + $0.19 OpenAI; the ElevenLabs voice run is $0.027 of the Monid figure, not additive) |
+| Monthly equivalent | $349 | **$8.81** at 4 briefs per month — a stated multiplication, `comparison.sonar_usd_month_equiv` |
+| Ratio | — | **39.6× cheaper** (`comparison.ratio`) |
+| Mentions | 10,000 per month quota | 348 fetched, 341 after dedup, all 341 labelled, this one brief |
+| Failed and empty runs | not itemised | 42 runs listed, 37 billed, 11 returned zero results, 0 failed — each with its cost |
+| Interval on every number | none published | 95% cluster bootstrap, 10,000 resamples; design effects 1.09–1.17 |
+| Verdict | none | `RECONCILED`, or `sonar verify results/demo/receipt.json` exits nonzero |
 
-**Open question OQ-README-1: measured cost of one `full` brief.** Resolved
-when the demo freeze lands `results/demo/receipt.json` with verdict
-`RECONCILED`; the number in that file's `totals.total_usd` replaces this
-paragraph, and the published-claims test fails if the README and the receipt
-disagree.
+Share of voice and net sentiment report for Nubank, Itaú and C6 Bank;
+PicPay had 12 relevant mentions in the current week and abstains. The
+week-over-week delta abstains for every brand: a first brief has no prior
+week to compare against (`docs/DECISIONS.md` D018). 21 topics, 11 events.
+
+**Pre-registered hypotheses (`docs/PRE-REGISTRATION.md`; published either
+way):** H1 all-in cost < $5 — **pass**, $2.20. H3 classifier–tiebreak
+agreement ≥ 0.85 — **0.84, not cleared** (21 of 25 audited). H4 a
+zero-mention brand still costs > $0 — **pass**, the Zephyrium Bank run
+(`results/demo-empty/`) fetched nothing and cost $0.23. H2 and H5 are in
+`docs/PRE-REGISTRATION.md` §Results.
 
 **Open question OQ-README-2: agreement on the blind hand check.** Resolved
 when the 50-label hand check under `results/handcheck/` is finished; the

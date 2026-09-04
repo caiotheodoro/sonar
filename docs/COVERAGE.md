@@ -28,7 +28,7 @@ demo without changing any status.
 | X | not covered | none | No X/Twitter endpoint in the Monid catalog as of 2026-09-02 (`docs/DECISIONS.md` D008). Registered `available=False` in the provider registry; listed first in `coverage_gaps` on every receipt. |
 | News | covered | `news` | `tinyfish /search` with `domain_type=news`, up to 3 pages per brand at $0, page text through `tinyfish /fetch`. Language reported as a stratum, never filtered. |
 | Blogs | not covered | none | No blog-specific endpoint in the source plan. `tinyfish /search` without the news filter would return blog posts but has no blog domain type, so results could not be labelled as blogs honestly. |
-| Reddit | covered | `reddit` | Posts and comments via `apify /trudax/reddit-scraper-lite` (`sort=new`, `time=week`, 40 per brand in `full`). Cluster key is the post id, so comment threads are one bootstrap unit. |
+| Reddit | covered | `reddit` | Posts and comments via `apify /trudax/reddit-scraper-lite` (`sort=new`, `time=month` since `docs/DECISIONS.md` D017 so the 14-day window's previous half is populated, 40 per brand in `full`). Cluster key is the post id, so comment threads are one bootstrap unit. |
 | LinkedIn | not covered | none | No LinkedIn adapter in the source plan and no keyword-search endpoint for LinkedIn was inspected in the Monid catalog. |
 | Medium | not covered | none | No Medium adapter in the source plan and no Medium endpoint inspected in the Monid catalog. |
 | Quora | not covered | none | No Quora adapter in the source plan and no Quora endpoint inspected in the Monid catalog. |
@@ -40,6 +40,31 @@ demo without changing any status.
 | Podcasts | not covered | none | No podcast adapter in the source plan; transcript search is not offered by any endpoint sonar calls. |
 
 Totals: 4 covered, 3 partial, 8 not covered, of 15 Brand24 sources.
+
+## Demo (measured)
+
+From the frozen demo (`results/demo/`, W6.1 — Nubank vs Itaú, C6 Bank,
+PicPay, one `full` brief). Mentions are the pre-dedup count across all
+four brands; cost is billed Monid USD over the four runs of that source.
+Status above is unchanged.
+
+| sonar source | Mentions (4 brands) | Billed | In `basis_sources`? |
+|---|---:|---:|---|
+| reddit | 69 | $0.9409 | **no** — abstained for PicPay (0 mentions), so it leaves the basis for every brand |
+| instagram | 86 | $0.1710 | yes |
+| tiktok | 68 | $0.0504 | yes |
+| youtube | 35 | $0.1800 | yes |
+| youtube_comment | 43 | $0.3893 | yes (excluded from WoW: no timestamps) |
+| google_maps | 36 | $0.0317 | yes |
+| facebook | 2 | $0.0190 | no — abstained `empty` for 3 of 4 brands |
+| trustpilot | 0 | $0.1200 | no — the company-search lookup found no entity for any brand |
+| g2 | 0 | $0.0800 | no — the software-search lookup found no product for any brand |
+| news | 2 | $0.0000 | no — `empty` for 3 of 4 brands ($0 endpoint) |
+
+The five `basis_sources` (instagram, tiktok, youtube, youtube_comment,
+google_maps) carry the demo's share of voice and net sentiment. reddit's
+69 mentions still feed topics and events, which are per-brand and do not
+use `basis_sources`.
 
 ## AI features
 

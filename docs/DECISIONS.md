@@ -802,4 +802,50 @@ then the level gate returns to both periods and the demo is re-run.
 
 ---
 
-*End of decisions. Next entry would be D019.*
+## D019 — Freeze the demo
+
+**Decision.** `results/demo/` and `results/demo-empty/` are frozen at:
+
+- **demo** — session `20260904T033800Z-nubank-53455a`, key 3, budget cap
+  raised. `sonar run --profile full Nubank --vs "Itaú" "C6 Bank" PicPay
+  --resamples 10000`. Verdict `RECONCILED`, `sonar verify` exits 0, 0
+  failed runs. 348 fetched / 341 deduped / 341 labelled. Nubank SoV 0.291
+  net +0.092; Itaú SoV 0.269 net +0.159; C6 Bank SoV 0.158 net −0.079;
+  PicPay abstains (12 relevant mentions in the current period). 21 topics,
+  11 events, WoW abstains for every brand. `total_usd` $2.2032
+  ($2.0088 Monid + $0.1944 OpenAI; ElevenLabs $0.0265 is a breakout of the
+  Monid figure). `comparison`: $8.81/month at 4 briefs, 39.6× the $349
+  incumbent.
+- **demo-empty** — session `20260904T035438Z-zephyrium-bank-3a3600`.
+  `sonar run --profile full "Zephyrium Bank" --no-voice`. A brand with
+  genuinely zero coverage: `mentions.fetched` = 0, verdict `RECONCILED`,
+  every source abstains `empty`, the receipt still lists all 9 runs with
+  their cost. `total_usd` $0.2282.
+
+**Hypotheses** (`docs/PRE-REGISTRATION.md` §Results): H1 **pass** ($2.20 <
+$5); H2 **partial** (`youtube_comment`/PicPay DE 1.69 ≥ 1.5; `reddit`
+unscored — it abstained for PicPay and left `basis_sources`); H3 **not
+cleared** (audit agreement 0.84, target 0.85 — 21 of 25); H4 **pass**
+(Zephyrium fetched 0, cost $0.23 > $0); H5 pending W6.3.
+
+**Rationale.** Original plan was Nubank vs Inter / C6 / Itaú. "Inter"
+collides with Inter Milan (42 % `not_about_brand`, A/W5.5) — replaced with
+PicPay. The demo run picked was the first `RECONCILED` full run with the
+budget cap raised and no concurrent Monid activity; two earlier full runs
+were partial (my probes in-window) or thin (mid-run budget exhaustion) and
+were discarded. `Zephyrium Bank` replaces the planned `Avenza` empty run:
+Avenza turned out to have 59 real mentions (SoV 1.0, net 0.66), so it does
+not exercise the zero-mention path H4 and the video's edge-case scene need.
+
+**Evidence.** `results/demo/receipt.json`, `results/demo-empty/receipt.json`
+(`sonar verify` both), `make check-claims` green (with
+`results/demo/openai-usage.csv` deferred to W6.2, RED-TEAM 4).
+
+**Reverses when.** A materially better full run becomes possible before the
+Sept 10 deadline (e.g. all four brands report, or `reddit` stays in
+`basis_sources`); then W6.1 is re-run and re-frozen through a new
+DECISIONS entry, never by editing `results/demo/`.
+
+---
+
+*End of decisions. Next entry would be D020.*

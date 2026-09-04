@@ -198,6 +198,26 @@ Precedence:
 
 ---
 
+## Results
+
+Measured on the frozen demo (`results/demo/`, session
+`20260904T033800Z-nubank`, verdict `RECONCILED`) and
+`results/demo-empty/` (Zephyrium Bank). Published whether or not the
+threshold is cleared.
+
+| Id | Threshold | Measured | Outcome |
+|---|---|---|---|
+| **H1** | all-in cost < $5 | `total_usd` = **$2.203** ($2.009 Monid + $0.194 OpenAI) | **pass** |
+| **H2** | design effect ≥ 1.5 on `reddit` and `youtube_comment` that meet minimums | `youtube_comment` / PicPay: n = 23, n_clusters = 9, **DE = 1.69** ≥ 1.5. `reddit` abstained for PicPay (0 mentions) and left `basis_sources` for every brand, so it has no `BySourceEntry` and is unscored. No other source–brand met n ≥ 20. | **partial** — the one qualifying measurement passes; `reddit` not measurable on this demo |
+| **H3** | agreement ≥ 0.85 | `audit.agreement` = **0.84** (21 of 25 audited rows agreed; `tiebreak_calls` 80) | **not cleared** |
+| **H4** | zero-mention brand costs > $0 | Zephyrium Bank: `mentions.fetched` = 0, `total_usd` = **$0.228** | **pass** |
+| **H5** | agreement ≥ 0.85 | blind hand check under `results/handcheck/` | **pending W6.3** |
+
+H3 missed by one audited row (22 of 25 would clear). No re-run: the audit
+sample is fixed at seed 777 and the estimand is reported as measured.
+
+---
+
 ## Threshold index
 
 The published-claims test asserts each of these equals the constant in
