@@ -1,0 +1,15 @@
+{
+  "url": "https://brand24.com/features/",
+  "captured_at": "2026-09-04",
+  "tool": "capture/shoot.mjs (playwright)",
+  "viewport": {
+    "width": 1920,
+    "height": 1080,
+    "dpr": 1
+  },
+  "width": 1920,
+  "height": 2400,
+  "full_page": true,
+  "pii_reviewed": true,
+  "redactions": []
+}

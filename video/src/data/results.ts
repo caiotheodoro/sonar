@@ -72,6 +72,8 @@ export interface Receipt {
   brand: string;
   competitors: string[];
   profile: string;
+  windowDays: number;
+  sources: string[];
   incumbent: Incumbent;
   totals: Totals;
   comparison: Comparison;
@@ -291,6 +293,8 @@ const readReceipt = (r: Reader): Receipt => ({
   brand: r.str("query.brand"),
   competitors: r.strings("query.competitors"),
   profile: r.str("query.profile"),
+  windowDays: r.int("query.window_days"),
+  sources: r.strings("query.sources"),
   incumbent: {
     name: r.str("incumbent.name"),
     priceUsdMonth: r.int("incumbent.price_usd_month"),

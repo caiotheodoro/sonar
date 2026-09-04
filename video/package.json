@@ -2,14 +2,21 @@
   "name": "sonar-video",
   "version": "1.0.0",
   "private": true,
-  "description": "Hackathon video for sonar. Every on-screen number is imported from ../results/demo/*.json.",
+  "description": "Hackathon video for sonar. Every on-screen number is imported from ../results/*.json or external-facts.json; every screenshot is a reviewed capture under public/shots.",
   "scripts": {
     "dev": "remotion studio",
     "render": "remotion render Sonar out/sonar.mp4",
     "slice": "remotion render Sonar out/slice.mp4 --frames=0-149",
     "still": "remotion still Sonar",
     "lint": "tsc --noEmit",
-    "shots": "node capture/check-shot-reality.mjs"
+    "shots": "node capture/check-shot-reality.mjs",
+    "preview": "remotion render Sonar out/preview.mp4 --scale 0.5",
+    "timeline": "node capture/resolve-timeline.mjs --report",
+    "cuts": "node capture/verify-cuts.mjs",
+    "shoot": "node capture/shoot.mjs",
+    "measure": "node capture/measure-cues.mjs",
+    "srt": "node capture/resolve-timeline.mjs --srt out/sonar.srt",
+    "collect": "node capture/collect-repo-facts.mjs && node capture/emit-cast-json.mjs && node capture/collect-shots.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.515",

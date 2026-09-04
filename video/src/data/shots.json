@@ -1,0 +1,68 @@
+{
+  "brand24-ai": {
+    "width": 1920,
+    "height": 2000,
+    "url": "https://brand24.com/ai-insights/",
+    "captured_at": "2026-09-04"
+  },
+  "brand24-home": {
+    "width": 1920,
+    "height": 2000,
+    "url": "https://brand24.com/",
+    "captured_at": "2026-09-04"
+  },
+  "brand24-mentions": {
+    "width": 1920,
+    "height": 2400,
+    "url": "https://brand24.com/features/",
+    "captured_at": "2026-09-04"
+  },
+  "brand24-pricing": {
+    "width": 1920,
+    "height": 1080,
+    "url": "https://brand24.com/prices/",
+    "captured_at": "2026-09-04"
+  },
+  "brand24-sentiment": {
+    "width": 1920,
+    "height": 1080,
+    "url": "https://brand24.com/features/",
+    "captured_at": "2026-09-04"
+  },
+  "brand24-sov": {
+    "width": 1920,
+    "height": 1080,
+    "url": "https://brand24.com/features/",
+    "captured_at": "2026-09-04"
+  },
+  "monid-docs-run": {
+    "width": 1920,
+    "height": 1080,
+    "url": "https://monid.ai/docs/api/overview",
+    "captured_at": "2026-09-04"
+  },
+  "monid-home": {
+    "width": 1920,
+    "height": 2000,
+    "url": "https://monid.ai/",
+    "captured_at": "2026-09-04"
+  },
+  "monid-tool-reddit": {
+    "width": 1920,
+    "height": 2000,
+    "url": "https://monid.ai/tools/reddit",
+    "captured_at": "2026-09-04"
+  },
+  "monid-tools-social": {
+    "width": 1920,
+    "height": 2200,
+    "url": "https://monid.ai/tools",
+    "captured_at": "2026-09-04"
+  },
+  "monid-tools": {
+    "width": 1920,
+    "height": 2400,
+    "url": "https://monid.ai/tools",
+    "captured_at": "2026-09-04"
+  }
+}

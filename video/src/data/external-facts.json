@@ -1,0 +1,12 @@
+{
+  "_comment": "Numbers the video shows that are NOT in results/. Each is a quotation of a third-party page, backed by a committed screenshot under public/shots and a source URL with the date it was read. The gates accept a narration or stamp number only if it is in results/ or here, and a fact here only if its shot is tracked and pii-reviewed.",
+  "facts": [
+    { "id": "brand24.price.individual", "value": 249, "display": "$249", "unit": "usd/month", "label": "Individual", "source_url": "https://brand24.com/prices/", "captured_at": "2026-09-04", "shot": "brand24-pricing" },
+    { "id": "brand24.price.team", "value": 349, "display": "$349", "unit": "usd/month", "label": "Team", "source_url": "https://brand24.com/prices/", "captured_at": "2026-09-04", "shot": "brand24-pricing" },
+    { "id": "brand24.price.pro", "value": 499, "display": "$499", "unit": "usd/month", "label": "Pro", "source_url": "https://brand24.com/prices/", "captured_at": "2026-09-04", "shot": "brand24-pricing" },
+    { "id": "brand24.price.business", "value": 699, "display": "$699", "unit": "usd/month", "label": "Business", "source_url": "https://brand24.com/prices/", "captured_at": "2026-09-04", "shot": "brand24-pricing" },
+    { "id": "brand24.price.enterprise", "value": 1499, "display": "$1,499", "unit": "usd/month", "label": "Enterprise, from", "source_url": "https://brand24.com/prices/", "captured_at": "2026-09-04", "shot": "brand24-pricing" },
+    { "id": "brand24.sources", "value": 25000000, "display": "25 million", "unit": "sources", "label": "online sources", "source_url": "https://brand24.com/", "captured_at": "2026-09-04", "shot": "brand24-home" },
+    { "id": "monid.tools", "value": 1700, "display": "1,700+", "unit": "tools", "label": "tools and APIs", "source_url": "https://monid.ai/", "captured_at": "2026-09-04", "shot": "monid-home" }
+  ]
+}

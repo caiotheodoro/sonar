@@ -28,4 +28,4 @@ demo:
 	@echo "demo: pending pipeline"
 
 video:
-	@echo "video: pending W7"
+	cd video && pnpm lint && pnpm collect && pnpm shots && pnpm render && pnpm srt

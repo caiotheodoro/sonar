@@ -2,14 +2,15 @@ import React from "react";
 import { Composition } from "remotion";
 import { Main } from "./Main";
 import { SocialCard } from "./scenes/SocialCard";
-import { FPS, HEIGHT, TOTAL_FRAMES, WIDTH } from "./manifest";
+import { FPS, HEIGHT, WIDTH } from "./manifest";
+import { TIMELINE } from "./timeline";
 
 export const RemotionRoot: React.FC = () => (
   <>
     <Composition
       id="Sonar"
       component={Main}
-      durationInFrames={TOTAL_FRAMES}
+      durationInFrames={TIMELINE.totalFrames}
       fps={FPS}
       width={WIDTH}
       height={HEIGHT}

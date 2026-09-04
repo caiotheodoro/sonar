@@ -1,0 +1,85 @@
+{
+  "_comment": "What capture/shoot.mjs captures. Viewport 1920\u00d71080 at DPR 1 so crop math in the storyboard is 1:1. fullPage shots are clipped to maxHeight. `redact` selectors are blurred before the screenshot; the sidecar records them. `scrollTo` is a CSS selector (or a pixel y) to bring into view first. `hide` selectors are display:none'd before every shot (cookie consent chrome, which is not the product); `click` is clicked first; `scrollTo` is a selector or a pixel y.",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "maxHeight": 3000,
+  "shots": [
+    {
+      "name": "brand24-home",
+      "url": "https://brand24.com/",
+      "fullPage": true,
+      "maxHeight": 2000
+    },
+    {
+      "name": "brand24-mentions",
+      "url": "https://brand24.com/features/",
+      "fullPage": true,
+      "maxHeight": 2400
+    },
+    {
+      "name": "brand24-sentiment",
+      "url": "https://brand24.com/features/",
+      "scrollTo": 8120,
+      "scrollBy": 0
+    },
+    {
+      "name": "brand24-sov",
+      "url": "https://brand24.com/features/",
+      "scrollTo": 760,
+      "scrollBy": 0
+    },
+    {
+      "name": "brand24-ai",
+      "url": "https://brand24.com/ai-insights/",
+      "fullPage": true,
+      "maxHeight": 2000
+    },
+    {
+      "name": "brand24-pricing",
+      "url": "https://brand24.com/prices/",
+      "click": "text=Monthly",
+      "scrollTo": 260,
+      "scrollBy": 0
+    },
+    {
+      "name": "monid-home",
+      "url": "https://monid.ai/",
+      "fullPage": true,
+      "maxHeight": 2000
+    },
+    {
+      "name": "monid-tools",
+      "url": "https://monid.ai/tools",
+      "fullPage": true,
+      "maxHeight": 2400
+    },
+    {
+      "name": "monid-tools-social",
+      "url": "https://monid.ai/tools",
+      "fullPage": true,
+      "maxHeight": 2400,
+      "waitMs": 3000,
+      "click": "text=Social Media"
+    },
+    {
+      "name": "monid-tool-reddit",
+      "url": "https://monid.ai/tools/reddit",
+      "fullPage": true,
+      "maxHeight": 2000,
+      "waitMs": 3000
+    },
+    {
+      "name": "monid-docs-run",
+      "url": "https://monid.ai/docs/api/overview",
+      "scrollTo": "text=POST /v1/run",
+      "scrollBy": -200
+    }
+  ],
+  "hide": [
+    "#onetrust-banner-sdk",
+    ".onetrust-pc-dark-filter",
+    "#onetrust-consent-sdk"
+  ]
+}

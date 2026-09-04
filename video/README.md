@@ -1,92 +1,126 @@
 # Sonar video
 
-The hackathon cut, built with Remotion from the assay pipeline. Every number on
-screen is imported from the frozen demo run under `results/demo/`
-(`receipt.json`, `stats.json`, `digest.json`) through the typed loader in
-`src/data/results.ts`; nothing in a scene is typed by hand. A missing file or a
-missing cited field stops the bundle before a frame is drawn.
+The hackathon cut, built with Remotion. Seventy-four seconds of hard cuts on
+the music's beat grid (the Eva take runs 69.6 s; the storyboard targeted 60): a tour of Brand24 as a product in its own screenshots, a
+`KILLED` stamp, Monid in its own screenshots, then how sonar rebuilt the
+feature set on Monid — every figure read from the frozen demo run under
+`results/demo/` and `results/demo-empty/` through the typed loader in
+`src/data/results.ts`, every third-party number quoted from
+`src/data/external-facts.json` with a reviewed screenshot as its citation.
+Nothing in a card is typed by hand. A missing file, a missing cited field, or
+a storyboard that does not resolve stops the bundle before a frame is drawn.
 
 ## Rules the cut has to satisfy
 
-- Sixty to ninety seconds, 1080p, captions burned in.
-- The first five seconds show what died: the incumbent's monthly price beside
-  the receipt's measured cost, side by side on screen.
-- A visible Monid call (the `POST /v1/run` trace).
+- Sixty to ninety seconds, 1080p. Captions ship as `out/sonar.srt` (the type
+  on screen carries every spoken line; nothing is burned in).
+- The incumbent's price beside the measured cost on screen (`price-vs-brief`).
+- A visible Monid call (`monid-docs-run`, then the `run_trace` cast).
 - `#monid` in the outro, with the repository URL.
+- Nothing negative said about the incumbent; the gate greps for it.
+
+## The system
+
+Three measured clocks, one resolver, no accumulated durations:
+
+| Clock | File | Written by |
+|---|---|---|
+| music beat grid | `src/data/beat-grid.json` | `capture/beat-grid.py` (numpy spectral flux; `--tap` to override) |
+| narration cues | `src/data/narration.json` (`startMs`/`endMs` are mp3-relative) | `capture/measure-cues.mjs` (ffmpeg silencedetect; N cues must give N segments) |
+| the cut | `src/data/storyboard.json` (anchors: `{ms}`, `{beat:i}`, `{hit:i}`, `{cue:id}`) | by hand |
+
+`src/timeline/resolve.mjs` turns anchors into absolute milliseconds and then
+frames in one function; Remotion (`src/timeline/index.ts`) and the gate
+(`capture/check-shot-reality.mjs`) import the same file, so the cut the
+renderer draws is the cut the gate checked.
+
+Look: true black, plate white, one signal orange spent in one place (the
+`KILLED` act, the price figures, an abstention's retract). Big Shoulders for
+stamps and act titles, Geist Mono for plates, specs, figures and the one
+terminal shot. Three gestures in the whole cut: the scan (a screenshot
+revealed top-to-bottom by one orange line), the slam (a stamp lands from 1.12×
+to 1× in four frames), the count (a figure runs up over ten frames). No fades.
 
 ## Shot list
 
-Timings below are measured from the real `public/narration.mp3` (Rachel runs
-slower than the 130 wpm the storyboard assumed — 127 wpm over 162 words is
-76.7 s of voice, not the ~64 s target); they sum to 82.2 s, leaving 7.8 s
-under the cap. Scene boundaries are not typed by hand: `src/manifest.ts`
-derives them from `narration.json`'s measured `startMs`/`endMs` per scene
-(`sceneDurationsFrames`), so a re-timed narration reflows this table's actual
-cut automatically, though the numbers below still have to be updated by hand
-to describe it.
+`pnpm timeline` prints the resolved table (start, end, frames, and which shots
+each cue lands on). Seven acts, twenty-seven shots:
 
-| # | Beat | Scene id | Timing | Shows | Source of every number |
-|---|------|----------|-------:|-------|------------------------|
-| 1 | The price that died | `price-died` | 0–11.8 s | The incumbent's list price drawn full width, then this brief's measured total on the same axis — no verdict word yet | `results/demo/receipt.json` (`incumbent.price_usd_month`, `totals.total_usd`) |
-| 2 | Live `POST /v1/run` | `live-trace` | 11.8–20.6 s | A fresh `sonar run --trace`, replayed from `public/casts/run_trace.cast`; the status strip flips to `POST /v1/run ×1` | cast (W7.3) |
-| 3 | The receipt | `receipt` | 20.6–33.9 s | Receipt rows on the tape: run counts, the money split, then `verdict RECONCILED` (earned here); read-line ceremony for the `39.6×` ratio; `×N` counts to 42 | `results/demo/receipt.json` (`totals`, `comparison`, `mentions`, `audit`) |
-| 4 | `sonar ask` with citations | `ask` | 33.9–53.9 s | Share of voice for Nubank/Itaú/C6 as one static group; PicPay takes the read-line abstain gesture; a sentiment strip; then `public/casts/ask.cast` with `[1] [2]` docking to real mention URLs; a persistent `X/Twitter — unavailable` chip | cast (W7.3) and `results/demo/{stats,digest}.json` (`share_of_voice[]`+`ci95`, `sentiment[]`, `top_mentions[]`, `coverage_gaps[0]`) |
-| 5 | The zero-mention run | `empty-run` | 53.9–70.8 s | Zephyrium Bank from `public/casts/empty_run.cast`: `mentions.fetched → 0`, `verdict RECONCILED`, all 9 runs still billed; then the read-line for `audit 0.84` with a static tick at the `0.85` bar | cast (W7.3), `results/demo-empty/*` (RESULTS_EMPTY), `results/demo/receipt.json` (`audit.agreement`), `src/data/repo-facts.json` (`auditBar`) |
-| 6 | Outro | `outro` | 70.8–82.2 s | The two beat-1 read-lines replayed verbatim — price faint, cost amber; `github.com/caiotheodoro/sonar`, `#monid` | `results/demo/receipt.json` and `src/manifest.ts` (`PUBLISHED`) |
+| Act | Shots | Shows | Source of every number |
+|---|---|---|---|
+| brand24 | `a0`–`a6` | plate `SUBJECT / BRAND24`; brand24.com home, features (mentions, AI features, reach + sentiment panel), AI insights, pricing with the Team seat chipped | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
+| killed | `b1` | full-bleed `KILLED` on the bar line, `WE KILL / MONID HACKATHON` | — |
+| monid | `c1`–`c5` | monid.ai home (tool-count chip), tools, social-media tools, the Reddit tool page (per-call prices), `POST /v1/run` in the API reference | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
+| rebuild | `d0`–`d6` | `SONAR` stamp with the session id; the brief (brand, competitors, window, sources); the real `run_trace` cast at ×6; mentions by source; share of voice + sentiment with intervals; topics + two real citations + the X gap; the voice line | `results/demo/receipt.json`, `stats.json`, `digest.json`, `public/casts/run_trace.cast` |
+| receipt | `e1`–`e3` | receipt rows (runs, came-back-empty, failed, Monid, model, voice, total); the seat and the brief on one axis; the ratio, giant, with the 4-brief monthly figure | `results/demo/receipt.json` (`totals`, `comparison`, `incumbent`) |
+| honest | `f1`–`f2` | PicPay's share of voice abstains (grey dash, same gesture); the label audit read against the bar from `src/sonar/config.py` | `results/demo/stats.json`, `receipt.json` (`audit`), `src/data/repo-facts.json` (`auditBar`) |
+| outro | `g1`–`g2` | `RECONCILED` stamped over the receipt's own rows; "The receipt is the product.", the repo, `#monid` | `results/demo/receipt.json`, `src/manifest.ts` (`PUBLISHED`) |
 
-`TOTAL_FRAMES` is derived from the scene durations and the manifest throws if
-the sum passes ninety seconds.
+## Assets and how they are made
 
-## What is built
-
-The cut is finished: `out/sonar.mp4`, 1920×1080, 82.2 s, captions burned in,
-`#monid` and the repo in the outro. `results/social/receipt-card.png` (the
-`SocialCard` composition, 1200×630) and `results/social/x-post.txt` are cut
-alongside it.
-
-- W7.2 wrote `src/data/narration.json` and spoke it through Monid's
-  ElevenLabs proxy (direct ElevenLabs was rejected — free-plan accounts
-  can't call library voices via the API, D016's theoretical path doesn't
-  apply here) — `public/narration.mp3`, `narrationSrc` in the manifest.
-  Rachel runs slower than the 130 wpm the storyboard assumed (127 wpm,
-  76.7 s of voice), so scene durations are derived from the timed
-  narration (`sceneDurationsFrames` in `manifest.ts`) rather than the
-  original 64 s target.
-- W7.3 recorded the casts with `capture/record-casts.mjs` into
-  `public/casts/` (`run_trace`, `ask`, `empty_run`), then
-  `capture/emit-cast-json.mjs` pre-parses them into `src/data/casts/*.json`
-  so `TerminalCast` has nothing to fetch at render time.
-- W7.4 replaced the placeholder scenes under `src/scenes/` with the dark
-  tape system: `ReadLine`, receipt rows, the SoV/sentiment static group,
-  PicPay's animated abstain, `RESULTS_EMPTY` for the zero-mention beat.
-- W7.5 picked the music (Pixabay Content License, no attribution required —
-  `public/music.mp3`), rendered, and ran the verification checks below.
+- **Screenshots** — `capture/shots.manifest.json` lists the pages;
+  `pnpm shoot` (Playwright) captures each into `public/shots/<name>.png` with
+  a `<name>.json` sidecar (`url`, `captured_at`, dims, `redactions`,
+  `pii_reviewed`). Cookie-consent chrome is hidden before the shot. Look at
+  every PNG, then set `pii_reviewed: true`; `pnpm collect` writes the dims
+  into `src/data/shots.json`. Logged-in pages: launch Chrome with
+  `--remote-debugging-port=9222 --user-data-dir=$HOME/chrome-shoot`, sign in
+  there, then `node capture/shoot.mjs --cdp http://127.0.0.1:9222 --only <name>`.
+- **Narration** — `node capture/emit-voicescript.mjs` writes
+  `VOICE-SCRIPT.md`, one paragraph per cue with a `<break>` between them.
+  Paste it into the ElevenLabs web UI (voice Eva, `weA4Q36twV5kwSaTEL0Q`,
+  Eleven Multilingual v2), download, save as `public/narration.mp3`, then
+  `pnpm measure` (the breaks are what the measurer finds; when the voice
+  also pauses that long inside a cue, the extra segments are merged back by
+  character share and the merge is printed). Library voices are
+  402 through the API on the free plan (`docs/HANDOFF.md`, W7.2), which is
+  why this is a browser step.
+- **Music** — `public/music.mp3` is "Cosmic Countdown" trimmed from
+  19.187 s to 62 s at −20 LUFS; `uv run python capture/beat-grid.py
+  public/music.mp3 --trim-start-ms 19187` rebuilds the grid (bars fall on
+  beat indices 4k). Provenance of the track is recorded in `docs/HANDOFF.md`.
+- **Casts** — unchanged: `capture/record-casts.mjs` records real sonar runs
+  into `public/casts/`, `capture/emit-cast-json.mjs` pre-parses them.
 
 ## Commands
 
-```sh
-pnpm install
-pnpm lint                              # tsc --noEmit; passes without results/demo
-pnpm shots                             # capture/check-shot-reality.mjs
-node capture/collect-repo-facts.mjs    # src/data/repo-facts.json (add --tests for the count)
-node capture/retime-captions.mjs       # cue times from public/narration.mp3
-node capture/emit-voicescript.mjs      # VOICE-SCRIPT.md from narration.json
-node capture/generate-voice.mjs        # public/narration.txt for sonar's TTS path
-node capture/record-casts.mjs [id ...] # doctor run_trace ask empty_run
-pnpm dev                               # Remotion studio; needs results/demo
-pnpm render                            # out/sonar.mp4; needs results/demo
-pnpm still SocialCard ../results/social/receipt-card.png  # 1200×630 share card
+```
+pnpm lint         # tsc
+pnpm collect      # repo facts + cast JSON + screenshot dims
+pnpm timeline     # the resolved cut, as a table
+pnpm shots        # the gate (below); run before every render
+pnpm preview      # out/preview.mp4 at half scale
+pnpm cuts         # one still per cut from the render → out/cuts.png
+pnpm render       # out/sonar.mp4
+pnpm srt          # out/sonar.srt
 ```
 
-## Verification (as cut)
+## The gate
 
-- `ffprobe out/sonar.mp4`: 1920×1080, 82.2 s (60–90 s window), audio track present.
-- `grep -Ei "same numbers|brand24's numbers|identical|all social media|every platform|everything brand24 monitors" src/data/narration.json README.md`: no hits.
-- `pnpm lint`, `pnpm shots`, `make validate` (repo root): green.
-- `results/social/receipt-card.png` and `results/social/x-post.txt` cut alongside the video.
+`pnpm shots` (`capture/check-shot-reality.mjs`) fails on any of:
 
-`pnpm lint` passes on a tree without `results/demo` because the three files
-are imported through the `@results` alias, which falls back to an `unknown`
-declaration in `src/results.d.ts`. Bundling has no fallback:
-`remotion.config.ts` refuses to start without the directory, and the loader
-throws on the first cited field that is absent or mistyped.
+1. a literal dollar amount, verdict, digest, or the words "all billed" in
+   `src/{cards,shots,components}`;
+2. a number in the narration or a stamp that is not in `results/demo`,
+   `results/demo-empty`, or an external fact whose screenshot is tracked;
+   `brand24.price.team` must equal the receipt's incumbent price;
+3. a cast that was not recorded from a sonar command;
+4. a storyboard that does not resolve (non-contiguous, out of act order,
+   over the 90 s cap, unknown card or receipt row, unmeasured narration);
+5. a screenshot that is missing, untracked, unreviewed, mis-sized, or from a
+   different host than the fact that cites it;
+6. a stale generated file (`beat-grid.json`, `narration.json` measurement,
+   `shots.json`) — the failure names the script to re-run;
+7. wording that pairs "billed" with "empty" as a partition, or says anything
+   negative about the incumbent.
+
+`tests/test_published_claims.py` mirrors 2 and 5 in Python and
+`scripts/privacy_gate.py` checks every tracked screenshot's sidecar (and OCRs
+the PNGs when `tesseract` is on PATH).
+
+## Verification
+
+- `ffprobe out/sonar.mp4`: 1920×1080, 74.4 s, audio track present.
+- `pnpm cuts` then look at `out/cuts.png`: every frame carries a screenshot
+  or ≥120 px type, no frame mostly empty, `KILLED` on the bar line.
+- `pnpm lint`, `pnpm shots`, `make validate`: green.

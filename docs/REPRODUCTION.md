@@ -76,11 +76,16 @@ All three exit 0 on the shipped tree.
 cd video
 pnpm install
 pnpm lint
+pnpm collect          # repo facts, cast JSON, screenshot dims
+pnpm shots            # every on-screen claim traces to results/, a cast, or a reviewed screenshot
 pnpm render           # writes video/out/sonar.mp4
+pnpm srt              # writes video/out/sonar.srt (the cues on the video timeline)
 ffprobe -v error -show_entries format=duration -of csv=p=0 out/sonar.mp4
 ```
 
-Expected: duration ≤ 90 s, 1920×1080, captions burned in.
+Expected: duration ≤ 90 s (the current cut is 74.4 s), 1920×1080, captions as the
+`out/sonar.srt` sidecar (nothing is burned in; the type on screen carries the
+line).
 
 ## Claude Code skill
 

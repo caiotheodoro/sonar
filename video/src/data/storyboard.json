@@ -1,0 +1,368 @@
+{
+  "_comment": "The cut, as data. Shots are contiguous hard cuts on the music's beat grid (src/data/beat-grid.json, 100 BPM = 600 ms a beat, 4 beats a bar); shot i ends where shot i+1 starts. Anchors resolve through src/timeline/resolve.mjs, which the gate imports too. Never type startMs by hand; use an anchor. Bars fall on beat indices 4k; act changes sit on bars, voice-led cuts may sit on the half-bar. narration.offsetMs places the Eva take so cue a2 (the seat price) ends just before KILLED and c1 (\"Rebuilt on Monid\") starts over the stamp. Text here is data-free: every figure on screen is read from results/ or external-facts.json by the component that draws it.",
+  "targetMs": 75000,
+  "capMs": 90000,
+  "minShotMs": 400,
+  "snapToleranceMs": 200,
+  "music": {
+    "src": "music.mp3",
+    "volume": 0.3,
+    "duckTo": 0.55,
+    "duckMs": 200,
+    "fadeOutMs": 2500
+  },
+  "narration": {
+    "src": "narration.mp3",
+    "offsetMs": 1800
+  },
+  "acts": [
+    "brand24",
+    "killed",
+    "monid",
+    "rebuild",
+    "receipt",
+    "honest",
+    "outro"
+  ],
+  "shots": [
+    {
+      "id": "a0",
+      "act": "brand24",
+      "kind": "stamp",
+      "variant": "plate",
+      "text": "SUBJECT",
+      "plate": [
+        "BRAND24",
+        "SOCIAL LISTENING"
+      ],
+      "start": {
+        "ms": 0
+      }
+    },
+    {
+      "id": "a1",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-home",
+      "move": "push",
+      "facts": [
+        "brand24.sources"
+      ],
+      "plate": [
+        "BRAND24",
+        "HOME"
+      ],
+      "start": {
+        "beat": 2
+      }
+    },
+    {
+      "id": "a2",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-mentions",
+      "move": "pan-down",
+      "plate": [
+        "BRAND24",
+        "MENTIONS"
+      ],
+      "start": {
+        "beat": 6
+      }
+    },
+    {
+      "id": "a3",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-sentiment",
+      "move": "hold",
+      "plate": [
+        "BRAND24",
+        "AI FEATURES"
+      ],
+      "start": {
+        "beat": 9
+      }
+    },
+    {
+      "id": "a4",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-sov",
+      "move": "hold",
+      "plate": [
+        "BRAND24",
+        "REACH",
+        "SENTIMENT"
+      ],
+      "start": {
+        "beat": 12
+      }
+    },
+    {
+      "id": "a5",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-ai",
+      "move": "push",
+      "plate": [
+        "BRAND24",
+        "AI INSIGHTS"
+      ],
+      "start": {
+        "beat": 15
+      }
+    },
+    {
+      "id": "a6",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-pricing",
+      "move": "hold",
+      "facts": [
+        "brand24.price.team"
+      ],
+      "plate": [
+        "BRAND24",
+        "PRICING",
+        "TEAM SEAT"
+      ],
+      "start": {
+        "beat": 18
+      }
+    },
+    {
+      "id": "b1",
+      "act": "killed",
+      "kind": "stamp",
+      "variant": "killed",
+      "text": "KILLED",
+      "plate": [
+        "WE KILL",
+        "MONID HACKATHON",
+        "2026-09"
+      ],
+      "statusStrip": false,
+      "start": {
+        "beat": 24
+      }
+    },
+    {
+      "id": "c1",
+      "act": "monid",
+      "kind": "shot",
+      "src": "monid-home",
+      "move": "push",
+      "facts": [
+        "monid.tools"
+      ],
+      "plate": [
+        "MONID",
+        "HOME"
+      ],
+      "start": {
+        "beat": 28
+      }
+    },
+    {
+      "id": "c2",
+      "act": "monid",
+      "kind": "shot",
+      "src": "monid-tools",
+      "move": "pan-down",
+      "plate": [
+        "MONID",
+        "TOOLS"
+      ],
+      "start": {
+        "beat": 32
+      }
+    },
+    {
+      "id": "c3",
+      "act": "monid",
+      "kind": "shot",
+      "src": "monid-tools-social",
+      "move": "pan-down",
+      "plate": [
+        "MONID",
+        "TOOLS",
+        "SOCIAL MEDIA"
+      ],
+      "start": {
+        "beat": 35
+      }
+    },
+    {
+      "id": "c4",
+      "act": "monid",
+      "kind": "shot",
+      "src": "monid-docs-run",
+      "move": "hold",
+      "plate": [
+        "MONID",
+        "DOCS",
+        "POST /v1/run"
+      ],
+      "start": {
+        "beat": 39
+      }
+    },
+    {
+      "id": "c5",
+      "act": "monid",
+      "kind": "shot",
+      "src": "monid-tool-reddit",
+      "move": "push",
+      "plate": [
+        "MONID",
+        "TOOL",
+        "REDDIT"
+      ],
+      "start": {
+        "beat": 42
+      }
+    },
+    {
+      "id": "d0",
+      "act": "rebuild",
+      "kind": "stamp",
+      "variant": "title",
+      "text": "SONAR",
+      "start": {
+        "beat": 46
+      }
+    },
+    {
+      "id": "d1",
+      "act": "rebuild",
+      "kind": "card",
+      "card": "brief",
+      "start": {
+        "beat": 50
+      }
+    },
+    {
+      "id": "d2",
+      "act": "rebuild",
+      "kind": "cast",
+      "src": "run_trace",
+      "speed": 6,
+      "rows": 16,
+      "castFromMs": 0,
+      "start": {
+        "beat": 56
+      }
+    },
+    {
+      "id": "d3",
+      "act": "rebuild",
+      "kind": "card",
+      "card": "map-mentions",
+      "start": {
+        "beat": 60
+      }
+    },
+    {
+      "id": "d4",
+      "act": "rebuild",
+      "kind": "card",
+      "card": "map-sentiment-sov",
+      "start": {
+        "beat": 64
+      }
+    },
+    {
+      "id": "d5",
+      "act": "rebuild",
+      "kind": "card",
+      "card": "map-topics",
+      "start": {
+        "beat": 68
+      }
+    },
+    {
+      "id": "d6",
+      "act": "rebuild",
+      "kind": "card",
+      "card": "map-voice",
+      "start": {
+        "beat": 72
+      }
+    },
+    {
+      "id": "e1",
+      "act": "receipt",
+      "kind": "receipt",
+      "rows": [
+        "runs",
+        "zero",
+        "failed",
+        "monid",
+        "llm",
+        "voice",
+        "total"
+      ],
+      "start": {
+        "beat": 76
+      }
+    },
+    {
+      "id": "e2",
+      "act": "receipt",
+      "kind": "card",
+      "card": "price-vs-brief",
+      "start": {
+        "beat": 80
+      }
+    },
+    {
+      "id": "e3",
+      "act": "receipt",
+      "kind": "card",
+      "card": "ratio",
+      "start": {
+        "beat": 88
+      }
+    },
+    {
+      "id": "f1",
+      "act": "honest",
+      "kind": "card",
+      "card": "picpay-abstain",
+      "start": {
+        "beat": 92
+      }
+    },
+    {
+      "id": "f2",
+      "act": "honest",
+      "kind": "card",
+      "card": "audit",
+      "start": {
+        "beat": 100
+      }
+    },
+    {
+      "id": "g1",
+      "act": "outro",
+      "kind": "card",
+      "card": "reconciled",
+      "start": {
+        "beat": 108
+      }
+    },
+    {
+      "id": "g2",
+      "act": "outro",
+      "kind": "card",
+      "card": "outro",
+      "start": {
+        "beat": 112
+      },
+      "end": {
+        "ms": 74400
+      }
+    }
+  ]
+}

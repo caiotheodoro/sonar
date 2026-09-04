@@ -37,6 +37,12 @@ DEMO_RECEIPT = ROOT / "results" / "demo" / "receipt.json"
 DEMO_STATS = ROOT / "results" / "demo" / "stats.json"
 DEMO_DIGEST = ROOT / "results" / "demo" / "digest.json"
 NARRATION = ROOT / "video" / "src" / "data" / "narration.json"
+DEMO_EMPTY_RECEIPT = ROOT / "results" / "demo-empty" / "receipt.json"
+DEMO_EMPTY_STATS = ROOT / "results" / "demo-empty" / "stats.json"
+DEMO_EMPTY_DIGEST = ROOT / "results" / "demo-empty" / "digest.json"
+STORYBOARD = ROOT / "video" / "src" / "data" / "storyboard.json"
+EXTERNAL_FACTS = ROOT / "video" / "src" / "data" / "external-facts.json"
+SHOTS_DIR = ROOT / "video" / "public" / "shots"
 
 # Documents whose backticked paths are citations a judge is expected to open.
 # ``docs/research/`` is the plan and the review transcripts: history, exempt.
@@ -401,17 +407,64 @@ def _normalise_number(token: str) -> str:
     return str(int(number)) if number.is_integer() else repr(number)
 
 
-def test_every_number_in_the_narration_exists_in_the_demo_results() -> None:
-    """The voice brief may not say a number the receipt or stats do not contain.
+def _shot_tracked(name: str, tracked: frozenset[str]) -> bool:
+    return (
+        f"video/public/shots/{name}.png" in tracked
+        and f"video/public/shots/{name}.json" in tracked
+    )
 
-    Only the ``text`` (burned caption) and ``spoken`` (voice override) of each
-    cue is a claim; ``startMs``/``endMs`` are timings written by
-    ``retime-captions.mjs`` and ``_comment`` is prose, so neither is scanned.
-    ``digest.json`` is a source too, to agree with ``check-shot-reality.mjs``.
+
+def _external_fact_numbers(tracked: frozenset[str]) -> set[str]:
+    """Numbers quoted from third-party pages, usable only with a tracked shot."""
+    if not EXTERNAL_FACTS.exists():
+        return set()
+    found: set[str] = set()
+    for fact in json.loads(EXTERNAL_FACTS.read_text(encoding="utf-8"))["facts"]:
+        if not _shot_tracked(fact["shot"], tracked):
+            continue
+        found.update(_numbers_in(fact["value"]))
+        if "display" in fact:
+            found.update(_numbers_in(fact["display"]))
+    return found
+
+
+def _storyboard_text() -> list[str]:
+    if not STORYBOARD.exists():
+        return []
+    out: list[str] = []
+    for shot in json.loads(STORYBOARD.read_text(encoding="utf-8"))["shots"]:
+        if "text" in shot:
+            out.append(shot["text"])
+        out.extend(shot.get("plate", []))
+    return out
+
+
+def test_every_number_in_the_narration_exists_in_the_demo_results() -> None:
+    """The voice brief may not say a number the results do not contain.
+
+    Only the ``text`` (spoken line, shown in the .srt sidecar) and ``spoken``
+    (voice override) of each cue is a claim; ``startMs``/``endMs`` are timings
+    written by ``measure-cues.mjs`` and ``_comment`` is prose, so neither is
+    scanned. Stamp ``text`` and ``plate`` lines in ``storyboard.json`` are
+    claims too. Sources: ``results/demo``, ``results/demo-empty`` (the
+    zero-mention receipt the cut cites), and ``external-facts.json`` for
+    numbers quoted from Brand24's and Monid's own pages, each accepted only
+    while its screenshot is tracked. Mirrors ``check-shot-reality.mjs``.
     """
     if not NARRATION.exists():
         pytest.skip("video/src/data/narration.json not yet written (W7.2)")
-    sources = [p for p in (DEMO_RECEIPT, DEMO_STATS, DEMO_DIGEST) if p.exists()]
+    sources = [
+        p
+        for p in (
+            DEMO_RECEIPT,
+            DEMO_STATS,
+            DEMO_DIGEST,
+            DEMO_EMPTY_RECEIPT,
+            DEMO_EMPTY_STATS,
+            DEMO_EMPTY_DIGEST,
+        )
+        if p.exists()
+    ]
     if not sources:
         pytest.skip("results/demo/receipt.json and stats.json not yet frozen (W6.1)")
     cues = json.loads(NARRATION.read_text(encoding="utf-8")).get("narration", [])
@@ -419,11 +472,80 @@ def test_every_number_in_the_narration_exists_in_the_demo_results() -> None:
     for cue in cues:
         narrated.update(_numbers_in(cue.get("text", "")))
         narrated.update(_numbers_in(cue.get("spoken", "")))
+    for line in _storyboard_text():
+        narrated.update(_numbers_in(line))
     published: set[str] = set()
     for source in sources:
         published.update(_numbers_in(json.loads(source.read_text(encoding="utf-8"))))
+    published |= _external_fact_numbers(_tracked())
     unsourced = sorted(narrated - published)
-    assert not unsourced, f"narration numbers absent from the demo results: {unsourced}"
+    assert not unsourced, f"narration numbers absent from the results and facts: {unsourced}"
+
+
+def test_every_external_fact_is_backed_by_a_tracked_reviewed_screenshot() -> None:
+    """A third-party number is a quotation; the screenshot is the citation."""
+    if not EXTERNAL_FACTS.exists():
+        pytest.skip("video/src/data/external-facts.json not yet written (W7.6)")
+    tracked = _tracked()
+    problems: list[str] = []
+    for fact in json.loads(EXTERNAL_FACTS.read_text(encoding="utf-8"))["facts"]:
+        fid = fact["id"]
+        if not _shot_tracked(fact["shot"], tracked):
+            problems.append(f"{fid}: shot {fact['shot']} png+json not tracked")
+            continue
+        sidecar = json.loads((SHOTS_DIR / f"{fact['shot']}.json").read_text(encoding="utf-8"))
+        if sidecar.get("pii_reviewed") is not True:
+            problems.append(f"{fid}: shot {fact['shot']} not pii_reviewed")
+        if not fact["source_url"].startswith("https://"):
+            problems.append(f"{fid}: source_url is not https")
+        if not _DATE.fullmatch(fact["captured_at"]):
+            problems.append(f"{fid}: captured_at is not a date")
+        fact_host = fact["source_url"].split("/")[2]
+        shot_host = sidecar["url"].split("/")[2]
+        if fact_host != shot_host:
+            problems.append(f"{fid}: cites {fact_host} but the shot is from {shot_host}")
+    assert not problems, "\n".join(problems)
+
+
+def test_the_external_incumbent_price_matches_the_constant() -> None:
+    if not EXTERNAL_FACTS.exists():
+        pytest.skip("video/src/data/external-facts.json not yet written (W7.6)")
+    facts = {
+        f["id"]: f for f in json.loads(EXTERNAL_FACTS.read_text(encoding="utf-8"))["facts"]
+    }
+    assert facts["brand24.price.team"]["value"] == BRAND24_TEAM.price_usd_month
+
+
+def test_every_storyboard_shot_is_committed() -> None:
+    """A screenshot the cut shows must be in the tree with its sidecar."""
+    if not STORYBOARD.exists():
+        pytest.skip("video/src/data/storyboard.json not yet written (W7.6)")
+    tracked = _tracked()
+    shots = json.loads(STORYBOARD.read_text(encoding="utf-8"))["shots"]
+    missing = sorted(
+        s["src"] for s in shots if s["kind"] == "shot" and not _shot_tracked(s["src"], tracked)
+    )
+    assert not missing, f"storyboard shots not tracked (png + json): {missing}"
+
+
+def test_narration_does_not_say_all_billed_when_runs_were_free() -> None:
+    """"All billed" is false whenever monid_runs != monid_runs_billed."""
+    if not NARRATION.exists():
+        pytest.skip("video/src/data/narration.json not yet written (W7.2)")
+    cues = json.loads(NARRATION.read_text(encoding="utf-8")).get("narration", [])
+    spoken = " ".join(f"{c.get('text', '')} {c.get('spoken', '')}" for c in cues)
+    for receipt_path in (DEMO_RECEIPT, DEMO_EMPTY_RECEIPT):
+        if not receipt_path.exists():
+            continue
+        totals = json.loads(receipt_path.read_text(encoding="utf-8"))["totals"]
+        if totals["monid_runs"] != totals["monid_runs_billed"]:
+            assert not re.search(r"all billed", spoken, re.IGNORECASE), (
+                f"{receipt_path.name}: {totals['monid_runs_billed']} of "
+                f"{totals['monid_runs']} runs were billed"
+            )
+    assert not re.search(r"(\d+|[a-z-]+) billed,? (\d+|[a-z-]+) (empty|zero)", spoken, re.I), (
+        "billed and zero-result overlap; do not pair them as a partition"
+    )
 
 
 # -------------------------------------------------------------------- receipt

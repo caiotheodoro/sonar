@@ -1,85 +1,96 @@
 {
-  "_comment": "Video narration. {scene, text, spoken?}: scene is a manifest beat id, text is the burned caption, spoken overrides it for the voice where a symbol or identifier must not be read literally. startMs/endMs are absolute and written by capture/retime-captions.mjs from the real narration.mp3 -- never by hand. Both text and spoken are number-gated: every digit token must be sourceable in results/demo, or spelled out. Headline is the seat price against one brief; no monid_usd, no WoW claim, no PicPay figure; the X gap is stated.",
+  "_comment": "startMs/endMs are RELATIVE TO public/narration.mp3, measured by capture/measure-cues.mjs (silencedetect). storyboard.json narration.offsetMs places the mp3 on the video timeline. text/spoken are number-gated against results/demo, results/demo-empty and external-facts.json. Editorial rules: nothing negative about Brand24; cents are spoken in words; no monid_usd, no WoW claim, no PicPay figure.",
+  "voice": {
+    "provider": "elevenlabs",
+    "voice": "Eva",
+    "voice_id": "weA4Q36twV5kwSaTEL0Q",
+    "model": "eleven_multilingual_v2",
+    "generated": "ElevenLabs web UI (library voices are 402 via the API on the free plan, docs/HANDOFF.md W7.2)",
+    "monid_billed_usd": 0
+  },
+  "measured": {
+    "mp3Sha256": "3bd7a975e82c780db3f3fbc9980725ada0bc3f3c16aa3cbf7ca59eaae540ba7f",
+    "durationMs": 69564,
+    "method": "silencedetect noise=-38dB d=600ms; 15 segments merged into 11 cues by dp on character share (total error 6506 ms)",
+    "measuredAt": "2026-09-04"
+  },
   "narration": [
     {
-      "scene": "price-died",
-      "startMs": 500,
-      "endMs": 6746,
-      "text": "A social-listening seat is three hundred forty-nine dollars a month.",
-      "spoken": "A social listening seat is three hundred forty nine dollars a month."
+      "id": "a1",
+      "act": "brand24",
+      "text": "Brand24. Social listening. Twenty-five million sources. Mentions. Sentiment. Share of voice. Reports.",
+      "startMs": 0,
+      "endMs": 8609
     },
     {
-      "scene": "price-died",
-      "startMs": 6886,
-      "endMs": 11754,
-      "text": "This is one full brief. Two dollars and twenty cents.",
-      "spoken": "This is one full brief. Two dollars and twenty cents."
+      "id": "a2",
+      "act": "brand24",
+      "text": "A Team seat: three hundred forty-nine dollars a month.",
+      "startMs": 9582,
+      "endMs": 12129
     },
     {
-      "scene": "live-trace",
-      "startMs": 11894,
-      "endMs": 15752,
-      "text": "Live: sonar fires a POST to the Monid API.",
-      "spoken": "Live. Sonar fires a POST to the Monid A P I."
+      "id": "c1",
+      "act": "monid",
+      "text": "Rebuilt on Monid. One key. One balance. Seventeen hundred tools, paid per call.",
+      "startMs": 13124,
+      "endMs": 18335
     },
     {
-      "scene": "live-trace",
-      "startMs": 15892,
-      "endMs": 20576,
-      "text": "A run id comes back, and a price. You pay per call."
+      "id": "c2",
+      "act": "monid",
+      "text": "Reddit. YouTube. TikTok. Instagram. Google Maps. News. Voice, too.",
+      "startMs": 19270,
+      "endMs": 25278
     },
     {
-      "scene": "receipt",
-      "startMs": 20716,
-      "endMs": 26502,
-      "text": "The receipt reconciles. 42 runs, 37 billed, 11 empty, 0 failed.",
-      "spoken": "The receipt reconciles. Forty two runs. Thirty seven billed, eleven empty, none failed."
+      "id": "d1",
+      "act": "rebuild",
+      "text": "This is sonar. One brief: a brand, three competitors, fourteen days, ten sources.",
+      "startMs": 26230,
+      "endMs": 31838
     },
     {
-      "scene": "receipt",
-      "startMs": 26642,
-      "endMs": 33806,
-      "text": "Monid, the model, the voice, one line each. Nearly forty times under the seat.",
-      "spoken": "Monid, the model, the voice. One line each. Nearly forty times under the seat."
+      "id": "d2",
+      "act": "rebuild",
+      "text": "Forty-two calls. Three hundred forty-one mentions. Sentiment and share of voice, each with an interval.",
+      "startMs": 32861,
+      "endMs": 38363
     },
     {
-      "scene": "ask",
-      "startMs": 33946,
-      "endMs": 38722,
-      "text": "Share of voice and sentiment, each with an interval."
+      "id": "d3",
+      "act": "rebuild",
+      "text": "Topics. A spoken summary. Every number cited to a real post.",
+      "startMs": 39510,
+      "endMs": 43696
     },
     {
-      "scene": "ask",
-      "startMs": 38862,
-      "endMs": 44465,
-      "text": "PicPay doesn't clear the bar. Not enough data, so it says so."
+      "id": "e1",
+      "act": "receipt",
+      "text": "Total: two dollars and twenty cents. Four briefs a month: eight dollars eighty-one.",
+      "startMs": 45075,
+      "endMs": 50161
     },
     {
-      "scene": "ask",
-      "startMs": 44605,
-      "endMs": 53790,
-      "text": "Ask it anything; every citation opens a real post. X has no endpoint, and the receipt says that too."
+      "id": "e2",
+      "act": "receipt",
+      "text": "Thirty-nine point six times under the seat.",
+      "startMs": 51410,
+      "endMs": 53644
     },
     {
-      "scene": "empty-run",
-      "startMs": 53930,
-      "endMs": 62564,
-      "text": "A brand with nothing to find still gets a receipt. 0 mentions, still reconciled, still billed.",
-      "spoken": "A brand with nothing to find still gets a receipt. Zero mentions, still reconciled, still billed."
+      "id": "f1",
+      "act": "honest",
+      "text": "When data is thin, sonar abstains. Our own label audit, zero point eight four, printed on the receipt.",
+      "startMs": 54828,
+      "endMs": 61947
     },
     {
-      "scene": "empty-run",
-      "startMs": 62704,
-      "endMs": 70695,
-      "text": "Our own label audit came in at 0.84, under the bar we set. Shipped flagged, not hidden.",
-      "spoken": "Our own label audit came in at zero point eight four, under the bar we set. Shipped flagged, not hidden."
-    },
-    {
-      "scene": "outro",
-      "startMs": 70835,
-      "endMs": 77173,
-      "text": "Three hundred forty-nine dollars a month, replaced. The code is open.",
-      "spoken": "Three hundred forty nine dollars a month, replaced. The code is open. Hashtag monid."
+      "id": "g1",
+      "act": "outro",
+      "text": "The receipt is the product. The code is open. Hashtag monid.",
+      "startMs": 63168,
+      "endMs": 69564
     }
   ]
 }
