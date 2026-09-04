@@ -16,9 +16,9 @@ committed.
 - Per-run cap `MONID_RUN_CAP_USD=3.5`. `MONID_WORKSPACE_BUDGET_USD` in
   `~/.sonar/.env` is a stale display hint, not enforced.
 - Reserve $1.50 stays for judging.
-- **Monid/Apify is intermittently `BLOCKED`** (all day 2026-09-03/04) — a
-  clean run has ~10–30 % of source runs blocked at random. Retry a run
-  whose demo brands came back thin.
+- **`BLOCKED` today was a $3/day workspace budget cap** (control
+  `01M1GB8M12ZEDM99NS357K29NQ`, resets 00:00 UTC), NOT Apify flakiness and
+  NOT the wallet. All 3 keys share it. Raise it at app.monid.ai/rules.
 - One `$` task at a time. A second live run never starts before the
   previous session's `sonar reconcile` has written `RECONCILED`.
 - Cost figures in this file come from `GET /v1/runs` via the session
@@ -213,7 +213,18 @@ blocker.
   `reconcile_session(now=finish+5s)`. *sonar fix:* bound the reconcile
   window to the session's own `finished_at`, not wall-clock now.
 - **W6.1-v3** was worse (92/116 BLOCKED, C6+PicPay got 0 mentions) —
-  discarded. Monid/Apify is degrading through the evening.
+  discarded.
+- **ROOT CAUSE of every BLOCKED today: a $3/day workspace budget cap.**
+  Raw `/v1/run` `reason`: *"Workspace day budget exceeded: available
+  $-0.03 of the $3 limit"*. Control `01M1GB8M12ZEDM99NS357K29NQ`
+  (`WORKSPACE_BUDGET`, `period: DAY`, `limitAmount: 3`, `windowStart`
+  00:00 UTC). **All 3 API keys share this one workspace budget** — key
+  switching never helped. Today's $3.03 went to W6.1 dry ($1.57, PARTIAL,
+  discarded) + W6.1-clean ($0.92, kept) + v3 + probes. The "36 BLOCKED
+  mid-run" in W6.1-clean was the budget running out partway.
+  **Operator action:** raise the cap at https://app.monid.ai/rules
+  (control `01M1GB8M12…`) to ~$20, or wait for the 00:00 UTC reset
+  (2026-09-05) — but $3/day barely covers W6.1 ($2.8) alone.
 - **Not frozen yet.** Waiting for Monid to stabilise enough for either a
   cleaner 3-4 brand W6.1 or at least the Avenza demo-empty run (freezing
   `results/demo/` without `results/demo-empty/` breaks `make check-claims`).
