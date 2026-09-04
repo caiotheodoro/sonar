@@ -105,12 +105,27 @@ for (const id of castIds) {
 
 // ---------------------------------------------------------------------------
 // 4. the storyboard fits the cap
+//
+// manifest.ts derives scene durations from the timed narration (see
+// sceneDurationsFrames), not literal `seconds(N)` calls, so this plain node
+// script cannot import it (path aliases, TS). It mirrors the same formula
+// against narration.json instead: this is the actual source of truth once
+// the narration is measured, and manifest.ts's own `TOTAL_FRAMES > MAX_FRAMES`
+// throw is the enforcement at bundle/render time either way.
 // ---------------------------------------------------------------------------
-const seconds = [...manifest.matchAll(/durationInFrames:\s*seconds\((\d+)\)/g)].map((m) => Number(m[1]));
-const total = seconds.reduce((a, b) => a + b, 0);
-if (seconds.length !== 6) fail(`manifest declares ${seconds.length} beats, the storyboard has six`);
-if (total > MAX_SECONDS) fail(`storyboard runs ${total}s, over the ${MAX_SECONDS}s cap`);
-notes.push(`storyboard: ${seconds.length} beats, ${total}s of ${MAX_SECONDS}s, ${total * FPS} frames`);
+const beatCount = new Set([...manifest.matchAll(/\bid:\s*"([a-z-]+)",\n\s*claim:/g)].map((m) => m[1])).size;
+if (beatCount !== 6) fail(`manifest declares ${beatCount} beats, the storyboard has six`);
+
+const OUTRO_TAIL_MS = 5000;
+let totalSeconds;
+if (cues.length && cues.every((c) => c.endMs > 0)) {
+  totalSeconds = (Math.max(...cues.map((c) => c.endMs)) + OUTRO_TAIL_MS) / 1000;
+} else {
+  const targets = [...manifest.matchAll(/^\s{2}"?([a-z-]+)"?:\s*(\d+),$/gm)];
+  totalSeconds = targets.reduce((a, m) => a + Number(m[2]), 0);
+}
+if (totalSeconds > MAX_SECONDS) fail(`storyboard runs ${totalSeconds}s, over the ${MAX_SECONDS}s cap`);
+notes.push(`storyboard: ${beatCount} beats, ${totalSeconds.toFixed(1)}s of ${MAX_SECONDS}s, ${Math.round(totalSeconds * FPS)} frames`);
 
 for (const n of notes) console.log(`  · ${n}`);
 if (failures.length) {

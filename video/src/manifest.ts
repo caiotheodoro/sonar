@@ -92,43 +92,87 @@ export interface Scene {
 
 const seconds = (s: number): number => s * FPS;
 
+const SCENE_IDS: SceneId[] = ["price-died", "live-trace", "receipt", "ask", "empty-run", "outro"];
+
+/** Storyboard targets (README.md), used only until the narration is timed. */
+const TARGET_SECONDS: Record<SceneId, number> = {
+  "price-died": 5,
+  "live-trace": 12,
+  receipt: 12,
+  ask: 18,
+  "empty-run": 11,
+  outro: 6,
+};
+
+/** Silence after the last cue, so the outro's replayed read-lines have room to land. */
+const OUTRO_TAIL_MS = 5000;
+
 /**
- * The six beats. Durations are the storyboard targets from README.md; the
- * final cut trims them against the narration, never the other way round.
+ * Scene durations, one per `SCENE_IDS` entry, derived from the timed
+ * narration rather than typed: each boundary sits at the midpoint of the
+ * gap between the previous scene's last cue and this scene's first, so a
+ * re-timed narration.json reflows the cut instead of silently drifting out
+ * of sync with it. Before the narration is measured (`startMs`/`endMs` all
+ * 0), falls back to the storyboard targets above.
+ */
+const sceneDurationsFrames = (): number[] => {
+  const timed = captions.some((c) => c.endMs > 0);
+  if (!timed) return SCENE_IDS.map((id) => seconds(TARGET_SECONDS[id]));
+
+  const bounds = SCENE_IDS.map((id) => {
+    const cues = captions.filter((c) => c.scene === id);
+    if (cues.length === 0) {
+      throw new Error(`src/data/narration.json: no cues for scene "${id}"`);
+    }
+    return {
+      start: Math.min(...cues.map((c) => c.startMs)),
+      end: Math.max(...cues.map((c) => c.endMs)),
+    };
+  });
+  const starts = bounds.map((b, i) => (i === 0 ? 0 : Math.round((bounds[i - 1].end + b.start) / 2)));
+  const totalMs = bounds[bounds.length - 1].end + OUTRO_TAIL_MS;
+  const frameBounds = [...starts, totalMs].map((ms) => Math.round((ms / 1000) * FPS));
+  return frameBounds.slice(1).map((f, i) => f - frameBounds[i]);
+};
+
+const durations = sceneDurationsFrames();
+
+/**
+ * The six beats. Durations come from `sceneDurationsFrames`, above.
  */
 export const scenes: Scene[] = [
   {
     id: "price-died",
     claim: "The incumbent's monthly price beside the receipt's measured cost.",
-    durationInFrames: seconds(5),
+    durationInFrames: durations[0],
   },
   {
     id: "live-trace",
     claim: "A live POST /v1/run, as sonar run --trace prints it.",
-    durationInFrames: seconds(12),
+    durationInFrames: durations[1],
     cast: { src: "run_trace", speed: 1.8, rows: 20 },
   },
   {
     id: "receipt",
     claim: "The receipt itemises every run, every zero, the verdict.",
-    durationInFrames: seconds(12),
+    durationInFrames: durations[2],
   },
   {
     id: "ask",
     claim: "sonar reports what it can, abstains from what it can't, then answers with citations.",
-    durationInFrames: seconds(18),
+    durationInFrames: durations[3],
     cast: { src: "ask", speed: 1.6, rows: 14 },
   },
   {
     id: "empty-run",
     claim: "A brand with nothing to find still gets a receipt; every estimate abstains.",
-    durationInFrames: seconds(11),
+    durationInFrames: durations[4],
     cast: { src: "empty_run", speed: 1.8, rows: 16 },
   },
   {
     id: "outro",
     claim: "The repository, the hashtag, the price that died.",
-    durationInFrames: seconds(6),
+    durationInFrames: durations[5],
   },
 ];
 
@@ -150,7 +194,7 @@ if (TOTAL_FRAMES > MAX_FRAMES) {
 export const voiceOffset = 15;
 
 /** The narration mp3 under public/, produced by sonar's own TTS path. Null until it exists. */
-export const narrationSrc: string | null = null;
+export const narrationSrc: string | null = "narration.mp3";
 
 export const musicSrc: string | null = null;
 export const musicVolume = 0.22;

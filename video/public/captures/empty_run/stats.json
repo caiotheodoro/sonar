@@ -1,0 +1,70 @@
+{
+  "share_of_voice": [
+    {
+      "brand": "Zephyrium Bank",
+      "n": 0,
+      "n_clusters": 0,
+      "share": null,
+      "ci95": null,
+      "basis_sources": [
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Zephyrium Bank",
+      "n": 0,
+      "n_confirmed": 0,
+      "pos": 0,
+      "neg": 0,
+      "neu": 0,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Zephyrium Bank",
+      "source": "google_maps",
+      "n": 0,
+      "n_clusters": 0,
+      "pos": 0,
+      "neg": 0,
+      "neu": 0,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow_scope": true
+    }
+  ],
+  "events": [],
+  "window": {
+    "current": {
+      "start": "2026-08-28T14:08:44Z",
+      "end": "2026-09-04T14:08:44Z"
+    },
+    "previous": {
+      "start": "2026-08-21T14:08:44Z",
+      "end": "2026-08-28T14:08:44Z"
+    }
+  }
+}

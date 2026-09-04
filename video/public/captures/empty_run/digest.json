@@ -1,0 +1,203 @@
+{
+  "brand": "Zephyrium Bank",
+  "competitors": [],
+  "window": {
+    "current": {
+      "start": "2026-08-28T14:08:44Z",
+      "end": "2026-09-04T14:08:44Z"
+    },
+    "previous": {
+      "start": "2026-08-21T14:08:44Z",
+      "end": "2026-08-28T14:08:44Z"
+    }
+  },
+  "share_of_voice": [
+    {
+      "brand": "Zephyrium Bank",
+      "n": 0,
+      "n_clusters": 0,
+      "share": null,
+      "ci95": null,
+      "basis_sources": [
+        "google_maps"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Zephyrium Bank",
+      "n": 0,
+      "n_confirmed": 0,
+      "pos": 0,
+      "neg": 0,
+      "neu": 0,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Zephyrium Bank",
+      "source": "google_maps",
+      "n": 0,
+      "n_clusters": 0,
+      "pos": 0,
+      "neg": 0,
+      "neu": 0,
+      "net": null,
+      "ci95": null,
+      "ci95_iid": null,
+      "design_effect": null,
+      "wow_scope": true
+    }
+  ],
+  "topics": [],
+  "events": [],
+  "top_mentions": [],
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "reddit",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "youtube",
+      "reason": "empty",
+      "detail": "local_seq 2: 1 item(s), all provider errors: NO_VIDEOS"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "youtube_comment",
+      "reason": "empty",
+      "detail": "no videos to fetch comments for"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "tiktok",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "instagram",
+      "reason": "schema_drift",
+      "detail": "local_seq 4: apify /apify/instagram-hashtag-scraper: item 0: required key 'caption' absent; raw saved 4.json"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 6: 1 item(s), all provider errors: not_available"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Zephyrium Bank",
+      "source": "news",
+      "reason": "empty",
+      "detail": "zero mentions after parse"
+    },
+    {
+      "scope": "brand",
+      "brand": "Zephyrium Bank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=0 < 20 in current; n_clusters=0 < 5 in current; n=0 < 20 in previous; n_clusters=0 < 5 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Zephyrium Bank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=0 < 20 in current; n_clusters=0 < 5 in current; n=0 < 20 in previous; n_clusters=0 < 5 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Zephyrium Bank",
+      "source": "google_maps",
+      "reason": "degenerate",
+      "detail": "by_source google_maps net: no relevant mentions"
+    },
+    {
+      "scope": "topics",
+      "brand": "Zephyrium Bank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "no topics: 0 relevant mentions, min_size 3"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "source": "x",
+      "reason": "unavailable",
+      "note": "X/Twitter has no Monid endpoint (verified 2026-09-02)"
+    }
+  ],
+  "cost": {
+    "verdict": "RECONCILED",
+    "totals": {
+      "monid_usd": 0.22194999999999998,
+      "monid_runs": 9,
+      "monid_runs_billed": 8,
+      "monid_runs_zero_results": 3,
+      "monid_runs_failed": 0,
+      "llm_usd": 0.0003438,
+      "llm_calls": {
+        "classify": 1,
+        "tiebreak": 0,
+        "embed": 0,
+        "name_topic": 0,
+        "narrate": 0,
+        "ask": 0
+      },
+      "llm_tokens": 789,
+      "elevenlabs_usd": 0.0,
+      "total_usd": 0.22229379999999999
+    }
+  },
+  "narration": {
+    "text": null,
+    "chars": 0,
+    "numbers_verified": false,
+    "mp3_path": null,
+    "local_seq": null
+  }
+}

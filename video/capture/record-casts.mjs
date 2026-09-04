@@ -40,8 +40,11 @@ if (!existsSync(receiptPath)) {
 const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
 const brand = receipt.query.brand;
 const competitors = receipt.query.competitors ?? [];
-const vs = competitors.flatMap((c) => ["--vs", c]);
 const quote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
+// The demo receipt ran --profile full with 3 competitors; the live casts run
+// --profile lite, which caps competitors at 1 (src/sonar/config.py PROFILES).
+// Passing all 3 to a lite run is a validation error, not a cheaper run.
+const vs = competitors.slice(0, 1).flatMap((c) => ["--vs", c]);
 
 // The empty-run shot records a different query: the zero-mention brand from
 // results/demo-empty, so the beat shows the same brand the RESULTS_EMPTY

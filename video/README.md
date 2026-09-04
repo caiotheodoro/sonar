@@ -16,20 +16,26 @@ missing cited field stops the bundle before a frame is drawn.
 
 ## Shot list
 
-Target timings; they sum to 64 s, leaving 26 s under the cap for the final cut.
+Timings below are measured from the real `public/narration.mp3` (Rachel runs
+slower than the 130 wpm the storyboard assumed — 127 wpm over 162 words is
+76.7 s of voice, not the ~64 s target); they sum to 82.2 s, leaving 7.8 s
+under the cap. Scene boundaries are not typed by hand: `src/manifest.ts`
+derives them from `narration.json`'s measured `startMs`/`endMs` per scene
+(`sceneDurationsFrames`), so a re-timed narration reflows this table's actual
+cut automatically, though the numbers below still have to be updated by hand
+to describe it.
 
-| # | Beat | Scene id | Target | Shows | Source of every number |
+| # | Beat | Scene id | Timing | Shows | Source of every number |
 |---|------|----------|-------:|-------|------------------------|
-| 1 | The price that died | `price-died` | 0–5 s | The incumbent's list price drawn full width, then this brief's measured total on the same axis — no verdict word yet | `results/demo/receipt.json` (`incumbent.price_usd_month`, `totals.total_usd`) |
-| 2 | Live `POST /v1/run` | `live-trace` | 5–17 s | A fresh `sonar run --trace`, replayed from `public/casts/run_trace.cast`; the status strip flips to `POST /v1/run ×1` | cast (W7.3) |
-| 3 | The receipt | `receipt` | 17–29 s | Receipt rows on the tape: run counts, the money split, then `verdict RECONCILED` (earned here); read-line ceremony for the `39.6×` ratio; `×N` counts to 42 | `results/demo/receipt.json` (`totals`, `comparison`, `mentions`, `audit`) |
-| 4 | `sonar ask` with citations | `ask` | 29–47 s | Share of voice for Nubank/Itaú/C6 as one static group; PicPay takes the read-line abstain gesture; a sentiment strip; then `public/casts/ask.cast` with `[1] [2]` docking to real mention URLs; a persistent `X/Twitter — unavailable` chip | cast (W7.3) and `results/demo/{stats,digest}.json` (`share_of_voice[]`+`ci95`, `sentiment[]`, `top_mentions[]`, `coverage_gaps[0]`) |
-| 5 | The zero-mention run | `empty-run` | 47–58 s | Zephyrium Bank from `public/casts/empty_run.cast`: `mentions.fetched → 0`, `verdict RECONCILED`, all 9 runs still billed; then the read-line for `audit 0.84` with a static tick at the `0.85` bar | cast (W7.3), `results/demo-empty/*` (RESULTS_EMPTY), `results/demo/receipt.json` (`audit.agreement`), `src/data/repo-facts.json` (`auditBar`) |
-| 6 | Outro | `outro` | 58–64 s | The two beat-1 read-lines replayed verbatim — price faint, cost amber; `github.com/caiotheodoro/sonar`, `#monid` | `results/demo/receipt.json` and `src/manifest.ts` (`PUBLISHED`) |
+| 1 | The price that died | `price-died` | 0–11.8 s | The incumbent's list price drawn full width, then this brief's measured total on the same axis — no verdict word yet | `results/demo/receipt.json` (`incumbent.price_usd_month`, `totals.total_usd`) |
+| 2 | Live `POST /v1/run` | `live-trace` | 11.8–20.6 s | A fresh `sonar run --trace`, replayed from `public/casts/run_trace.cast`; the status strip flips to `POST /v1/run ×1` | cast (W7.3) |
+| 3 | The receipt | `receipt` | 20.6–33.9 s | Receipt rows on the tape: run counts, the money split, then `verdict RECONCILED` (earned here); read-line ceremony for the `39.6×` ratio; `×N` counts to 42 | `results/demo/receipt.json` (`totals`, `comparison`, `mentions`, `audit`) |
+| 4 | `sonar ask` with citations | `ask` | 33.9–53.9 s | Share of voice for Nubank/Itaú/C6 as one static group; PicPay takes the read-line abstain gesture; a sentiment strip; then `public/casts/ask.cast` with `[1] [2]` docking to real mention URLs; a persistent `X/Twitter — unavailable` chip | cast (W7.3) and `results/demo/{stats,digest}.json` (`share_of_voice[]`+`ci95`, `sentiment[]`, `top_mentions[]`, `coverage_gaps[0]`) |
+| 5 | The zero-mention run | `empty-run` | 53.9–70.8 s | Zephyrium Bank from `public/casts/empty_run.cast`: `mentions.fetched → 0`, `verdict RECONCILED`, all 9 runs still billed; then the read-line for `audit 0.84` with a static tick at the `0.85` bar | cast (W7.3), `results/demo-empty/*` (RESULTS_EMPTY), `results/demo/receipt.json` (`audit.agreement`), `src/data/repo-facts.json` (`auditBar`) |
+| 6 | Outro | `outro` | 70.8–82.2 s | The two beat-1 read-lines replayed verbatim — price faint, cost amber; `github.com/caiotheodoro/sonar`, `#monid` | `results/demo/receipt.json` and `src/manifest.ts` (`PUBLISHED`) |
 
-Scene durations live in `src/manifest.ts` and are the only place timing is
-set; `TOTAL_FRAMES` is derived from them and the manifest throws if the sum
-passes ninety seconds.
+`TOTAL_FRAMES` is derived from the scene durations and the manifest throws if
+the sum passes ninety seconds.
 
 ## What is scaffolded and what is not
 

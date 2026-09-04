@@ -1,0 +1,52 @@
+[
+  {
+    "topic_id": "itau-01",
+    "brand": "Itaú",
+    "name": "Private Pension Tax Benefits",
+    "n": 3,
+    "n_clusters": 2,
+    "share": 0.04918032786885246,
+    "net": 0.3333333333333333,
+    "ci95": [
+      0.0,
+      0.5
+    ],
+    "exemplar_mention_ids": [
+      "d358a10e17d54db850a1e845",
+      "9077dd18ecc597270aacc9a5",
+      "fba4ba758b0f20ede488b04a"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  },
+  {
+    "topic_id": "nubank-01",
+    "brand": "Nubank",
+    "name": "Nubank Q1 Earnings Analysis",
+    "n": 3,
+    "n_clusters": 3,
+    "share": 0.057692307692307696,
+    "net": 0.0,
+    "ci95": [
+      0.0,
+      0.0
+    ],
+    "exemplar_mention_ids": [
+      "faced3ee532a169e3fd493c0",
+      "b4d95c5e6fe6861022d3aadf",
+      "f812780b7cd591b3efb15fcd"
+    ],
+    "method": {
+      "embedding_model": "text-embedding-3-small",
+      "linkage": "average",
+      "threshold": 0.35,
+      "min_size": 3,
+      "min_breadth": 2
+    }
+  }
+]

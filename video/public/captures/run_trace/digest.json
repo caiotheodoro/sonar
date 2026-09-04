@@ -1,0 +1,841 @@
+{
+  "brand": "Nubank",
+  "competitors": [
+    "Itaú"
+  ],
+  "window": {
+    "current": {
+      "start": "2026-08-28T14:03:46Z",
+      "end": "2026-09-04T14:03:46Z"
+    },
+    "previous": {
+      "start": "2026-08-21T14:03:46Z",
+      "end": "2026-08-28T14:03:46Z"
+    }
+  },
+  "share_of_voice": [
+    {
+      "brand": "Nubank",
+      "n": 50,
+      "n_clusters": 41,
+      "share": 0.45045045045045046,
+      "ci95": [
+        0.339995145631068,
+        0.561418007829491
+      ],
+      "basis_sources": [
+        "reddit",
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps",
+        "news"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 61,
+      "n_clusters": 55,
+      "share": 0.5495495495495496,
+      "ci95": [
+        0.4385819921705089,
+        0.6600048543689321
+      ],
+      "basis_sources": [
+        "reddit",
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps",
+        "news"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Nubank",
+      "n": 52,
+      "n_confirmed": 14,
+      "pos": 19,
+      "neg": 6,
+      "neu": 27,
+      "net": 0.25,
+      "ci95": [
+        0.07142857142857142,
+        0.4230769230769231
+      ],
+      "ci95_iid": [
+        0.07272727272727272,
+        0.42857142857142855
+      ],
+      "design_effect": 0.9765567735542774,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 61,
+      "n_confirmed": 25,
+      "pos": 25,
+      "neg": 13,
+      "neu": 23,
+      "net": 0.19672131147540983,
+      "ci95": [
+        0.015145861601085492,
+        0.38461538461538464
+      ],
+      "ci95_iid": [
+        0.0,
+        0.37322626000432574
+      ],
+      "design_effect": 0.979970165386398,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Nubank",
+      "source": "reddit",
+      "n": 8,
+      "n_clusters": 7,
+      "pos": 3,
+      "neg": 2,
+      "neu": 3,
+      "net": 0.125,
+      "ci95": [
+        -0.37687499999999885,
+        0.6
+      ],
+      "ci95_iid": [
+        -0.44487179487179407,
+        0.6666666666666666
+      ],
+      "design_effect": 0.7723764101992306,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 1,
+      "neg": 0,
+      "neu": 4,
+      "net": 0.2,
+      "ci95": [
+        0.0,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6666666666666666
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube_comment",
+      "n": 4,
+      "n_clusters": 3,
+      "pos": 2,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.25,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "Nubank",
+      "source": "tiktok",
+      "n": 17,
+      "n_clusters": 10,
+      "pos": 5,
+      "neg": 0,
+      "neu": 12,
+      "net": 0.29411764705882354,
+      "ci95": [
+        0.05263157894736842,
+        0.5714285714285714
+      ],
+      "ci95_iid": [
+        0.09081027667984207,
+        0.5384615384615384
+      ],
+      "design_effect": 1.343121414922204,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "instagram",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 4,
+      "neg": 0,
+      "neu": 0,
+      "net": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        1.0,
+        1.0
+      ],
+      "design_effect": null,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "google_maps",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 2,
+      "neg": 3,
+      "neu": 0,
+      "net": -0.2,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "news",
+      "n": 7,
+      "n_clusters": 7,
+      "pos": 0,
+      "neg": 0,
+      "neu": 7,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "reddit",
+      "n": 10,
+      "n_clusters": 8,
+      "pos": 2,
+      "neg": 1,
+      "neu": 7,
+      "net": 0.1,
+      "ci95": [
+        -0.3333333333333333,
+        0.35714285714285715
+      ],
+      "ci95_iid": [
+        -0.25,
+        0.5
+      ],
+      "design_effect": 0.8475686570924665,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 2,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.25,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube_comment",
+      "n": 3,
+      "n_clusters": 1,
+      "pos": 1,
+      "neg": 2,
+      "neu": 0,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -0.3333333333333333,
+        -0.3333333333333333
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 0.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "tiktok",
+      "n": 16,
+      "n_clusters": 14,
+      "pos": 9,
+      "neg": 2,
+      "neu": 5,
+      "net": 0.4375,
+      "ci95": [
+        0.07142857142857142,
+        0.8125
+      ],
+      "ci95_iid": [
+        0.0625,
+        0.7692307692307693
+      ],
+      "design_effect": 1.0995428019882119,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "instagram",
+      "n": 12,
+      "n_clusters": 12,
+      "pos": 4,
+      "neg": 3,
+      "neu": 5,
+      "net": 0.08333333333333333,
+      "ci95": [
+        -0.36363636363636365,
+        0.5454545454545454
+      ],
+      "ci95_iid": [
+        -0.37524038461538417,
+        0.5457070707070693
+      ],
+      "design_effect": 0.9744171638766959,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "google_maps",
+      "n": 6,
+      "n_clusters": 6,
+      "pos": 2,
+      "neg": 4,
+      "neu": 0,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -1.0,
+        0.6
+      ],
+      "ci95_iid": [
+        -1.0,
+        0.6
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "news",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 5,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.5,
+      "ci95": [
+        0.15357142857142905,
+        0.8333333333333334
+      ],
+      "ci95_iid": [
+        0.2,
+        0.818560606060604
+      ],
+      "design_effect": 1.207672365335784,
+      "wow_scope": false
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "itau-01",
+      "brand": "Itaú",
+      "name": "Private Pension Tax Benefits",
+      "n": 3,
+      "n_clusters": 2,
+      "share": 0.04918032786885246,
+      "net": 0.3333333333333333,
+      "ci95": [
+        0.0,
+        0.5
+      ],
+      "exemplar_mention_ids": [
+        "d358a10e17d54db850a1e845",
+        "9077dd18ecc597270aacc9a5",
+        "fba4ba758b0f20ede488b04a"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    },
+    {
+      "topic_id": "nubank-01",
+      "brand": "Nubank",
+      "name": "Nubank Q1 Earnings Analysis",
+      "n": 3,
+      "n_clusters": 3,
+      "share": 0.057692307692307696,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "exemplar_mention_ids": [
+        "faced3ee532a169e3fd493c0",
+        "b4d95c5e6fe6861022d3aadf",
+        "f812780b7cd591b3efb15fcd"
+      ],
+      "method": {
+        "embedding_model": "text-embedding-3-small",
+        "linkage": "average",
+        "threshold": 0.35,
+        "min_size": 3,
+        "min_breadth": 2
+      }
+    }
+  ],
+  "events": [
+    {
+      "brand": "Itaú",
+      "date": "2026-09-02",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "itaú",
+      "exhibit_url": "https://www.tiktok.com/@bruamilli/video/7679567956648545543"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-03",
+      "n": 16,
+      "n_clusters": 14,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Private Pension Tax Benefits",
+      "exhibit_url": "https://www.tiktok.com/@onbackstage/video/7681132386750303509"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-02",
+      "n": 8,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.youtube.com/watch?v=q6BKFUT6tpk"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-04",
+      "n": 10,
+      "n_clusters": 9,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.reddit.com/r/investimentos/comments/1w6xsj1/me_ajude_a_diversificar_170k"
+    }
+  ],
+  "top_mentions": [
+    {
+      "mention_id": "5ad5164cb9ba8cab90f55158",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=-CJ1ydkcVZA",
+      "quote": "O segmento que faz valer a sua jornada.\n\nAproveite benefícios pensados para fazer suas escolhas e seu dinheiro valerem ainda mais. \n\n-----------------------------------------------------------------------------------------------------------",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-18T19:21:49Z",
+      "engagement_score": 36406932
+    },
+    {
+      "mention_id": "01f4b1c1f323c265490df9ab",
+      "brand": "Nubank",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=q6BKFUT6tpk",
+      "quote": "Nubank Parque\n\nO estádio mudou de nome e Fred foi contratado para não deixar ninguém confundir.\n\n---------------------------------------------------------------------------------------------------------------------------\nQuer acompanhar tod",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T13:25:38Z",
+      "engagement_score": 4623789
+    },
+    {
+      "mention_id": "a5a55a21cfad72bb6b532414",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@henri_invest/video/7680938396931427605",
+      "quote": "Olha só essa simulação #emprestimo #nubank #banco ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T14:03:56Z",
+      "engagement_score": 262267
+    },
+    {
+      "mention_id": "3850c98223b0fe34f172eb9a",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@larissabrandao.adv/video/7676126717055962389",
+      "quote": "O Nubank anunciou em julho de 2026 a aquisição de 100% do Banco Porto Real de Investimentos. O movimento busca incorporar uma licença bancária ao conglomerado e manter a marca e o nome Nubank. Para os clientes, a própria empresa informou qu",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-20T14:52:11Z",
+      "engagement_score": 222334
+    },
+    {
+      "mention_id": "bbe5333bc5208c2fa3f2cd42",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@henri_invest/video/7680962251733372181",
+      "quote": "Teria coragem?? #emprestimo #nubank #henri_invest #negocios ",
+      "lang": "other",
+      "label": "neutral",
+      "published_at": "2026-09-02T15:36:31Z",
+      "engagement_score": 176843
+    },
+    {
+      "mention_id": "71f67de8cf85fc15a8c6b03c",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@henri_invest/video/7680723833816354068",
+      "quote": "Para quem tem dúvidas! #henri_invest #emprestimo #nubank #banco ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T00:11:25Z",
+      "engagement_score": 167855
+    },
+    {
+      "mention_id": "1d22af29944a1cf345c6b2bc",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@henri_invest/video/7681050608924691733",
+      "quote": "Oque vcs acha é muito juros? #negocios #consorcio #emprestimo #nubank ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T21:19:28Z",
+      "engagement_score": 99432
+    },
+    {
+      "mention_id": "fcec2ec3b436f0b4d517961a",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@bruamilli/video/7671442313024933128",
+      "quote": "Detalhes do Nubank Croma 💜 #nubank #investidoriniciante #finanças #educaçãofinanceira ",
+      "lang": "other",
+      "label": "neutral",
+      "published_at": "2026-08-09T11:00:00Z",
+      "engagement_score": 85084
+    },
+    {
+      "mention_id": "f7cb68eb80b41c0fd106155a",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@dinheiro.no.fundo.dopoco/video/7671456541832121621",
+      "quote": "Viu isso no NUBANK? 🤩 . . . . . . #nubank #nu #nubankbrasil #assistentevirtual #assistentenubank ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-08T00:49:29Z",
+      "engagement_score": 56091
+    },
+    {
+      "mention_id": "50f1c15357efcbf7b83fd713",
+      "brand": "Nubank",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@sertaoinvestidoroficial/video/7680954528669371655",
+      "quote": "Como sacar dinheiro do Nubank ? Você usa dinheiro em espécie ? #nubankbrasil #nubank #financaspessoais ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-09-02T15:06:33Z",
+      "engagement_score": 54690
+    },
+    {
+      "mention_id": "8822c13ba0cb4734bb833927",
+      "brand": "Itaú",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=a0miwt8v18U",
+      "quote": "Para ser cliente Itaú solo necesitas de algunos minutos | Itaú Chile 🧡\n\nEstás a un par de minutos de obtener los beneficios del banco Itaú ⏱️. Haz el proceso completo desde tu celular ingresando awww.itau.cl. 🧡 No necesitas ir a una sucursa",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-05T23:52:43Z",
+      "engagement_score": 11670180
+    },
+    {
+      "mention_id": "a3d577293a44c09dcf7f5bb6",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@advogado_eduardo/video/7673874819821128967",
+      "quote": "Tentou sacar R$50 mil no Itaú e o gerente perguntou o que ia fazer com o dinheiro ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-14T13:13:42Z",
+      "engagement_score": 261941
+    },
+    {
+      "mention_id": "058a2e01584e989ce6d12c1d",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@itau/video/7679097302132296967",
+      "quote": "Agora que os mitos foram oficialmente derrubados, só falta a sua inscrição. Vem pro Trainee Itaú 2027. ",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-28T14:59:32Z",
+      "engagement_score": 194552
+    },
+    {
+      "mention_id": "733ce7963d9d42a1836f8931",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@tarjetasenuruguay/video/7678900548631842069",
+      "quote": "Malas noticias para algunos clientes de Itaú! 😬🤦‍♂️ #itau #uruguay #descuentos ",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-28T02:16:08Z",
+      "engagement_score": 71590
+    },
+    {
+      "mention_id": "4d7dda27d5c689c8e9156270",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@bruamilli/video/7679567956648545543",
+      "quote": "Respondendo a @Nilton Souza CDB do banco Itaú #finanças #rendafixa #itau #investidoriniciante #comoinvestir ",
+      "lang": "other",
+      "label": "neutral",
+      "published_at": "2026-09-02T10:00:00Z",
+      "engagement_score": 37668
+    },
+    {
+      "mention_id": "3a55a74e7ac8609ec18d6a91",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@rafaelamolas/video/7672885414885133589",
+      "quote": "Qual o melhor cartão de crédito do banco ITAÚ? Meu destaque vai para o Itaú The One - e o Azul Visa Infinite!  . Pontos que levei em consideração: pontuação, acesso a sala vip, anuidade e benefícios!  . . #itau #azul #cartaodecredito #ciaae",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-11T21:14:25Z",
+      "engagement_score": 36888
+    },
+    {
+      "mention_id": "c92e994cd8c9c1cdf74b2123",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@tarjetasenuruguay/video/7679571802812648724",
+      "quote": "⚠️ Cambios en las condiciones de accesos a salas VIP con tarjetas Itaú  Gracias a Gabriel por la info!  #salasvip #aeropuerto #itau #uruguay #viajes",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-29T21:40:57Z",
+      "engagement_score": 35954
+    },
+    {
+      "mention_id": "bfb39975082d709cbf4e8f74",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@posocco/video/7678376147641503009",
+      "quote": "Advogado Fabricio Posocco, do escritório Posocco & Advogados Associados, com Luciano Faccioli, na TH+ Band, orienta sobre as cobranças indevidas em cartões do Itaú. 💳💸 ▶️ Veja a entrevista completa em posocco.com.br",
+      "lang": "pt",
+      "label": "negative",
+      "published_at": "2026-08-26T16:21:03Z",
+      "engagement_score": 27631
+    },
+    {
+      "mention_id": "a2b5b6e7d33a926fb5f69bad",
+      "brand": "Itaú",
+      "source": "tiktok",
+      "url": "https://www.tiktok.com/@rafaelamolas/video/7673338673936469268",
+      "quote": "Respondendo a @Kleiton K10✌🏼 Quais são os melhores cartões de crédito do Itaú?  . . #itau #cartaodecredito #latampass #viagem #milhas ",
+      "lang": "pt",
+      "label": "neutral",
+      "published_at": "2026-08-13T02:33:10Z",
+      "engagement_score": 27333
+    },
+    {
+      "mention_id": "6f05d3d8fe14203cb1bc2a24",
+      "brand": "Itaú",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=IHTXRSwKt1A",
+      "quote": "McKinsey Talks: Como a AI está redesenhando os bancos, com o diretor de tecnologia do Itaú\n\nA digitalização dos bancos levou cerca de dez anos para se consolidar – e transformou totalmente a relação das instituições financeiras com seus cli",
+      "lang": "pt",
+      "label": "positive",
+      "published_at": "2026-08-12T03:00:21Z",
+      "engagement_score": 23299
+    }
+  ],
+  "abstentions": [
+    {
+      "scope": "source",
+      "brand": "Nubank",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Nubank",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "facebook",
+      "reason": "empty",
+      "detail": "local_seq 18: 1 item(s), all provider errors: not_available"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "trustpilot",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "source",
+      "brand": "Itaú",
+      "source": "g2",
+      "reason": "empty",
+      "detail": "lookup found no matching entity; reviews run skipped"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=5 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=4 < 20 in previous; n_clusters=4 < 5 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": "instagram",
+      "reason": "degenerate",
+      "detail": "by_source instagram net design_effect: iid ci95 has zero width"
+    },
+    {
+      "scope": "brand",
+      "brand": "Nubank",
+      "source": "news",
+      "reason": "degenerate",
+      "detail": "by_source news net design_effect: iid ci95 has zero width"
+    },
+    {
+      "scope": "brand",
+      "brand": "Itaú",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "net: n=9 < 20 in previous"
+    },
+    {
+      "scope": "brand",
+      "brand": "Itaú",
+      "source": null,
+      "reason": "below_minimum",
+      "detail": "share: n=9 < 20 in previous"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "source": "x",
+      "reason": "unavailable",
+      "note": "X/Twitter has no Monid endpoint (verified 2026-09-02)"
+    }
+  ],
+  "cost": {
+    "verdict": "RECONCILED",
+    "totals": {
+      "monid_usd": 0.608825,
+      "monid_runs": 22,
+      "monid_runs_billed": 18,
+      "monid_runs_zero_results": 4,
+      "monid_runs_failed": 0,
+      "llm_usd": 0.07051617999999998,
+      "llm_calls": {
+        "classify": 2,
+        "tiebreak": 31,
+        "embed": 2,
+        "name_topic": 2,
+        "narrate": 0,
+        "ask": 0
+      },
+      "llm_tokens": 28703,
+      "elevenlabs_usd": 0.0,
+      "total_usd": 0.67934118
+    }
+  },
+  "narration": {
+    "text": null,
+    "chars": 0,
+    "numbers_verified": false,
+    "mp3_path": null,
+    "local_seq": null
+  }
+}

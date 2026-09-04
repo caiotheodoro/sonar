@@ -1,0 +1,448 @@
+{
+  "share_of_voice": [
+    {
+      "brand": "Nubank",
+      "n": 50,
+      "n_clusters": 41,
+      "share": 0.45045045045045046,
+      "ci95": [
+        0.339995145631068,
+        0.561418007829491
+      ],
+      "basis_sources": [
+        "reddit",
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps",
+        "news"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 61,
+      "n_clusters": 55,
+      "share": 0.5495495495495496,
+      "ci95": [
+        0.4385819921705089,
+        0.6600048543689321
+      ],
+      "basis_sources": [
+        "reddit",
+        "youtube",
+        "youtube_comment",
+        "tiktok",
+        "instagram",
+        "google_maps",
+        "news"
+      ],
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "sentiment": [
+    {
+      "brand": "Nubank",
+      "n": 52,
+      "n_confirmed": 14,
+      "pos": 19,
+      "neg": 6,
+      "neu": 27,
+      "net": 0.25,
+      "ci95": [
+        0.07142857142857142,
+        0.4230769230769231
+      ],
+      "ci95_iid": [
+        0.07272727272727272,
+        0.42857142857142855
+      ],
+      "design_effect": 0.9765567735542774,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    },
+    {
+      "brand": "Itaú",
+      "n": 61,
+      "n_confirmed": 25,
+      "pos": 25,
+      "neg": 13,
+      "neu": 23,
+      "net": 0.19672131147540983,
+      "ci95": [
+        0.015145861601085492,
+        0.38461538461538464
+      ],
+      "ci95_iid": [
+        0.0,
+        0.37322626000432574
+      ],
+      "design_effect": 0.979970165386398,
+      "wow": {
+        "delta": null,
+        "ci95": null,
+        "ci95_confirmed_only": null,
+        "verdict": "ABSTAIN",
+        "p_raw": null,
+        "p_holm": null
+      }
+    }
+  ],
+  "by_source": [
+    {
+      "brand": "Nubank",
+      "source": "reddit",
+      "n": 8,
+      "n_clusters": 7,
+      "pos": 3,
+      "neg": 2,
+      "neu": 3,
+      "net": 0.125,
+      "ci95": [
+        -0.37687499999999885,
+        0.6
+      ],
+      "ci95_iid": [
+        -0.44487179487179407,
+        0.6666666666666666
+      ],
+      "design_effect": 0.7723764101992306,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 1,
+      "neg": 0,
+      "neu": 4,
+      "net": 0.2,
+      "ci95": [
+        0.0,
+        0.6666666666666666
+      ],
+      "ci95_iid": [
+        0.0,
+        0.6666666666666666
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "youtube_comment",
+      "n": 4,
+      "n_clusters": 3,
+      "pos": 2,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.25,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "Nubank",
+      "source": "tiktok",
+      "n": 17,
+      "n_clusters": 10,
+      "pos": 5,
+      "neg": 0,
+      "neu": 12,
+      "net": 0.29411764705882354,
+      "ci95": [
+        0.05263157894736842,
+        0.5714285714285714
+      ],
+      "ci95_iid": [
+        0.09081027667984207,
+        0.5384615384615384
+      ],
+      "design_effect": 1.343121414922204,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "instagram",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 4,
+      "neg": 0,
+      "neu": 0,
+      "net": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        1.0,
+        1.0
+      ],
+      "design_effect": null,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "google_maps",
+      "n": 5,
+      "n_clusters": 5,
+      "pos": 2,
+      "neg": 3,
+      "neu": 0,
+      "net": -0.2,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Nubank",
+      "source": "news",
+      "n": 7,
+      "n_clusters": 7,
+      "pos": 0,
+      "neg": 0,
+      "neu": 7,
+      "net": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "ci95_iid": [
+        0.0,
+        0.0
+      ],
+      "design_effect": null,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "reddit",
+      "n": 10,
+      "n_clusters": 8,
+      "pos": 2,
+      "neg": 1,
+      "neu": 7,
+      "net": 0.1,
+      "ci95": [
+        -0.3333333333333333,
+        0.35714285714285715
+      ],
+      "ci95_iid": [
+        -0.25,
+        0.5
+      ],
+      "design_effect": 0.8475686570924665,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube",
+      "n": 4,
+      "n_clusters": 4,
+      "pos": 2,
+      "neg": 1,
+      "neu": 1,
+      "net": 0.25,
+      "ci95": [
+        -1.0,
+        1.0
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "youtube_comment",
+      "n": 3,
+      "n_clusters": 1,
+      "pos": 1,
+      "neg": 2,
+      "neu": 0,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -0.3333333333333333,
+        -0.3333333333333333
+      ],
+      "ci95_iid": [
+        -1.0,
+        1.0
+      ],
+      "design_effect": 0.0,
+      "wow_scope": false
+    },
+    {
+      "brand": "Itaú",
+      "source": "tiktok",
+      "n": 16,
+      "n_clusters": 14,
+      "pos": 9,
+      "neg": 2,
+      "neu": 5,
+      "net": 0.4375,
+      "ci95": [
+        0.07142857142857142,
+        0.8125
+      ],
+      "ci95_iid": [
+        0.0625,
+        0.7692307692307693
+      ],
+      "design_effect": 1.0995428019882119,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "instagram",
+      "n": 12,
+      "n_clusters": 12,
+      "pos": 4,
+      "neg": 3,
+      "neu": 5,
+      "net": 0.08333333333333333,
+      "ci95": [
+        -0.36363636363636365,
+        0.5454545454545454
+      ],
+      "ci95_iid": [
+        -0.37524038461538417,
+        0.5457070707070693
+      ],
+      "design_effect": 0.9744171638766959,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "google_maps",
+      "n": 6,
+      "n_clusters": 6,
+      "pos": 2,
+      "neg": 4,
+      "neu": 0,
+      "net": -0.3333333333333333,
+      "ci95": [
+        -1.0,
+        0.6
+      ],
+      "ci95_iid": [
+        -1.0,
+        0.6
+      ],
+      "design_effect": 1.0,
+      "wow_scope": true
+    },
+    {
+      "brand": "Itaú",
+      "source": "news",
+      "n": 10,
+      "n_clusters": 10,
+      "pos": 5,
+      "neg": 0,
+      "neu": 5,
+      "net": 0.5,
+      "ci95": [
+        0.15357142857142905,
+        0.8333333333333334
+      ],
+      "ci95_iid": [
+        0.2,
+        0.818560606060604
+      ],
+      "design_effect": 1.207672365335784,
+      "wow_scope": false
+    }
+  ],
+  "events": [
+    {
+      "brand": "Itaú",
+      "date": "2026-09-02",
+      "n": 5,
+      "n_clusters": 5,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "itaú",
+      "exhibit_url": "https://www.tiktok.com/@bruamilli/video/7679567956648545543"
+    },
+    {
+      "brand": "Itaú",
+      "date": "2026-09-03",
+      "n": 16,
+      "n_clusters": 14,
+      "baseline_median": 2.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "Private Pension Tax Benefits",
+      "exhibit_url": "https://www.tiktok.com/@onbackstage/video/7681132386750303509"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-02",
+      "n": 8,
+      "n_clusters": 5,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.youtube.com/watch?v=q6BKFUT6tpk"
+    },
+    {
+      "brand": "Nubank",
+      "date": "2026-09-04",
+      "n": 10,
+      "n_clusters": 9,
+      "baseline_median": 1.0,
+      "baseline_mad": 1.0,
+      "threshold": 5.0,
+      "label": "nubank",
+      "exhibit_url": "https://www.reddit.com/r/investimentos/comments/1w6xsj1/me_ajude_a_diversificar_170k"
+    }
+  ],
+  "window": {
+    "current": {
+      "start": "2026-08-28T14:03:46Z",
+      "end": "2026-09-04T14:03:46Z"
+    },
+    "previous": {
+      "start": "2026-08-21T14:03:46Z",
+      "end": "2026-08-28T14:03:46Z"
+    }
+  }
+}

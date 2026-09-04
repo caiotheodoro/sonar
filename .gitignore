@@ -12,3 +12,5 @@ video/node_modules/
 video/.remotion/
 node_modules/
 docs/private/
+# sonar ask's retrieval cache: regenerable, not evidence (src/sonar/chat/store.py)
+results/**/embeddings.npy

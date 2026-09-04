@@ -3,81 +3,81 @@
   "narration": [
     {
       "scene": "price-died",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 500,
+      "endMs": 6746,
       "text": "A social-listening seat is three hundred forty-nine dollars a month.",
       "spoken": "A social listening seat is three hundred forty nine dollars a month."
     },
     {
       "scene": "price-died",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 6886,
+      "endMs": 11754,
       "text": "This is one full brief. Two dollars and twenty cents.",
       "spoken": "This is one full brief. Two dollars and twenty cents."
     },
     {
       "scene": "live-trace",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 11894,
+      "endMs": 15752,
       "text": "Live: sonar fires a POST to the Monid API.",
       "spoken": "Live. Sonar fires a POST to the Monid A P I."
     },
     {
       "scene": "live-trace",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 15892,
+      "endMs": 20576,
       "text": "A run id comes back, and a price. You pay per call."
     },
     {
       "scene": "receipt",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 20716,
+      "endMs": 26502,
       "text": "The receipt reconciles. 42 runs, 37 billed, 11 empty, 0 failed.",
       "spoken": "The receipt reconciles. Forty two runs. Thirty seven billed, eleven empty, none failed."
     },
     {
       "scene": "receipt",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 26642,
+      "endMs": 33806,
       "text": "Monid, the model, the voice, one line each. Nearly forty times under the seat.",
       "spoken": "Monid, the model, the voice. One line each. Nearly forty times under the seat."
     },
     {
       "scene": "ask",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 33946,
+      "endMs": 38722,
       "text": "Share of voice and sentiment, each with an interval."
     },
     {
       "scene": "ask",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 38862,
+      "endMs": 44465,
       "text": "PicPay doesn't clear the bar. Not enough data, so it says so."
     },
     {
       "scene": "ask",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 44605,
+      "endMs": 53790,
       "text": "Ask it anything; every citation opens a real post. X has no endpoint, and the receipt says that too."
     },
     {
       "scene": "empty-run",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 53930,
+      "endMs": 62564,
       "text": "A brand with nothing to find still gets a receipt. 0 mentions, still reconciled, still billed.",
       "spoken": "A brand with nothing to find still gets a receipt. Zero mentions, still reconciled, still billed."
     },
     {
       "scene": "empty-run",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 62704,
+      "endMs": 70695,
       "text": "Our own label audit came in at 0.84, under the bar we set. Shipped flagged, not hidden.",
       "spoken": "Our own label audit came in at zero point eight four, under the bar we set. Shipped flagged, not hidden."
     },
     {
       "scene": "outro",
-      "startMs": 0,
-      "endMs": 0,
+      "startMs": 70835,
+      "endMs": 77173,
       "text": "Three hundred forty-nine dollars a month, replaced. The code is open.",
       "spoken": "Three hundred forty nine dollars a month, replaced. The code is open. Hashtag monid."
     }
