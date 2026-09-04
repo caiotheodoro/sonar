@@ -6,6 +6,7 @@ import React from "react";
 import { interpolate, useCurrentFrame } from "remotion";
 import { fact, factHost, factText } from "../data/facts";
 import { MOTION, T, TYPE } from "../theme";
+import { Sfx } from "./Sfx";
 
 export const FactChip: React.FC<{ id: string; startFrame?: number; signal?: boolean }> = ({ id, startFrame = MOTION.scanFrames, signal = false }) => {
   const frame = useCurrentFrame();
@@ -13,6 +14,7 @@ export const FactChip: React.FC<{ id: string; startFrame?: number; signal?: bool
   const f = fact(id);
   return (
     <div style={{ display: "flex", alignItems: "baseline", gap: 18, opacity: o, fontFamily: T.mono }}>
+      <Sfx src="click" at={startFrame} gain={0.6} />
       <span style={{ fontSize: TYPE.value, fontWeight: 700, color: signal ? T.signal : T.plate, lineHeight: 1 }}>{factText(id)}</span>
       <span style={{ fontSize: TYPE.label, color: T.engrave, letterSpacing: "0.08em", textTransform: "uppercase" }}>
         {f.label}

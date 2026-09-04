@@ -4,6 +4,7 @@ import { RESULTS } from "../manifest";
 import { T, TYPE } from "../theme";
 import { displayFamily } from "../fonts";
 import { Card, Label, useSince, type CardProps } from "./Card";
+import { SfxAt } from "../components/Sfx";
 
 const { brand, competitors, windowDays, sources, sessionId } = RESULTS.receipt;
 
@@ -11,6 +12,8 @@ export const Brief: React.FC<CardProps> = () => {
   const f = useSince(0);
   return (
     <Card plate={["BRIEF", sessionId]} source={["results/demo/receipt.json", "query"]}>
+      <SfxAt src="click" frames={competitors.map((_, i) => 3 + i * 2)} gain={0.6} />
+      <SfxAt src="tick" frames={sources.map((_, i) => 10 + i)} gain={0.35} />
       <div style={{ display: "flex", alignItems: "baseline", gap: 40 }}>
         <span style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 260, lineHeight: 0.85, color: T.plate, textTransform: "uppercase" }}>
           {brand}

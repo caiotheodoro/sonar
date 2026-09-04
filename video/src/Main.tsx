@@ -1,8 +1,9 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile } from "remotion";
+import { CutTrack } from "./components/CutTrack";
 import { StatusStrip } from "./components/StatusStrip";
 import { ShotView } from "./shots/ShotView";
-import { STORYBOARD, TIMELINE, msToFrame } from "./timeline";
+import { STORYBOARD, TIMELINE, actFrom, msToFrame } from "./timeline";
 import { monoFamily } from "./fonts";
 import { T } from "./theme";
 
@@ -26,7 +27,13 @@ const musicGain = (f: number): number => {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
-  return music.volume * duck * tail;
+  // the kill: music drops out under the hit for six frames, then climbs back
+  const killAt = actFrom("killed");
+  const dip = interpolate(f, [killAt, killAt + 6, killAt + 18], [0.15, 0.15, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  return music.volume * duck * tail * (f >= killAt ? dip : 1);
 };
 
 export const Main: React.FC = () => (
@@ -44,6 +51,7 @@ export const Main: React.FC = () => (
     ))}
 
     <StatusStrip />
+    <CutTrack />
 
     <Sequence from={TIMELINE.narrationFrom} name="narration">
       <Audio src={staticFile(narration.src)} />

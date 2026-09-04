@@ -8,6 +8,7 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { Plate } from "./Plate";
+import { SfxAt } from "./Sfx";
 import { usd } from "../data/results";
 import { RESULTS, RESULTS_EMPTY } from "../manifest";
 import { LAYOUT, T, TYPE, VERDICT } from "../theme";
@@ -101,6 +102,7 @@ export const ReceiptRows: React.FC<{
     <AbsoluteFill style={{ padding: LAYOUT.margin, justifyContent: "center" }}>
       <Plate segments={["RECEIPT", sessionId]} size={TYPE.label} style={{ marginBottom: 28 }} />
       <div style={{ width }}>{rows.map(row)}</div>
+      <SfxAt src="blip" frames={rows.map((_, i) => startFrame + i * STEP)} gain={0.45} />
       <Plate segments={[`results/${results}/receipt.json`, "totals", `verdict ${verdict}`]} size={16} style={{ marginTop: 28 }} />
     </AbsoluteFill>
   );

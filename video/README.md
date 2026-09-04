@@ -41,6 +41,31 @@ terminal shot. Three gestures in the whole cut: the scan (a screenshot
 revealed top-to-bottom by one orange line), the slam (a stamp lands from 1.12×
 to 1× in four frames), the count (a figure runs up over ten frames). No fades.
 
+## Sound and micro-motion
+
+Every effect is synthesised by `capture/sfx.py` (numpy, seeded, 48 kHz
+mono, each under 500 ms, peak −6 dBFS) into `public/sfx/`: `tick`, `key`,
+`shutter`, `click`, `blip`, `sweep`, `whoosh`, `hit`, `stamp`, `chime`. No
+recordings, no licences; replace any file with a recording of the same name
+and record its licence in `docs/HANDOFF.md`. `storyboard.json` `sfx.volume`
+is the bus.
+
+A sound is attached to the thing that moves, at the frame it moves, by the
+component that draws it (`components/Sfx.tsx`): a key per typed character,
+a blip per receipt or bar row, a click when a chip or citation lands, a
+sweep under every scan and read-line, a tick on every count step and every
+cast line, a hit under `KILLED` (the music drops to 15 % for six frames), a
+stamp under `SONAR`, `RECONCILED` and the ratio landing, a chime on the
+outro. `components/CutTrack.tsx` adds a tick on every hard cut and a whoosh
+on every act change, from `TIMELINE`. One sound per visual event, none
+under a still frame.
+
+Moves on a screenshot: `hold`, `push` (1 → 1.03), `pan-down`, `zoom`
+(`zoom: [from, to]` toward `focus`), `punch` (instant cut-in at `at`), and
+`flash` (one-frame plate flash with a shutter, for the photo burst). Act A
+opens with six tight crops of the tracked Brand24 captures at one beat
+each, then the pricing page zooms onto the Team card.
+
 ## Shot list
 
 `pnpm timeline` prints the resolved table (start, end, frames, and which shots
@@ -48,7 +73,7 @@ each cue lands on). Seven acts, twenty-seven shots:
 
 | Act | Shots | Shows | Source of every number |
 |---|---|---|---|
-| brand24 | `a0`–`a6` | plate `SUBJECT / BRAND24`; brand24.com home, features (mentions, AI features, reach + sentiment panel), AI insights, pricing with the Team seat chipped | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
+| brand24 | `a0`–`a7`, `p1`–`p6` | plate `SUBJECT / BRAND24`; brand24.com home; a six-shot photo burst (dashboard, reach numbers, sentiment chart, AI insights panel, positives gauge, Team card) with shutters; features, AI insights, reach + sentiment panel; pricing wide, then a zoom onto the Team seat with its chip | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
 | killed | `b1` | full-bleed `KILLED` on the bar line, `WE KILL / MONID HACKATHON` | — |
 | monid | `c1`–`c5` | monid.ai home (tool-count chip), tools, social-media tools, the Reddit tool page (per-call prices), `POST /v1/run` in the API reference | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
 | rebuild | `d0`–`d6` | `SONAR` stamp with the session id; the brief (brand, competitors, window, sources); the real `run_trace` cast at ×6; mentions by source; share of voice + sentiment with intervals; topics + two real citations + the X gap; the voice line | `results/demo/receipt.json`, `stats.json`, `digest.json`, `public/casts/run_trace.cast` |
@@ -117,7 +142,10 @@ what the README links.
 6. a stale generated file (`beat-grid.json`, `narration.json` measurement,
    `shots.json`) — the failure names the script to re-run;
 7. wording that pairs "billed" with "empty" as a partition, or says anything
-   negative about the incumbent.
+   negative about the incumbent;
+8. a sound name in `src/sfx.ts` with no tracked 48 kHz mono WAV under
+   500 ms in `public/sfx/`, or a `zoom`/`punch`/`focus`/`flash` field the
+   storyboard uses wrongly.
 
 `tests/test_published_claims.py` mirrors 2 and 5 in Python and
 `scripts/privacy_gate.py` checks every tracked screenshot's sidecar (and OCRs

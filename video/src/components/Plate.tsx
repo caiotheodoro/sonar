@@ -6,6 +6,7 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
 import { T, TYPE } from "../theme";
+import { SfxAt } from "./Sfx";
 
 export const Plate: React.FC<{
   segments: string[];
@@ -20,6 +21,9 @@ export const Plate: React.FC<{
   const full = segments.join("  /  ");
   const shown = typewriter ? Math.max(0, Math.min(full.length, Math.floor(frame / cps))) : full.length;
   let consumed = 0;
+  const keyFrames = typewriter
+    ? Array.from({ length: full.length }, (_, i) => Math.ceil((i + 1) * cps) + startFrame).filter((f, i, arr) => full[i] !== " " && arr.indexOf(f) === i)
+    : [];
   return (
     <div
       style={{
@@ -47,6 +51,7 @@ export const Plate: React.FC<{
         );
       })}
       {typewriter && shown < full.length ? <span style={{ color: T.signal }}>▌</span> : null}
+      {typewriter ? <SfxAt src="key" frames={keyFrames} gain={0.5} /> : null}
     </div>
   );
 };

@@ -8,7 +8,7 @@ export type Anchor =
   | { hit: number; offsetMs?: number }
   | { cue: string; edge?: "start" | "end"; offsetMs?: number };
 
-export type Move = "hold" | "push" | "pan-down";
+export type Move = "hold" | "push" | "pan-down" | "zoom" | "punch";
 
 export type ReceiptRowId =
   | "runs"
@@ -33,6 +33,8 @@ interface ShotBase {
   snap?: "beat" | "hit";
   /** Hide the frame-locked status strip on this shot. */
   statusStrip?: boolean;
+  /** Per-shot sound overrides: `cut: false` silences the cut tick. */
+  sfx?: { cut?: boolean };
 }
 
 export interface Crop {
@@ -54,6 +56,14 @@ export type ShotSpec =
       plate?: string[];
       /** Highlight rectangle in source px (the Team tier, say). */
       highlight?: Crop;
+      /** Point in source px the zoom or punch moves toward. */
+      focus?: { x: number; y: number };
+      /** zoom: [from, to] scale over the shot; punch: the scale after `at`. */
+      zoom?: [number, number] | number;
+      /** punch: shot-local frame of the cut-in. */
+      at?: number;
+      /** One-frame plate flash on the first frame, with a shutter (photo burst). */
+      flash?: boolean;
     }
   | {
       kind: "stamp";
@@ -88,6 +98,7 @@ export interface Storyboard {
     fadeOutMs: number;
   };
   narration: { src: string; offsetMs: number };
+  sfx?: { volume: number };
   acts: Act[];
   shots: Shot[];
 }

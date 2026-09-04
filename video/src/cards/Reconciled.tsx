@@ -6,6 +6,7 @@ import { RESULTS } from "../manifest";
 import { displayFamily } from "../fonts";
 import { MOTION, T } from "../theme";
 import type { CardProps } from "./Card";
+import { Sfx } from "../components/Sfx";
 
 const { verdict } = RESULTS.receipt;
 
@@ -15,6 +16,7 @@ export const Reconciled: React.FC<CardProps> = () => {
   const s = interpolate(f, [at, at + MOTION.slamFrames], [1.3, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <AbsoluteFill>
+      <Sfx src="stamp" at={at} gain={0.9} />
       <ReceiptRows rows={["runs", "billed", "failed", "mentions", "total"]} width={740} />
       {f >= at ? (
         <div

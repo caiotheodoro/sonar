@@ -1,0 +1,1 @@
+Synthesised by `video/capture/sfx.py` (numpy, seeded). No recordings, no licences. Regenerate with `uv run python video/capture/sfx.py`; replace any file with a recording of the same name and record its licence in `docs/HANDOFF.md`.

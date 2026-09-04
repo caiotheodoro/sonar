@@ -9,6 +9,7 @@ import React from "react";
 import { interpolate, useCurrentFrame } from "remotion";
 import { LAYOUT, MOTION, T, TYPE } from "../theme";
 import { Plate } from "./Plate";
+import { Sfx } from "./Sfx";
 
 export const SPECIMEN = {
   x: LAYOUT.margin,
@@ -38,6 +39,7 @@ export const Specimen: React.FC<{
   const revealed = p * SPECIMEN.h;
   return (
     <>
+      {scan ? <Sfx src="sweep" at={0} gain={0.35} /> : null}
       <div
         style={{
           position: "absolute",

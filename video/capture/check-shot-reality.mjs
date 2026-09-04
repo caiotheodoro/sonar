@@ -199,6 +199,42 @@ const shotsJson = readJson(join(DATA, "shots.json"));
 if (JSON.stringify(shotsJson) !== JSON.stringify(shots)) fail("src/data/shots.json is stale; run capture/collect-shots.mjs");
 
 // ---------------------------------------------------------------------------
+// 8. sounds: every name the code can ask for exists, synthesised, short
+// ---------------------------------------------------------------------------
+const sfxSrc = readFileSync(join(VIDEO, "src", "sfx.ts"), "utf8");
+const sfxNames = [...(sfxSrc.match(/SFX_NAMES = \[([^\]]+)\]/)?.[1] ?? "").matchAll(/"([a-z]+)"/g)].map((m) => m[1]);
+if (!sfxNames.length) fail("src/sfx.ts: could not read SFX_NAMES");
+for (const name of sfxNames) {
+  const p = join(VIDEO, "public", "sfx", `${name}.wav`);
+  if (!existsSync(p)) {
+    fail(`public/sfx/${name}.wav is missing; run uv run python capture/sfx.py`);
+    continue;
+  }
+  const b = readFileSync(p);
+  if (b.toString("ascii", 0, 4) !== "RIFF") fail(`public/sfx/${name}.wav is not a WAV`);
+  const channels = b.readUInt16LE(22);
+  const rate = b.readUInt32LE(24);
+  const bytes = b.readUInt32LE(40);
+  const ms = (bytes / (rate * channels * 2)) * 1000;
+  if (channels !== 1 || rate !== 48000) fail(`public/sfx/${name}.wav must be 48 kHz mono (is ${rate} Hz, ${channels} ch)`);
+  if (ms > 500) fail(`public/sfx/${name}.wav is ${ms.toFixed(0)} ms; effects stay under 500 ms`);
+  if (!isTracked(`video/public/sfx/${name}.wav`)) fail(`public/sfx/${name}.wav is not tracked`);
+}
+notes.push(`sfx: ${sfxNames.length} effect(s) present, 48 kHz mono, under 500 ms`);
+for (const s of storyboard.shots) {
+  if (s.kind !== "shot") {
+    if (s.flash) fail(`shot "${s.id}": flash is only for kind "shot"`);
+    continue;
+  }
+  if (s.move === "zoom" && (!Array.isArray(s.zoom) || !s.focus)) fail(`shot "${s.id}": move "zoom" needs zoom [from, to] and focus`);
+  if (s.move === "punch" && (typeof s.zoom !== "number" || typeof s.at !== "number")) fail(`shot "${s.id}": move "punch" needs a numeric zoom and at`);
+  if (s.focus && shots[s.src]) {
+    const c = s.crop ?? { x: 0, y: 0, w: shots[s.src].width, h: shots[s.src].height };
+    if (s.focus.x < c.x || s.focus.x > c.x + c.w || s.focus.y < c.y || s.focus.y > c.y + c.h) fail(`shot "${s.id}": focus is outside the crop`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 7. wording
 // ---------------------------------------------------------------------------
 const spoken = cues.flatMap((c) => [c.text, c.spoken].filter(Boolean)).join(" ");

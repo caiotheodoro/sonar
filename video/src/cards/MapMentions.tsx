@@ -3,6 +3,8 @@ import React from "react";
 import { RESULTS } from "../manifest";
 import { T, TYPE } from "../theme";
 import { Big, Card, Label, useCount, useSince, type CardProps } from "./Card";
+import { SfxAt } from "../components/Sfx";
+import { MOTION } from "../theme";
 
 const { mentions } = RESULTS.receipt;
 const rows = Object.entries(mentions.bySource).sort((a, b) => b[1] - a[1]);
@@ -13,6 +15,8 @@ export const MapMentions: React.FC<CardProps> = () => {
   const shown = Math.round(useCount(mentions.deduped, 2));
   return (
     <Card plate={["REBUILD", "MENTIONS"]} reproduces="mentions feed" source={["results/demo/receipt.json", "mentions.by_source", "mentions.deduped"]}>
+      <SfxAt src="tick" frames={Array.from({ length: Math.floor(MOTION.countFrames / 2) }, (_, i) => 2 + i * 2)} gain={0.35} />
+      <SfxAt src="blip" frames={rows.map((_, i) => 4 + i * 2)} gain={0.4} />
       <div style={{ display: "flex", gap: 96, alignItems: "flex-start" }}>
         <div>
           <Big size={300}>{shown}</Big>

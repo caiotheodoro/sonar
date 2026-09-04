@@ -13,6 +13,7 @@
 import React from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { MOTION, T } from "../theme";
+import { Sfx } from "./Sfx";
 
 const CURVE = Easing.bezier(MOTION.snap[0], MOTION.snap[1], MOTION.snap[2], MOTION.snap[3]);
 
@@ -90,6 +91,9 @@ export const ReadLine: React.FC<ReadLineProps> = ({
 
   return (
     <div style={{ width, fontFamily: T.mono }}>
+      <Sfx src="sweep" at={startFrame} gain={0.4} />
+      {abstained ? <Sfx src="tick" at={startFrame + 10} gain={0.5} /> : <Sfx src="click" at={startFrame + 10} gain={0.7} />}
+      {ci && !abstained ? <Sfx src="click" at={startFrame + 14} gain={0.3} /> : null}
       <div style={{ fontFamily: T.font, fontSize: 21, color: T.textMuted, marginBottom: 10 }}>
         {label}
       </div>

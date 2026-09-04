@@ -8,6 +8,7 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { displayFamily } from "../fonts";
 import { LAYOUT, MOTION, T, TYPE } from "../theme";
 import { Plate } from "./Plate";
+import { Sfx } from "./Sfx";
 
 const SHAKE = [0, 6, -5, 3, 0];
 
@@ -32,6 +33,8 @@ export const Stamp: React.FC<{
 
   const killed = variant === "killed";
   return (
+    <>
+    <Sfx src={killed ? "hit" : "stamp"} at={1} gain={killed ? 1 : 0.8} />
     <AbsoluteFill
       style={{
         background: killed ? T.signal : T.ink,
@@ -66,5 +69,6 @@ export const Stamp: React.FC<{
         </div>
       ) : null}
     </AbsoluteFill>
+    </>
   );
 };

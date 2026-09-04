@@ -21,6 +21,7 @@
 import React, { useMemo } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { T } from "../theme";
+import { SfxAt } from "./Sfx";
 import askCastJson from "../data/casts/ask.json";
 import emptyRunCastJson from "../data/casts/empty_run.json";
 import runTraceCastJson from "../data/casts/run_trace.json";
@@ -215,6 +216,22 @@ export const TerminalCast: React.FC<TerminalCastProps> = ({
   const grid = useMemo(() => screenAt(cast, castTime), [cast, castTime]);
 
   const height = rows ?? usedRows(grid);
+  // frames (shot-local) at which the replay adds a line: one tick each
+  const lineFrames = useMemo(() => {
+    const out: number[] = [];
+    let last = 0;
+    for (const ev of cast.events) {
+      if (ev.kind !== "o") continue;
+      const newlines = (ev.data.match(/\n/g) ?? []).length;
+      if (newlines === 0) continue;
+      const f = Math.round(((ev.t / speed) * fps)) + startFrame;
+      if (f > last) {
+        out.push(f);
+        last = f;
+      }
+    }
+    return out;
+  }, [cast, speed, fps, startFrame]);
   const shown = grid.slice(0, height);
   const elapsed = Math.min(castTime, cast.duration);
   const running = castTime < cast.duration;
@@ -233,6 +250,7 @@ export const TerminalCast: React.FC<TerminalCastProps> = ({
         position: "relative",
       }}
     >
+      <SfxAt src="tick" frames={lineFrames} gain={0.3} />
       {cast.header.command ? (
         <div style={{ marginBottom: 14, whiteSpace: "pre" }}>
           <span style={{ color: T.accent }}>$ </span>

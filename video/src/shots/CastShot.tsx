@@ -5,7 +5,8 @@
  * compressed is said.
  */
 import React from "react";
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { Sfx } from "../components/Sfx";
 import { TerminalCast } from "../components/TerminalCast";
 import { Specimen } from "../components/Specimen";
 import { FPS } from "../manifest";
@@ -17,10 +18,14 @@ export const CastShot: React.FC<{
   castFromMs?: number;
 }> = ({ src, speed = 1, rows = 16, castFromMs = 0 }) => {
   const startFrame = -Math.round(((castFromMs / 1000) * FPS) / speed);
+  const frame = useCurrentFrame();
+  const PUNCH_AT = 36;
+  const punched = frame >= PUNCH_AT;
   return (
     <AbsoluteFill>
+      <Sfx src="tick" at={PUNCH_AT} gain={0.7} />
       <Specimen plate={["SONAR", "RUN", "TRACE"]} scan>
-        <div style={{ padding: 8 }}>
+        <div style={{ padding: 8, transform: punched ? "scale(1.25)" : "none", transformOrigin: "12% 70%" }}>
           <TerminalCast src={src} speed={speed} rows={rows} fontSize={19} startFrame={startFrame} />
         </div>
       </Specimen>

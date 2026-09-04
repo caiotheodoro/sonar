@@ -3,6 +3,7 @@ import React from "react";
 import { RESULTS } from "../manifest";
 import { T, TYPE } from "../theme";
 import { Card, Label, useSince, type CardProps } from "./Card";
+import { SfxAt } from "../components/Sfx";
 
 const { topics, topMentions, coverageGaps } = RESULTS.digest;
 const top = [...topics].sort((a, b) => b.n - a.n).slice(0, 6);
@@ -12,6 +13,8 @@ export const MapTopics: React.FC<CardProps> = () => {
   const f = useSince(0);
   return (
     <Card plate={["REBUILD", "TOPICS", "CITATIONS"]} reproduces="AI insights and topics" source={["results/demo/digest.json", "topics", "top_mentions", "coverage_gaps"]}>
+      <SfxAt src="blip" frames={top.map((_, i) => 2 + i * 2)} gain={0.4} />
+      <SfxAt src="click" frames={cites.map((_, i) => 8 + i * 4)} gain={0.6} />
       <div style={{ display: "flex", gap: 96 }}>
         <div style={{ width: 900 }}>
           <Label>topics, named by the model, counted by the receipt</Label>

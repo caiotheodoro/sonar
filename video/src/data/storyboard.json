@@ -1,5 +1,5 @@
 {
-  "_comment": "The cut, as data. Shots are contiguous hard cuts on the music's beat grid (src/data/beat-grid.json, 100 BPM = 600 ms a beat, 4 beats a bar); shot i ends where shot i+1 starts. Anchors resolve through src/timeline/resolve.mjs, which the gate imports too. Never type startMs by hand; use an anchor. Bars fall on beat indices 4k; act changes sit on bars, voice-led cuts may sit on the half-bar. narration.offsetMs places the Eva take so cue a2 (the seat price) ends just before KILLED and c1 (\"Rebuilt on Monid\") starts over the stamp. Text here is data-free: every figure on screen is read from results/ or external-facts.json by the component that draws it.",
+  "_comment": "The cut, as data. Shots are contiguous hard cuts on the music's beat grid (src/data/beat-grid.json, 100 BPM = 600 ms a beat, 4 beats a bar); shot i ends where shot i+1 starts. Anchors resolve through src/timeline/resolve.mjs, which the gate imports too. Never type startMs by hand; use an anchor. Bars fall on beat indices 4k; act changes sit on bars, voice-led cuts may sit on the half-bar. narration.offsetMs places the Eva take so cue a2 (the seat price) ends just before KILLED and c1 (\"Rebuilt on Monid\") starts over the stamp. Text here is data-free: every figure on screen is read from results/ or external-facts.json by the component that draws it. Act A opens with a photo burst: six tight crops of the tracked Brand24 captures at one beat each, `flash: true` (one-frame plate flash, shutter). `sfx.volume` is the bus for every synthesised effect under public/sfx/.",
   "targetMs": 75000,
   "capMs": 90000,
   "minShotMs": 400,
@@ -57,6 +57,133 @@
       }
     },
     {
+      "id": "p1",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-home",
+      "crop": {
+        "x": 600,
+        "y": 550,
+        "w": 800,
+        "h": 392
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "DASHBOARD"
+      ],
+      "start": {
+        "beat": 4
+      }
+    },
+    {
+      "id": "p2",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-sov",
+      "crop": {
+        "x": 870,
+        "y": 180,
+        "w": 560,
+        "h": 275
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "MENTIONS",
+        "REACH"
+      ],
+      "start": {
+        "beat": 5
+      }
+    },
+    {
+      "id": "p3",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-sov",
+      "crop": {
+        "x": 870,
+        "y": 320,
+        "w": 560,
+        "h": 275
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "SENTIMENT"
+      ],
+      "start": {
+        "beat": 6
+      }
+    },
+    {
+      "id": "p4",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-ai",
+      "crop": {
+        "x": 610,
+        "y": 580,
+        "w": 600,
+        "h": 294
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "AI INSIGHTS"
+      ],
+      "start": {
+        "beat": 7
+      }
+    },
+    {
+      "id": "p5",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-ai",
+      "crop": {
+        "x": 1130,
+        "y": 590,
+        "w": 560,
+        "h": 275
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "POSITIVES"
+      ],
+      "start": {
+        "beat": 8
+      }
+    },
+    {
+      "id": "p6",
+      "act": "brand24",
+      "kind": "shot",
+      "src": "brand24-pricing",
+      "crop": {
+        "x": 580,
+        "y": 300,
+        "w": 520,
+        "h": 255
+      },
+      "move": "hold",
+      "flash": true,
+      "plate": [
+        "BRAND24",
+        "TEAM SEAT"
+      ],
+      "start": {
+        "beat": 9
+      }
+    },
+    {
       "id": "a2",
       "act": "brand24",
       "kind": "shot",
@@ -67,21 +194,21 @@
         "MENTIONS"
       ],
       "start": {
-        "beat": 6
+        "beat": 10
       }
     },
     {
-      "id": "a3",
+      "id": "a5",
       "act": "brand24",
       "kind": "shot",
-      "src": "brand24-sentiment",
-      "move": "hold",
+      "src": "brand24-ai",
+      "move": "push",
       "plate": [
         "BRAND24",
-        "AI FEATURES"
+        "AI INSIGHTS"
       ],
       "start": {
-        "beat": 9
+        "beat": 12
       }
     },
     {
@@ -96,21 +223,21 @@
         "SENTIMENT"
       ],
       "start": {
-        "beat": 12
+        "beat": 14
       }
     },
     {
-      "id": "a5",
+      "id": "a7",
       "act": "brand24",
       "kind": "shot",
-      "src": "brand24-ai",
-      "move": "push",
+      "src": "brand24-pricing",
+      "move": "hold",
       "plate": [
         "BRAND24",
-        "AI INSIGHTS"
+        "PRICING"
       ],
       "start": {
-        "beat": 15
+        "beat": 16
       }
     },
     {
@@ -118,7 +245,21 @@
       "act": "brand24",
       "kind": "shot",
       "src": "brand24-pricing",
-      "move": "hold",
+      "move": "zoom",
+      "zoom": [
+        1.0,
+        1.3
+      ],
+      "focus": {
+        "x": 720,
+        "y": 400
+      },
+      "highlight": {
+        "x": 592,
+        "y": 222,
+        "w": 250,
+        "h": 700
+      },
       "facts": [
         "brand24.price.team"
       ],
@@ -213,7 +354,7 @@
       "act": "monid",
       "kind": "shot",
       "src": "monid-tool-reddit",
-      "move": "push",
+      "move": "zoom",
       "plate": [
         "MONID",
         "TOOL",
@@ -221,6 +362,14 @@
       ],
       "start": {
         "beat": 42
+      },
+      "zoom": [
+        1.0,
+        1.2
+      ],
+      "focus": {
+        "x": 960,
+        "y": 560
       }
     },
     {
@@ -364,5 +513,8 @@
         "ms": 74400
       }
     }
-  ]
+  ],
+  "sfx": {
+    "volume": 0.7
+  }
 }

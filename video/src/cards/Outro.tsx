@@ -4,6 +4,7 @@ import { PUBLISHED, RESULTS } from "../manifest";
 import { displayFamily } from "../fonts";
 import { T, TYPE } from "../theme";
 import { Card, useSince, type CardProps } from "./Card";
+import { Sfx } from "../components/Sfx";
 
 const { sessionId, verdict } = RESULTS.receipt;
 
@@ -11,6 +12,7 @@ export const Outro: React.FC<CardProps> = () => {
   const f = useSince(0);
   return (
     <Card plate={["SONAR", "OPEN SOURCE"]} source={[sessionId, verdict]}>
+      <Sfx src="chime" at={12} gain={0.7} />
       <div style={{ fontFamily: displayFamily, fontWeight: 900, fontSize: 300, lineHeight: 0.85, color: T.plate, textTransform: "uppercase" }}>
         The receipt
         <br />
