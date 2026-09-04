@@ -248,17 +248,17 @@
       "move": "zoom",
       "zoom": [
         1.0,
-        1.3
+        1.06
       ],
       "focus": {
-        "x": 720,
-        "y": 400
+        "x": 700,
+        "y": 370
       },
       "highlight": {
         "x": 592,
         "y": 222,
         "w": 250,
-        "h": 700
+        "h": 388
       },
       "facts": [
         "brand24.price.team"
@@ -270,6 +270,12 @@
       ],
       "start": {
         "beat": 18
+      },
+      "crop": {
+        "x": 320,
+        "y": 215,
+        "w": 780,
+        "h": 400
       }
     },
     {
@@ -306,32 +312,32 @@
       }
     },
     {
-      "id": "c2",
-      "act": "monid",
-      "kind": "shot",
-      "src": "monid-tools",
-      "move": "pan-down",
-      "plate": [
-        "MONID",
-        "TOOLS"
-      ],
-      "start": {
-        "beat": 32
-      }
-    },
-    {
       "id": "c3",
       "act": "monid",
       "kind": "shot",
       "src": "monid-tools-social",
-      "move": "pan-down",
+      "move": "zoom",
       "plate": [
         "MONID",
         "TOOLS",
         "SOCIAL MEDIA"
       ],
       "start": {
-        "beat": 35
+        "beat": 32
+      },
+      "crop": {
+        "x": 360,
+        "y": 520,
+        "w": 1220,
+        "h": 625
+      },
+      "zoom": [
+        1.0,
+        1.08
+      ],
+      "focus": {
+        "x": 1000,
+        "y": 760
       }
     },
     {
@@ -346,7 +352,7 @@
         "POST /v1/run"
       ],
       "start": {
-        "beat": 39
+        "beat": 38
       }
     },
     {
@@ -358,18 +364,25 @@
       "plate": [
         "MONID",
         "TOOL",
-        "REDDIT"
+        "REDDIT",
+        "PER CALL"
       ],
       "start": {
         "beat": 42
       },
       "zoom": [
         1.0,
-        1.2
+        1.06
       ],
       "focus": {
-        "x": 960,
-        "y": 560
+        "x": 900,
+        "y": 700
+      },
+      "crop": {
+        "x": 360,
+        "y": 400,
+        "w": 1200,
+        "h": 615
       }
     },
     {

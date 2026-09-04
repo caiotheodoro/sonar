@@ -64,7 +64,11 @@ Moves on a screenshot: `hold`, `push` (1 → 1.03), `pan-down`, `zoom`
 (`zoom: [from, to]` toward `focus`), `punch` (instant cut-in at `at`), and
 `flash` (one-frame plate flash with a shutter, for the photo burst). Act A
 opens with six tight crops of the tracked Brand24 captures at one beat
-each, then the pricing page zooms onto the Team card.
+each. A zoom frames its subject with `crop` first and then pushes gently
+(1 → 1.06): scaling a whole page only makes a small thing slightly less
+small. The pricing shot is cropped to the three middle tiers with the Team
+card boxed, the Reddit tool page to its per-call prices, the tools
+catalogue to the platform cards.
 
 ## Shot list
 
@@ -75,7 +79,7 @@ each cue lands on). Seven acts, twenty-seven shots:
 |---|---|---|---|
 | brand24 | `a0`–`a7`, `p1`–`p6` | plate `SUBJECT / BRAND24`; brand24.com home; a six-shot photo burst (dashboard, reach numbers, sentiment chart, AI insights panel, positives gauge, Team card) with shutters; features, AI insights, reach + sentiment panel; pricing wide, then a zoom onto the Team seat with its chip | `public/shots/brand24-*.png`, `external-facts.json` (`brand24.sources`, `brand24.price.team` == `receipt.incumbent.price_usd_month`) |
 | killed | `b1` | full-bleed `KILLED` on the bar line, `WE KILL / MONID HACKATHON` | — |
-| monid | `c1`–`c5` | monid.ai home (tool-count chip), tools, social-media tools, the Reddit tool page (per-call prices), `POST /v1/run` in the API reference | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
+| monid | `c1`, `c3`–`c5` | monid.ai home (tool-count chip), the tools catalogue filtered to social media and cropped to the platform cards sonar fetches, `POST /v1/run` in the API reference, the Reddit tool page cropped to its per-call prices | `public/shots/monid-*.png`, `external-facts.json` (`monid.tools`) |
 | rebuild | `d0`–`d6` | `SONAR` stamp with the session id; the brief (brand, competitors, window, sources); the real `run_trace` cast at ×6; mentions by source; share of voice + sentiment with intervals; topics + two real citations + the X gap; the voice line | `results/demo/receipt.json`, `stats.json`, `digest.json`, `public/casts/run_trace.cast` |
 | receipt | `e1`–`e3` | receipt rows (runs, came-back-empty, failed, Monid, model, voice, total); the seat and the brief on one axis; the ratio, giant, with the 4-brief monthly figure | `results/demo/receipt.json` (`totals`, `comparison`, `incumbent`) |
 | honest | `f1`–`f2` | PicPay's share of voice abstains (grey dash, same gesture); the label audit read against the bar from `src/sonar/config.py` | `results/demo/stats.json`, `receipt.json` (`audit`), `src/data/repo-facts.json` (`auditBar`) |
