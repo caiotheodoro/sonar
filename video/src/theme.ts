@@ -1,60 +1,66 @@
 /**
- * Design tokens for the sonar hackathon video.
+ * Design tokens for the sonar hackathon video — dark instrument system.
  *
- * Same system as the author's site and the assay video: literals rather than
- * CSS variables, because `var(--color-…)` does not resolve inside a headless
- * Remotion bundle where SVG attributes and canvas measurement need concrete
- * values.
+ * Literals, not CSS variables: `var(--color-…)` does not resolve inside a
+ * headless Remotion bundle where SVG attributes and canvas measurement need
+ * concrete values.
+ *
+ * One reading colour (`accent`, sodium amber) for every *measured* value, the
+ * read-line, the live trace, citation markers. `abstain` is a calm grey for the
+ * em-dash that stands in for a number sonar refused to guess — never red, an
+ * abstention is not an error.
  */
 export const T = {
-  text: "#171717",
-  textMuted: "#6b6b6b",
-  textFaint: "#a3a3a3",
-  accent: "#c93d1e",
-  accentPress: "#a83218",
-  bg: "#ffffff",
-  bgSubtle: "#f8f8f7",
-  codeBg: "#f3f3ed",
-  border: "#e8e8e4",
-  borderStrong: "#d4d4cf",
-  font: '"Plus Jakarta Sans", system-ui, sans-serif',
+  text: "#E6E8EA",
+  textMuted: "#9BA1A8",
+  textFaint: "#5B6169",
+  accent: "#F2A83B",
+  accentPress: "#D8901F",
+  abstain: "#5B6169",
+  bg: "#08090A",
+  bgSubtle: "#0E1011",
+  codeBg: "#0E1011",
+  border: "#1C1F22",
+  borderStrong: "#2A2E33",
+  /** captions and labels — sentence case, no tracking; mono is the vernacular */
+  font: '"Space Grotesk", system-ui, sans-serif',
+  /** everything structural + the big display figures + the terminal, one face */
   mono: '"Geist Mono", ui-monospace, monospace',
 } as const;
 
 /**
- * Categorical series colours, validated against the light surface. The worst
- * colour-vision pair sits in the band that is only legal with a secondary
- * encoding, so every series carries a direct value label, never colour alone.
- * Assign in fixed order: brand first, then competitors in query order.
+ * Categorical order: brand first, then competitors in query order. On the dark
+ * ground the brand keeps the amber; the rivals step down in grey. Every series
+ * still carries a direct value label — colour is never the only encoding.
  */
-export const SERIES = ["#c93d1e", "#4361ee", "#1f7a3d", "#9a6700"] as const;
+export const SERIES = ["#F2A83B", "#9BA1A8", "#6E747C", "#3A3F45"] as const;
 
-/** Neutral for reference marks that carry no identity: the incumbent price. */
-export const NEUTRAL = "#a3a3a3";
+/** Neutral for reference marks that carry no identity (the incumbent price). */
+export const NEUTRAL = "#5B6169";
 
 /**
- * Receipt verdict colours. RECONCILED is the only verdict `sonar verify`
- * accepts; PARTIAL means a run is still unreconciled; REPLAY means the receipt
- * was produced from stored artifacts and spent nothing.
+ * Verdict rendering. RECONCILED is confident plain text on this ground, not a
+ * green badge; PARTIAL / REPLAY keep a muted hue so a bad verdict still reads.
  */
 export const VERDICT = {
-  RECONCILED: "#1a7f37",
-  PARTIAL: "#9a6700",
-  REPLAY: "#8250df",
+  RECONCILED: "#E6E8EA",
+  PARTIAL: "#C77B5A",
+  REPLAY: "#B08CCF",
 } as const;
 
-/** Sentiment label colours, used only beside the label word. */
+/** Sentiment label colours — warm, not alarm. */
 export const SENTIMENT = {
-  pos: "#1a7f37",
-  neg: "#cf222e",
-  neu: "#6e7781",
+  pos: "#7FB88C",
+  neg: "#C77B5A",
+  neu: "#5B6169",
 } as const;
 
-export const GRID = { stroke: T.border, dasharray: "2 4" } as const;
+export const GRID = { stroke: T.border, dasharray: "2 6" } as const;
 
-/** fadeUp from the site's animations.css, as frames at 30fps. */
+/** Snappy ease-out; everything moves fast and settles. Frames at 30fps. */
 export const MOTION = {
-  easeOut: [0.25, 0.46, 0.45, 0.94] as const,
-  fadeFrames: 17,
+  easeOut: [0.22, 1, 0.36, 1] as const,
+  snap: [0.22, 1, 0.36, 1] as const,
+  fadeFrames: 9,
   staggerFrames: 2,
 };

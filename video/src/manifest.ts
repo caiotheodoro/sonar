@@ -47,19 +47,17 @@ interface NarrationFile {
 /** Every caption cue, in order. Empty until the narration lands. */
 export const captions: CaptionCue[] = (narrationFile as NarrationFile).narration;
 
-export interface CastSegment {
-  /** Frames into the cast to begin this segment. */
-  trimBefore: number;
-  /** Playback multiplier. A ramp drops no frames, so no run is ever cut. */
-  playbackRate: number;
-  /** How many frames of the scene this segment occupies. */
-  sceneFrames: number;
-}
-
 export interface Cast {
   /** File under public/casts, recorded by capture/record-casts.mjs. */
   src: string;
-  segments?: CastSegment[];
+  /** Playback multiplier; a ramp drops no frames, so no run is ever cut. */
+  speed?: number;
+  /** Frames into the scene to start the replay. */
+  startFrame?: number;
+  /** Terminal grid rows to show. */
+  rows?: number;
+  /** Terminal glyph size, px. */
+  fontSize?: number;
 }
 
 export type SceneId =
@@ -93,31 +91,30 @@ export const scenes: Scene[] = [
   {
     id: "live-trace",
     claim: "A live POST /v1/run, as sonar run --trace prints it.",
-    durationInFrames: seconds(20),
-    cast: { src: "run_trace" },
+    durationInFrames: seconds(12),
+    cast: { src: "run_trace", speed: 1.8, rows: 20 },
   },
   {
     id: "receipt",
-    claim: "The receipt scrolls: every run, every zero, the verdict.",
-    durationInFrames: seconds(15),
-    cast: { src: "receipt" },
+    claim: "The receipt itemises every run, every zero, the verdict.",
+    durationInFrames: seconds(12),
   },
   {
     id: "ask",
-    claim: "sonar ask answers with citations that resolve to real mentions.",
+    claim: "sonar reports what it can, abstains from what it can't, then answers with citations.",
     durationInFrames: seconds(18),
-    cast: { src: "ask" },
+    cast: { src: "ask", speed: 1.6, rows: 14 },
   },
   {
     id: "empty-run",
-    claim: "Barely any coverage: every run still on the receipt, every estimate abstains.",
-    durationInFrames: seconds(12),
-    cast: { src: "avenza_empty" },
+    claim: "A brand with nothing to find still gets a receipt; every estimate abstains.",
+    durationInFrames: seconds(11),
+    cast: { src: "empty_run", speed: 1.8, rows: 16 },
   },
   {
     id: "outro",
     claim: "The repository, the hashtag, the price that died.",
-    durationInFrames: seconds(8),
+    durationInFrames: seconds(6),
   },
 ];
 

@@ -1,7 +1,9 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile } from "remotion";
 import { CaptionOverlay } from "./components/CaptionOverlay";
-import { Dissolve, SCENE_OVERLAP } from "./components/Beat";
+import { SCENE_OVERLAP, Tape } from "./components/Camera";
+import { StatusStrip } from "./components/StatusStrip";
+import { TapeGround } from "./components/TapeGround";
 import { SceneAsk } from "./scenes/SceneAsk";
 import { SceneEmptyRun } from "./scenes/SceneEmptyRun";
 import { SceneLiveTrace } from "./scenes/SceneLiveTrace";
@@ -41,21 +43,27 @@ const sceneContent = (scene: Scene): React.ReactNode => {
 
 export const Main: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: T.bg, fontFamily: sansFamily }}>
-    {scenes.map((scene, i) => {
-      // Scenes overlap by SCENE_OVERLAP so beat changes crossfade rather than
-      // cut. The last one is not extended past the composition.
-      const last = i === scenes.length - 1;
-      const duration = scene.durationInFrames + (last ? 0 : SCENE_OVERLAP);
-      return (
-        <Sequence key={scene.id} from={from(i)} durationInFrames={duration} name={scene.id}>
-          <Dissolve durationInFrames={last ? undefined : duration} overlap={SCENE_OVERLAP}>
-            {sceneContent(scene)}
-          </Dissolve>
-        </Sequence>
-      );
-    })}
+    <TapeGround />
 
-    {/* One caption track for the whole cut; cue times are absolute. */}
+    <Tape>
+      {scenes.map((scene, i) => {
+        const last = i === scenes.length - 1;
+        return (
+          <Sequence
+            key={scene.id}
+            from={from(i)}
+            durationInFrames={scene.durationInFrames + (last ? 0 : SCENE_OVERLAP)}
+            premountFor={SCENE_OVERLAP}
+            styleWhilePremounted={{ opacity: 1 }}
+            name={scene.id}
+          >
+            {sceneContent(scene)}
+          </Sequence>
+        );
+      })}
+    </Tape>
+
+    <StatusStrip />
     <CaptionOverlay cues={captions} />
 
     {narrationSrc ? (

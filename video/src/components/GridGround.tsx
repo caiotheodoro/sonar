@@ -14,7 +14,7 @@ export const GridGround: React.FC<{ children?: React.ReactNode }> = ({ children 
   <AbsoluteFill style={{ backgroundColor: T.bg }}>
     <AbsoluteFill
       style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(242,168,59,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(242,168,59,0.05) 1px, transparent 1px)`,
         backgroundSize: `${CELL}px ${CELL}px`,
       }}
     />
@@ -33,10 +33,8 @@ export const Eyebrow: React.FC<{ children: React.ReactNode; style?: React.CSSPro
   <div
     style={{
       fontFamily: T.mono,
-      fontSize: 22,
-      letterSpacing: "0.14em",
-      textTransform: "uppercase",
-      color: T.accent,
+      fontSize: 21,
+      color: T.textMuted,
       ...style,
     }}
   >

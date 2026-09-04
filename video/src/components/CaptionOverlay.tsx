@@ -44,14 +44,15 @@ export const CaptionOverlay: React.FC<{ cues: CaptionCue[] }> = ({ cues }) => {
       <div
         style={{
           maxWidth: 1400,
-          padding: "16px 30px",
+          padding: "16px 32px",
           borderRadius: 10,
-          background: "rgba(255,255,255,0.92)",
+          background: "rgba(8,9,10,0.82)",
           border: `1px solid ${T.border}`,
+          backdropFilter: "blur(6px)",
           color: T.text,
           fontFamily: T.font,
           fontSize: 34,
-          fontWeight: 600,
+          fontWeight: 500,
           lineHeight: 1.35,
           textAlign: "center",
           textWrap: "balance",

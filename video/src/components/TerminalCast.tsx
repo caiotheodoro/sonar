@@ -62,27 +62,27 @@ export const parseCast = (text: string): Cast => {
 };
 
 /**
- * ANSI colours remapped for a light ground. The recorded escape codes are
- * untouched; only their rendering is chosen, so the trace's greens and reds stay
- * legible on #f3f3ed and agree with the series palette instead of fighting it.
+ * ANSI colours remapped for the dark ground. The recorded escape codes are
+ * untouched; only their rendering is chosen, so the trace's greens and ambers
+ * stay legible on #0E1011 and agree with the video's one-amber palette.
  */
 const ANSI: Record<number, string> = {
-  30: "#171717",
-  31: "#c93d1e",
-  32: "#1f7a3d",
-  33: "#9a6700",
-  34: "#4361ee",
-  35: "#8250df",
-  36: "#0e7490",
-  37: "#6b6b6b",
-  90: "#a3a3a3",
-  91: "#d4553a",
-  92: "#2f9455",
-  93: "#b08200",
-  94: "#5f78f0",
-  95: "#9a68e3",
-  96: "#2b8ba3",
-  97: "#171717",
+  30: "#5B6169",
+  31: "#C77B5A",
+  32: "#7FB88C",
+  33: "#F2A83B",
+  34: "#7FA6D9",
+  35: "#B08CCF",
+  36: "#6FB8B8",
+  37: "#E6E8EA",
+  90: "#5B6169",
+  91: "#D98C6E",
+  92: "#93C79E",
+  93: "#F5B85C",
+  94: "#93B6E0",
+  95: "#C2A0DA",
+  96: "#8CCACA",
+  97: "#F2F3F5",
 };
 
 interface Cell {
