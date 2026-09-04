@@ -9,11 +9,16 @@ committed.
 
 ## Rules of the wallet
 
-- Wallet **$20** on key 2 (`monid_live_DJVq…`), topped up 2026-09-03.
-  Per-run cap `MONID_RUN_CAP_USD=3.5`. `MONID_WORKSPACE_BUDGET_USD=10` in
+- **Three Monid keys exist.** Only ONE carries funds at a time. As of
+  2026-09-04: key 1 (`…VI12…`) ≈ small; key 2 (`…DJVq…`) ≈ $0; key 3
+  (`…lAzr…`, in `~/.sonar/.env` now) ≈ $18. Monid `BLOCKED` with an empty
+  `providerResponse` = wallet-block; check the raw `/v1/run` `reason` field.
+- Per-run cap `MONID_RUN_CAP_USD=3.5`. `MONID_WORKSPACE_BUDGET_USD` in
   `~/.sonar/.env` is a stale display hint, not enforced.
-- Reserve $1.50 stays for judging. Remaining `$` work is ≈ $6–8
-  (W6.1 full, Avenza, W7.2 TTS, W8.2 rehearsal).
+- Reserve $1.50 stays for judging.
+- **Monid/Apify is intermittently `BLOCKED`** (all day 2026-09-03/04) — a
+  clean run has ~10–30 % of source runs blocked at random. Retry a run
+  whose demo brands came back thin.
 - One `$` task at a time. A second live run never starts before the
   previous session's `sonar reconcile` has written `RECONCILED`.
 - Cost figures in this file come from `GET /v1/runs` via the session
