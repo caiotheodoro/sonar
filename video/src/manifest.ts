@@ -18,15 +18,29 @@
 import receiptRaw from "@results/receipt.json";
 import statsRaw from "@results/stats.json";
 import digestRaw from "@results/digest.json";
+import receiptEmptyRaw from "@results-empty/receipt.json";
+import statsEmptyRaw from "@results-empty/stats.json";
+import digestEmptyRaw from "@results-empty/digest.json";
 import narrationFile from "./data/narration.json";
-import { loadResults } from "./data/results";
+import { loadResultsFrom } from "./data/results";
 
 export const FPS = 30;
 export const WIDTH = 1920;
 export const HEIGHT = 1080;
 
 /** The demo run, validated field by field. Throws at import when a cited number is absent. */
-export const RESULTS = loadResults({ receipt: receiptRaw, stats: statsRaw, digest: digestRaw });
+export const RESULTS = loadResultsFrom("demo", {
+  receipt: receiptRaw,
+  stats: statsRaw,
+  digest: digestRaw,
+});
+
+/** The zero-mention run (Zephyrium Bank): a receipt reconciles with nothing to find. */
+export const RESULTS_EMPTY = loadResultsFrom("demo-empty", {
+  receipt: receiptEmptyRaw,
+  stats: statsEmptyRaw,
+  digest: digestEmptyRaw,
+});
 
 export interface CaptionCue {
   /** Scene id this cue belongs to; used to derive sub-beat frames. */

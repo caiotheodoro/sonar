@@ -23,10 +23,13 @@ can finish the job later.
 
 Voice runs after the first reconcile so the narration quotes reconciled
 Monid costs; the numbers gate that authorises the audio runs against that
-pre-voice digest. The final digest adds the voice spend to the cost quote, so
-the narration is gated once more against the digest that ships and
-``numbers_verified`` holds for that digest (a narration that quoted the
-pre-voice total reads ``numbers_verified=false`` with its audio still linked).
+pre-voice digest. The session reconciles once more after the voice stage,
+whether or not TTS billed a run (D020), so a lagging Monid listing cannot
+leave the shipped receipt ``PARTIAL``. The final digest adds the voice spend
+to the cost quote, so the narration is gated once more against the digest
+that ships and ``numbers_verified`` holds for that digest (a narration that
+quoted the pre-voice total reads ``numbers_verified=false`` with its audio
+still linked).
 
 ``--fixtures`` (offline replay) is :func:`fixtures_client` plus
 :class:`FixtureLlm`: a ``MonidClient`` over an ``httpx.MockTransport`` that
@@ -994,10 +997,11 @@ def run(
             api_key=options.tts_api_key,
         )
         narration, voice_usage, voice_abstentions = voice.narration, voice.usage, voice.abstentions
-        if voice.record is not None and voice.record.run_id is not None:
-            reconciliation = _reconcile(
-                ledger, monid_client, started_at=started_at, options=options
-            )
+        # Reconcile once more after the voice stage regardless of whether TTS
+        # produced a billable run (D020): a Monid listing that lagged the
+        # mid-pipeline reconcile at line 924 would otherwise leave the shipped
+        # receipt PARTIAL and the auto-narration quoting that transient verdict.
+        reconciliation = _reconcile(ledger, monid_client, started_at=started_at, options=options)
         clock = _stage("narration+tts", clock)
 
     receipt = receipt_for(voice_usage, voice_abstentions)

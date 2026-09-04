@@ -78,7 +78,9 @@ if (cues.length === 0) {
     const p = join(DEMO, name);
     if (existsSync(p)) numbersIn(JSON.parse(readFileSync(p, "utf8")), published);
   }
-  const said = numbersIn(cues.map((c) => c.text));
+  // text is the caption, spoken is the voice; both are claims. startMs/endMs
+  // (written by retime-captions.mjs) are timings, not claims — never checked.
+  const said = numbersIn(cues.flatMap((c) => [c.text, c.spoken].filter(Boolean)));
   const unsourced = [...said].filter((n) => !published.has(n)).sort();
   if (unsourced.length) fail(`narration says numbers absent from results/demo: ${unsourced.join(", ")}`);
   notes.push(`narration: ${said.size} number token(s), all in results/demo`);

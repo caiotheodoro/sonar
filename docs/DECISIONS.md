@@ -848,4 +848,46 @@ DECISIONS entry, never by editing `results/demo/`.
 
 ---
 
-*End of decisions. Next entry would be D020.*
+## D020 — Reconcile after the voice stage unconditionally
+
+**Decision.** `pipeline.run` runs a second `_reconcile` after the voice
+stage whether or not TTS billed a Monid run, not only when
+`voice.record.run_id is not None`. The mid-pipeline reconcile stays; this
+adds one more against a fresher Monid billing listing before the receipt
+and digest that ship are built.
+
+**Problem.** `narrate()` generates the spoken text from the pre-voice
+digest, whose receipt reflects the reconcile at the stats stage. If Monid's
+billing listing lagged that call, a run stayed unmatched, the receipt read
+`PARTIAL`, and the auto-narration quoted that transient verdict and total.
+The post-voice reconcile that would have cleared it only ran when the TTS
+call itself produced a billable run — a `--no-voice` or direct-ElevenLabs
+session never got it. The frozen **demo** (D019) shows the tail of this:
+`digest.json > narration.text` says "2.17 USD, marked partial" while the
+final receipt is `$2.2032` / `RECONCILED`. `regate` caught the number
+drift and the shipped `digest.json` carries `numbers_verified=false`, but
+`brief.mp3` was already voiced from the stale text.
+
+**Scope.** Code fix for future runs only. The frozen `results/demo/` and
+`results/demo-empty/` are **not** edited — `brief.mp3` was synthesised from
+`narration.text` and editing only the JSON would desync a frozen artifact
+(D019). The video never quotes `narration.text`; its script is written
+around the final receipt numbers, and `2.17`/`PARTIAL` appear nowhere in
+`video/src/data/narration.json`.
+
+**Residual.** The second reconcile freshens the *shipped* receipt and
+digest, but cannot un-speak an already-synthesised mp3. Fully closing the
+gap means splitting `narrate()` so text generation and gating happen
+after the final reconcile and TTS synthesis last; that is a voice-module
+refactor with its own tests, deferred.
+
+**Evidence.** `src/sonar/pipeline.py` (the `if voice.record …` guard
+removed; module docstring updated). `tests/test_pipeline.py`,
+`tests/test_voice.py` green (103).
+
+**Reverses when.** `narrate()` is split as above, at which point the
+unconditional second reconcile can fold back into that ordering.
+
+---
+
+*End of decisions. Next entry would be D021.*

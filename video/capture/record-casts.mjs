@@ -6,7 +6,9 @@
  * receipt does not get to fake its own terminal.
  *
  * The brand, competitors and profile come from the frozen demo receipt, so
- * the recording is of the same query the numbers on screen describe. Runs
+ * the recording is of the same query the numbers on screen describe; the
+ * empty_run shot takes its brand from results/demo-empty for the same reason.
+ * Runs
  * that spend Monid or OpenAI credit are marked `spends` and refuse to start
  * unless SONAR_CAPTURE_SPEND=1 is set; their sessions are written under
  * public/captures so nothing touches results/demo.
@@ -25,6 +27,7 @@ const REPO = resolve(VIDEO, "..");
 const OUT = join(VIDEO, "public", "casts");
 const CAPTURES = join(VIDEO, "public", "captures");
 const DEMO = join(REPO, "results", "demo");
+const DEMO_EMPTY = join(REPO, "results", "demo-empty");
 
 /** 120x28 keeps output unwrapped and legible when scaled to 1080p. */
 const WINDOW = process.env.CAST_WINDOW ?? "120x28";
@@ -39,6 +42,16 @@ const brand = receipt.query.brand;
 const competitors = receipt.query.competitors ?? [];
 const vs = competitors.flatMap((c) => ["--vs", c]);
 const quote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
+
+// The empty-run shot records a different query: the zero-mention brand from
+// results/demo-empty, so the beat shows the same brand the RESULTS_EMPTY
+// numbers describe.
+const emptyReceiptPath = join(DEMO_EMPTY, "receipt.json");
+if (!existsSync(emptyReceiptPath)) {
+  console.error(`no zero-mention receipt at ${emptyReceiptPath}; the empty_run cast records that query`);
+  process.exit(1);
+}
+const emptyBrand = JSON.parse(readFileSync(emptyReceiptPath, "utf8")).query.brand;
 
 const CASTS = [
   {
@@ -60,21 +73,15 @@ const CASTS = [
     spends: true,
   },
   {
-    id: "receipt",
-    title: "the receipt, verified",
-    cmd: `uv run sonar verify ${quote(receiptPath)} && uv run sonar render --from ${quote(DEMO)}`,
-    spends: false,
-  },
-  {
     id: "ask",
     title: "sonar ask, with citations",
     cmd: `uv run sonar ask ${quote(brand)} ${quote(process.env.SONAR_ASK_QUESTION ?? "What do people complain about most?")} --session ${quote(DEMO)}`,
     spends: true,
   },
   {
-    id: "avenza_empty",
+    id: "empty_run",
     title: "a brand with no mentions",
-    cmd: `uv run sonar run --trace --profile lite --no-voice Avenza --out ${quote(join(CAPTURES, "avenza_empty"))}`,
+    cmd: `uv run sonar run --trace --profile lite --no-voice ${quote(emptyBrand)} --out ${quote(join(CAPTURES, "empty_run"))}`,
     spends: true,
   },
 ];

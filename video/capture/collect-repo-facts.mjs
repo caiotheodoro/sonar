@@ -21,6 +21,14 @@ const OUT = join(VIDEO, "src", "data", "repo-facts.json");
 const testFiles = readdirSync(join(REPO, "tests")).filter((f) => /^test_.*\.py$/.test(f));
 const rev = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: REPO, encoding: "utf8" }).trim();
 
+// The acceptance bar the audit agreement is judged against (H3). Read from the
+// constant, never typed into a scene: results/demo/receipt.json carries the
+// measured agreement, this is the line it has to clear.
+const configPy = readFileSync(join(REPO, "src", "sonar", "config.py"), "utf8");
+const barMatch = /^H3_MIN_AGREEMENT:\s*Final\[float\]\s*=\s*([\d.]+)/m.exec(configPy);
+if (!barMatch) throw new Error("could not read H3_MIN_AGREEMENT from src/sonar/config.py");
+const auditBar = Number(barMatch[1]);
+
 const previous = existsSync(OUT) ? JSON.parse(readFileSync(OUT, "utf8")) : {};
 let testsCollected = previous.testsCollected ?? null;
 
@@ -30,12 +38,10 @@ if (process.argv.includes("--tests")) {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
   });
-  // pytest -q prints one "path: N" line per file, not one line per test id.
-  testsCollected = out
-    .split("\n")
-    .map((l) => /^tests\/.*: (\d+)$/.exec(l.trim()))
-    .filter(Boolean)
-    .reduce((a, m) => a + Number(m[1]), 0);
+  // pytest -q ends with a "<N> tests collected in <t>s" summary line.
+  const summary = /(\d+) tests? collected/.exec(out);
+  if (!summary) throw new Error(`could not read the collected count from pytest:\n${out.slice(-400)}`);
+  testsCollected = Number(summary[1]);
 }
 
 const facts = {
@@ -44,9 +50,10 @@ const facts = {
   sonarRev: rev,
   testFiles: testFiles.length,
   testsCollected,
+  auditBar,
 };
 
 writeFileSync(OUT, `${JSON.stringify(facts, null, 2)}\n`);
 console.log(
-  `rev: ${facts.sonarRev} · test files: ${facts.testFiles} · tests: ${facts.testsCollected ?? "(pass --tests)"}`,
+  `rev: ${facts.sonarRev} · test files: ${facts.testFiles} · tests: ${facts.testsCollected ?? "(pass --tests)"} · audit bar: ${facts.auditBar}`,
 );

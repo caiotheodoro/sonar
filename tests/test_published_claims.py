@@ -35,6 +35,7 @@ PRE_REG = ROOT / "docs" / "PRE-REGISTRATION.md"
 INCUMBENT_README = ROOT / "results" / "incumbent" / "README.md"
 DEMO_RECEIPT = ROOT / "results" / "demo" / "receipt.json"
 DEMO_STATS = ROOT / "results" / "demo" / "stats.json"
+DEMO_DIGEST = ROOT / "results" / "demo" / "digest.json"
 NARRATION = ROOT / "video" / "src" / "data" / "narration.json"
 
 # Documents whose backticked paths are citations a judge is expected to open.
@@ -401,13 +402,23 @@ def _normalise_number(token: str) -> str:
 
 
 def test_every_number_in_the_narration_exists_in_the_demo_results() -> None:
-    """The voice brief may not say a number the receipt or stats do not contain."""
+    """The voice brief may not say a number the receipt or stats do not contain.
+
+    Only the ``text`` (burned caption) and ``spoken`` (voice override) of each
+    cue is a claim; ``startMs``/``endMs`` are timings written by
+    ``retime-captions.mjs`` and ``_comment`` is prose, so neither is scanned.
+    ``digest.json`` is a source too, to agree with ``check-shot-reality.mjs``.
+    """
     if not NARRATION.exists():
         pytest.skip("video/src/data/narration.json not yet written (W7.2)")
-    sources = [p for p in (DEMO_RECEIPT, DEMO_STATS) if p.exists()]
+    sources = [p for p in (DEMO_RECEIPT, DEMO_STATS, DEMO_DIGEST) if p.exists()]
     if not sources:
         pytest.skip("results/demo/receipt.json and stats.json not yet frozen (W6.1)")
-    narrated = _numbers_in(json.loads(NARRATION.read_text(encoding="utf-8")))
+    cues = json.loads(NARRATION.read_text(encoding="utf-8")).get("narration", [])
+    narrated: set[str] = set()
+    for cue in cues:
+        narrated.update(_numbers_in(cue.get("text", "")))
+        narrated.update(_numbers_in(cue.get("spoken", "")))
     published: set[str] = set()
     for source in sources:
         published.update(_numbers_in(json.loads(source.read_text(encoding="utf-8"))))

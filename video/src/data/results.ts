@@ -1,5 +1,7 @@
 /**
- * The video's numbers, read off the frozen demo run and nothing else.
+ * The video's numbers, read off the frozen runs and nothing else:
+ * `results/demo` (RESULTS) and `results/demo-empty` (RESULTS_EMPTY), both
+ * validated through `loadResultsFrom`.
  *
  * Nothing in `src/scenes` or `src/components` may contain a literal figure.
  * The three files arrive as `unknown` (see `src/results.d.ts`) and every
@@ -57,6 +59,12 @@ export interface RunRow {
   costSource: string;
 }
 
+export interface Audit {
+  nSample: number;
+  nAgree: number;
+  agreement: number | null;
+}
+
 export interface Receipt {
   sessionId: string;
   verdict: string;
@@ -68,6 +76,7 @@ export interface Receipt {
   totals: Totals;
   comparison: Comparison;
   mentions: MentionCounts;
+  audit: Audit;
   runs: RunRow[];
   whatCouldNotBeChecked: string[];
 }
@@ -77,15 +86,18 @@ export interface SovRow {
   n: number;
   nClusters: number;
   share: number | null;
+  ci95: [number, number] | null;
 }
 
 export interface SentimentRow {
   brand: string;
   n: number;
+  nConfirmed: number;
   pos: number;
   neg: number;
   neu: number;
   net: number | null;
+  ci95: [number, number] | null;
 }
 
 export interface BySourceRow {
@@ -127,11 +139,20 @@ export interface TopMentionRow {
   label: string;
 }
 
+export interface AbstentionRow {
+  scope: string;
+  brand: string;
+  source: string | null;
+  reason: string;
+  detail: string;
+}
+
 export interface Digest {
   brand: string;
   topics: TopicRow[];
   topMentions: TopMentionRow[];
   coverageGaps: { source: string; reason: string }[];
+  abstentions: AbstentionRow[];
   narrationChars: number;
   narrationNumbersVerified: boolean;
   costVerdict: string;
@@ -152,10 +173,12 @@ type Json = Record<string, unknown>;
 const isObject = (v: unknown): v is Json => typeof v === "object" && v !== null && !Array.isArray(v);
 
 class Reader {
+  private readonly dir: string;
   private readonly file: string;
   private readonly root: unknown;
 
-  constructor(file: string, root: unknown) {
+  constructor(dir: string, file: string, root: unknown) {
+    this.dir = dir;
     this.file = file;
     this.root = root;
   }
@@ -164,7 +187,7 @@ class Reader {
     let cur: unknown = this.root;
     for (const key of path.split(".")) {
       if (!isObject(cur) || !(key in cur)) {
-        throw new Error(`results/demo/${this.file}: ${path} is missing`);
+        throw new Error(`results/${this.dir}/${this.file}: ${path} is missing`);
       }
       cur = cur[key];
     }
@@ -172,7 +195,7 @@ class Reader {
   }
 
   private fail(path: string, expected: string): never {
-    throw new Error(`results/demo/${this.file}: ${path} is not ${expected}`);
+    throw new Error(`results/${this.dir}/${this.file}: ${path} is not ${expected}`);
   }
 
   num(path: string): number {
@@ -184,6 +207,20 @@ class Reader {
     const v = this.at(path);
     if (v === null) return null;
     return typeof v === "number" && Number.isFinite(v) ? v : this.fail(path, "a number or null");
+  }
+
+  /** A `[lo, hi]` pair of finite numbers, or null (an abstained interval). */
+  pairOrNull(path: string): [number, number] | null {
+    const v = this.at(path);
+    if (v === null) return null;
+    if (
+      Array.isArray(v) &&
+      v.length === 2 &&
+      v.every((x) => typeof x === "number" && Number.isFinite(x))
+    ) {
+      return [v[0] as number, v[1] as number];
+    }
+    return this.fail(path, "a [lo, hi] pair or null");
   }
 
   int(path: string): number {
@@ -224,7 +261,9 @@ class Reader {
   list<Row>(path: string, row: (r: Reader) => Row): Row[] {
     const v = this.at(path);
     if (!Array.isArray(v)) this.fail(path, "a list");
-    return (v as unknown[]).map((item, i) => row(new Reader(this.file, item).nested(`${path}[${i}]`)));
+    return (v as unknown[]).map((item, i) =>
+      row(new Reader(this.dir, this.file, item).nested(`${path}[${i}]`)),
+    );
   }
 
   /** Integer-valued map, e.g. mentions.by_source. */
@@ -241,7 +280,7 @@ class Reader {
 
   /** A reader whose error paths are prefixed, so a bad row names its index. */
   private nested(prefix: string): Reader {
-    return new Reader(`${this.file} ${prefix}`, this.root);
+    return new Reader(this.dir, `${this.file} ${prefix}`, this.root);
   }
 }
 
@@ -282,6 +321,11 @@ const readReceipt = (r: Reader): Receipt => ({
     labelled: r.int("mentions.labelled"),
     bySource: r.intMap("mentions.by_source"),
   },
+  audit: {
+    nSample: r.int("audit.n_sample"),
+    nAgree: r.int("audit.n_agree"),
+    agreement: r.numOrNull("audit.agreement"),
+  },
   runs: r.list("runs", (row) => ({
     localSeq: row.int("local_seq"),
     runId: row.strOrNull("run_id"),
@@ -304,14 +348,17 @@ const readStats = (r: Reader): Stats => ({
     n: row.int("n"),
     nClusters: row.int("n_clusters"),
     share: row.numOrNull("share"),
+    ci95: row.pairOrNull("ci95"),
   })),
   sentiment: r.list("sentiment", (row) => ({
     brand: row.str("brand"),
     n: row.int("n"),
+    nConfirmed: row.int("n_confirmed"),
     pos: row.int("pos"),
     neg: row.int("neg"),
     neu: row.int("neu"),
     net: row.numOrNull("net"),
+    ci95: row.pairOrNull("ci95"),
   })),
   bySource: r.list("by_source", (row) => ({
     brand: row.str("brand"),
@@ -347,6 +394,13 @@ const readDigest = (r: Reader): Digest => ({
     source: row.str("source"),
     reason: row.str("reason"),
   })),
+  abstentions: r.list("abstentions", (row) => ({
+    scope: row.str("scope"),
+    brand: row.str("brand"),
+    source: row.strOrNull("source"),
+    reason: row.str("reason"),
+    detail: row.str("detail"),
+  })),
   narrationChars: r.int("narration.chars"),
   narrationNumbersVerified: r.bool("narration.numbers_verified"),
   costVerdict: r.str("cost.verdict"),
@@ -357,22 +411,32 @@ const readDigest = (r: Reader): Digest => ({
  * Cross-file agreement is checked too: the digest's cost verdict is the
  * receipt's verdict, and the digest is about the receipt's brand.
  */
-export const loadResults = (raw: { receipt: unknown; stats: unknown; digest: unknown }): Results => {
-  const receipt = readReceipt(new Reader("receipt.json", raw.receipt));
-  const stats = readStats(new Reader("stats.json", raw.stats));
-  const digest = readDigest(new Reader("digest.json", raw.digest));
+export const loadResultsFrom = (
+  dir: string,
+  raw: { receipt: unknown; stats: unknown; digest: unknown },
+): Results => {
+  const receipt = readReceipt(new Reader(dir, "receipt.json", raw.receipt));
+  const stats = readStats(new Reader(dir, "stats.json", raw.stats));
+  const digest = readDigest(new Reader(dir, "digest.json", raw.digest));
   if (digest.brand !== receipt.brand) {
     throw new Error(
-      `results/demo: digest.json is about "${digest.brand}" but receipt.json is about "${receipt.brand}"`,
+      `results/${dir}: digest.json is about "${digest.brand}" but receipt.json is about "${receipt.brand}"`,
     );
   }
   if (digest.costVerdict !== receipt.verdict) {
     throw new Error(
-      `results/demo: digest.json cost.verdict ${digest.costVerdict} disagrees with receipt.json verdict ${receipt.verdict}`,
+      `results/${dir}: digest.json cost.verdict ${digest.costVerdict} disagrees with receipt.json verdict ${receipt.verdict}`,
     );
   }
   return { receipt, stats, digest };
 };
+
+/** The frozen demo run at results/demo. */
+export const loadResults = (raw: {
+  receipt: unknown;
+  stats: unknown;
+  digest: unknown;
+}): Results => loadResultsFrom("demo", raw);
 
 /** Money on screen: two decimals, dollar sign, never rounded away from the file. */
 export const usd = (v: number): string => `$${v.toFixed(2)}`;
@@ -385,3 +449,9 @@ export const fmt = (v: number): string => {
   if (Number.isInteger(v)) return String(v);
   return v.toFixed(1);
 };
+
+/** A share of voice as a whole percent: 0.2906 -> "29%". */
+export const pct = (v: number): string => `${Math.round(v * 100)}%`;
+
+/** A net sentiment on [-1, 1], signed, two decimals: 0.092 -> "+0.09". */
+export const net = (v: number): string => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
