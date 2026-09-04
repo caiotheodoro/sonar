@@ -1,7 +1,7 @@
 """Configuration layer: source plan, profiles, LLM ids and rates, thresholds.
 
 Every number the published-claims gate checks lives here as a named constant:
-the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.1.2, frozen
+the threshold index of ``docs/PRE-REGISTRATION.md`` (v1.1.3, frozen
 2026-09-02, amended same day by D012 A1/A2, D013 A3 and D014 A4; later
 amendments bump the patch version there, never the values here without a
 ``DECISIONS.md`` entry), the

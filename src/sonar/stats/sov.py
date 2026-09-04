@@ -81,17 +81,21 @@ class SovPlan:
             rows = [r for r in self.frame.rows if r.brand == brand and r.source in basis]
             current = _period_counts(rows, "current")
             previous = _period_counts(rows, "previous")
-            detail = below_minimum_detail("share", current, previous)
+            point_detail = below_minimum_detail("share", current)
+            wow_detail = below_minimum_detail("share", current, previous)
             share: float | None = None
             ci95: CI | None = None
             delta: float | None = None
             delta_ci: CI | None = None
             p_raw: float | None = None
-            if detail is None:
+            if point_detail is None:
                 point, cluster, _ = res.column(self._columns[(brand, None)])
                 total_point, total_draws = totals[None]
                 share = ratio_point(point, total_point)
                 ci95 = percentile_ci(ratio(cluster, total_draws))
+                if share is None or ci95 is None:
+                    share, ci95 = None, None
+            if wow_detail is None:
                 cur_point, cur_draws, _ = res.column(self._columns[(brand, "current")])
                 prev_point, prev_draws, _ = res.column(self._columns[(brand, "previous")])
                 cur_share = ratio_point(cur_point, totals["current"][0])
@@ -103,8 +107,6 @@ class SovPlan:
                 )
                 delta_ci = percentile_ci(delta_draws)
                 p_raw = two_sided_p(delta_draws)
-                if share is None or ci95 is None:
-                    share, ci95 = None, None
             out.append(
                 ShareStat(
                     brand=brand,
@@ -115,7 +117,11 @@ class SovPlan:
                     share=share,
                     ci95=ci95,
                     test=ShareTest(
-                        brand=brand, delta=delta, ci95=delta_ci, p_raw=p_raw, below_minimum=detail
+                        brand=brand,
+                        delta=delta,
+                        ci95=delta_ci,
+                        p_raw=p_raw,
+                        below_minimum=wow_detail,
                     ),
                 )
             )

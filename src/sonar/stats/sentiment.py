@@ -165,7 +165,8 @@ class SentimentPlan:
             rows = self.frame.brand_rows(brand)
             current = _period_counts(rows, "current")
             previous = _period_counts(rows, "previous")
-            detail = below_minimum_detail("net", current, previous)
+            point_detail = below_minimum_detail("net", current)
+            wow_detail = below_minimum_detail("net", current, previous)
             full = self._brand_triple(res, brand, "all", None)
             pos, neg, neu = full.point
             n_confirmed = sum(1 for r in rows if r.confirmed)
@@ -175,8 +176,9 @@ class SentimentPlan:
             confirmed_ci: CI | None = None
             confirmed_detail: str | None = None
             p_raw: float | None = None
-            if detail is None:
+            if point_detail is None:
                 estimate = _estimate(full, "net")
+            if wow_detail is None:
                 cur = self._brand_triple(res, brand, "all", "current")
                 prev = self._brand_triple(res, brand, "all", "previous")
                 cur_point, prev_point = cur.net_point(), prev.net_point()
@@ -213,7 +215,7 @@ class SentimentPlan:
                         ci95_confirmed_only=confirmed_ci,
                         confirmed_detail=confirmed_detail,
                         p_raw=p_raw,
-                        below_minimum=detail,
+                        below_minimum=wow_detail,
                     ),
                 )
             )

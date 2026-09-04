@@ -1,8 +1,8 @@
 # PRE-REGISTRATION — sonar statistics plan
 
-**Version**: 1.1.2
+**Version**: 1.1.3
 **Frozen**: 2026-09-02 (design reference: `docs/research/2026-09-02-task-graph-and-design.md`)
-**Amended**: 2026-09-02, A1, A2, A3 and A4 (see §Amendments; `docs/DECISIONS.md` D012, D013, D014)
+**Amended**: 2026-09-02, A1–A4 (D012, D013, D014); 2026-09-03, A5 (`docs/DECISIONS.md` D018)
 
 > **FROZEN TEXT.** Any change to the thresholds, rules, or hypotheses below
 > after the freeze date goes through a **DECISIONS.md entry** stating the
@@ -85,11 +85,19 @@ WoW, share WoW}, eight tests for a brand with three competitors.
 
 ## Abstention thresholds
 
-A brand's share and net estimates are set to **ABSTAIN** (reason
-`below_minimum`) when **either**:
+The minimums are `n_clusters ≥ 5` and `n ≥ 20`. They gate two estimands
+separately (A5):
 
-- `n_clusters < 5` in either the current or previous period, **or**
-- `n < 20` in either the current or previous period.
+- A brand's **level** estimates — `share` and `net` with their `ci95` —
+  are set to **ABSTAIN** (reason `below_minimum`) when a minimum is missed
+  in the **current** period.
+- A brand's **week-over-week** delta — `delta`, its `ci95`, `p_raw`,
+  `p_holm` and the WoW `verdict` — is set to **ABSTAIN** (reason
+  `below_minimum`) when a minimum is missed in **either** the current or
+  the previous period.
+
+So a brand with a well-populated current period but a thin previous
+period reports its level `share` and `net` and abstains only on the trend.
 
 `n` is the estimand's own count: for share, `SovEntry.n` (mention–brand
 pairs over `basis_sources`); for net, `SentimentEntry.n` (relevant
@@ -112,7 +120,7 @@ paired with a row of reason `degenerate`.
 | `deadline` | TIMED_OUT / exceeded deadline |
 | `unavailable` | endpoint absent (e.g. X/Twitter) |
 | `schema_drift` | AdapterSchemaError (raw saved) |
-| `below_minimum` | brand-level minimums above not met in either period |
+| `below_minimum` | level: minimum missed in the current period; WoW: minimum missed in either period (A5) |
 | `halted` | Monid 402 breaker stopped the session |
 | `embedding_failed` | embedding call failed; topics abstain, chat falls back to lexical retrieval |
 | `signals_conflict` | verdict only: full-set and confirmed-only CIs exclude 0 with opposite signs |
@@ -199,7 +207,7 @@ The published-claims test asserts each of these equals the constant in
 - α=0.05 (Holm) over the tests with non-null `p_raw`; `p_holm` governs
   SIGNIFICANT, `p_raw` governs SUGGESTIVE; ABSTAIN evaluated first
 - window_days = 14; periods `[now − 7 d, now)` and `[now − 14 d, now − 7 d)`
-- abstain at n_clusters < 5 or n < 20 in either period
+- abstain the level (share, net) at n_clusters < 5 or n < 20 in the current period; abstain the WoW delta at n_clusters < 5 or n < 20 in either period (A5)
 - events: n_day ≥ max(5, median + 3·MAD), n_clusters_day ≥ 3, 14-day baseline
   excluding the tested day, UTC days
 - tiebreak: confidence < 0.6, cap 40 %, audit 10 %
@@ -338,3 +346,27 @@ which 0 do.
   `maxComments` all 40); new `maxPostCount 15` and `maxComments 2` per post
   with `maxItems` at the profile cap and the unit cost unchanged. The
   denominators and thresholds in this file are not affected.
+
+### A5 — D018, split the below-minimum rule by estimand (v1.1.3, 2026-09-03)
+
+Applies `docs/DECISIONS.md` D018 after the first live full run (W6.1 dry,
+session `20260904T023500Z-nubank-441cf0`): 4 brands, 27–72 relevant
+mentions in the current 7-day period, 7–13 in the previous — every brand
+abstained on both `share` and `net` under the old rule.
+
+- §Abstention thresholds: prior "A brand's share and net estimates are set
+  to ABSTAIN when either: `n_clusters < 5` in either the current or
+  previous period, or `n < 20` in either the current or previous period.
+  … Each is evaluated per period." New: the **level** estimates (`share`,
+  `net`, `ci95`) gate on the **current** period only; the **week-over-week
+  delta** (`delta`, its `ci95`, `p_raw`, `p_holm`, WoW `verdict`) gates on
+  **either** period. A brand with a populated current period and a thin
+  previous period reports its level and abstains only on the trend.
+- §Threshold index: the "abstain at n_clusters < 5 or n < 20 in either
+  period" line is split accordingly.
+- Thresholds, window, estimands and hypotheses are otherwise unchanged;
+  `MIN_MENTIONS_PER_WEEK = 20` and `MIN_CLUSTERS_PER_WEEK = 5` keep their
+  values. No wire-format change (a level estimate could already be null
+  independently of its WoW).
+- Reversal clause per D018: the H5 hand check or a RED-TEAM attack shows a
+  current-period-only level estimate is unreliable without the prior week.

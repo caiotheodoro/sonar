@@ -110,10 +110,11 @@ def test_pre_registration_frozen_banner_and_version() -> None:
     text = PRE_REG.read_text(encoding="utf-8")
     assert "FROZEN TEXT" in text
     assert "**Frozen**: 2026-09-02" in text
-    # A1/A2 (D012) landed in 1.1.0, A3 (D013) in 1.1.1 and A4 (D014) in 1.1.2;
-    # anything older predates the wording and thresholds this file checks.
-    assert pre_registration_version() >= (1, 1, 2)
-    assert "**Amended**: 2026-09-02, A1, A2, A3 and A4" in text
+    # A1/A2 (D012) landed in 1.1.0, A3 (D013) in 1.1.1, A4 (D014) in 1.1.2,
+    # A5 (D018) in 1.1.3; anything older predates the wording this file checks.
+    assert pre_registration_version() >= (1, 1, 3)
+    assert "A1–A4 (D012, D013, D014)" in text
+    assert "A5 (`docs/DECISIONS.md` D018)" in text
 
 
 # --- source plan ----------------------------------------------------------

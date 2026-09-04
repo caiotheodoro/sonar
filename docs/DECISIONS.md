@@ -750,4 +750,56 @@ window rule is amended with a minimum-baseline-days clause.
 
 ---
 
-*End of decisions. Next entry would be D018.*
+## D018 — Split the below-minimum abstention by estimand (PRE-REGISTRATION A5)
+
+**Decision.** The `below_minimum` rule now gates two estimands separately:
+
+- **Level** (`share`, `net`, and their `ci95`): ABSTAIN when
+  `n < MIN_MENTIONS_PER_WEEK` or `n_clusters < MIN_CLUSTERS_PER_WEEK` in
+  the **current** 7-day period.
+- **Week-over-week delta** (`delta`, its `ci95`, `p_raw`, `p_holm`, WoW
+  `verdict`): ABSTAIN when a minimum is missed in **either** period.
+
+**Prior value.** "A brand's share and net estimates are set to ABSTAIN
+when either: `n_clusters < 5` in either the current or previous period, or
+`n < 20` in either the current or previous period" — both the level and
+the trend gated on both periods.
+
+**Rationale.** The first live full run (W6.1 dry, session
+`20260904T023500Z-nubank-441cf0`) had 27–72 relevant mentions per brand in
+the current period and 7–13 in the previous one — social-listening data is
+heavily recency-skewed, and D017's `time=month` fix did not fill the older
+half. Under the prior rule every brand abstained on `share` **and** `net`
+on **every** first brief, which defeats the product: sonar exists to give
+a first brand brief, and its two headline analyses would always say "not
+enough data". A level estimate over 40+ mentions is statistically sound
+regardless of the prior week; only a *trend* needs two comparable periods.
+The change makes the level report and abstains the trend honestly (a first
+brief has no prior week to compare against).
+
+**Evidence.** `out/w6.1/` receipt and digest (all four brands
+`below_minimum` on `net` and `share`, previous-period `n` of 7–13).
+`tests/test_stats.py` `test_below_minimum_only_previous_keeps_the_level_abstains_the_wow`,
+`test_property_abstention_below_minimums`;
+`src/sonar/stats/verdict.py` `below_minimum_detail` now takes an optional
+`previous`.
+
+**Alternatives rejected.** Widening `window_days` to 28 (a post-hoc change
+to a pre-registered constant to make an abstention disappear — the
+goalpost move RED-TEAM flags — and `sort=new` recency skew would leave the
+older 14 days thin anyway). Larger `SOURCE_PLAN` caps (own DECISIONS entry;
+still recency-skewed). Accepting the abstention (a demo whose SoV and
+sentiment both abstain does not show the product).
+
+**Thresholds unchanged.** `MIN_MENTIONS_PER_WEEK = 20`,
+`MIN_CLUSTERS_PER_WEEK = 5` keep their values; the window, estimands,
+verdict rule and hypotheses are untouched. No `schema_rev` bump: a level
+estimate could already be null independently of its WoW.
+
+**Reverses when.** The H5 blind hand check or a RED-TEAM attack shows a
+current-period-only level estimate is unreliable without the prior week;
+then the level gate returns to both periods and the demo is re-run.
+
+---
+
+*End of decisions. Next entry would be D019.*

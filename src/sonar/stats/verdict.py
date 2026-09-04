@@ -77,11 +77,20 @@ class PeriodCounts:
 
 
 def below_minimum_detail(
-    estimand: str, current: PeriodCounts, previous: PeriodCounts
+    estimand: str, current: PeriodCounts, previous: PeriodCounts | None = None
 ) -> str | None:
-    """The ``Abstention.detail`` when a period misses a minimum, else ``None``."""
+    """The ``Abstention.detail`` when a period misses a minimum, else ``None``.
+
+    ``previous=None`` checks the current period only: the level estimates
+    (``net``, ``share``) need the minimums in the current period, the
+    week-over-week delta needs them in both (PRE-REGISTRATION v1.1.3, A5 /
+    ``docs/DECISIONS.md`` D018).
+    """
     failures: list[str] = []
-    for name, counts in (("current", current), ("previous", previous)):
+    periods = [("current", current)]
+    if previous is not None:
+        periods.append(("previous", previous))
+    for name, counts in periods:
         if counts.n < config.MIN_MENTIONS_PER_WEEK:
             failures.append(f"n={counts.n} < {config.MIN_MENTIONS_PER_WEEK} in {name}")
         if counts.n_clusters < config.MIN_CLUSTERS_PER_WEEK:

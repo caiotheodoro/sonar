@@ -791,17 +791,20 @@ def test_shared_index_pairs_periods_and_brands() -> None:
         assert sent.wow.delta == 0.0 and sent.wow.verdict == "NO_CHANGE_DETECTED"
 
 
-def test_below_minimum_nulls_everything_and_pairs_rows() -> None:
+def test_below_minimum_only_previous_keeps_the_level_abstains_the_wow() -> None:
+    # Inter has 40 current-period mentions and none in the previous period:
+    # the level estimates compute, only the WoW abstains (D018 / PRE-REG v1.1.3).
     rows = healthy_brand("Nubank") + period_rows("Inter", CURRENT, [(3, 2, 0)] * 8, tag="cur")
     result = compute(rows)
     inter_sov = result.share_of_voice[1]
     inter_sent = result.sentiment[1]
-    assert inter_sov.share is None and inter_sov.ci95 is None and inter_sov.wow.verdict == "ABSTAIN"
-    assert inter_sent.net is None and inter_sent.design_effect is None
+    assert inter_sov.share is not None and inter_sov.ci95 is not None
+    assert inter_sov.wow.verdict == "ABSTAIN" and inter_sov.wow.delta is None
+    assert inter_sent.net is not None
     assert inter_sent.wow.is_below_minimum
     reasons = sorted((a.brand, a.reason, a.detail.split(":")[0]) for a in result.abstentions)
     assert reasons == [("Inter", "below_minimum", "net"), ("Inter", "below_minimum", "share")]
-    assert "n=0" in next(a.detail for a in result.abstentions if a.detail.startswith("share"))
+    assert "in previous" in next(a.detail for a in result.abstentions if a.detail.startswith("share"))
     # The healthy brand still reports, and its share counts Inter's rows in the denominator.
     nubank = result.share_of_voice[0]
     assert nubank.share == pytest.approx(48 / (48 + 40))
@@ -1036,6 +1039,13 @@ def test_property_self_delta_is_exactly_zero(spec: Any, other: Any) -> None:
 small_period = st.lists(cluster_spec, min_size=1, max_size=8)
 
 
+def _below_minimum(spec: Any) -> bool:
+    return (
+        len(spec) < config.MIN_CLUSTERS_PER_WEEK
+        or sum(map(sum, spec)) < config.MIN_MENTIONS_PER_WEEK
+    )
+
+
 @PROPERTY
 @given(current=small_period, previous=small_period)
 def test_property_abstention_below_minimums(current: Any, previous: Any) -> None:
@@ -1043,14 +1053,13 @@ def test_property_abstention_below_minimums(current: Any, previous: Any) -> None
     result = compute(rows)
     sent = result.sentiment[0]
     sov = result.share_of_voice[0]
-    expected_below = any(
-        len(spec) < config.MIN_CLUSTERS_PER_WEEK
-        or sum(map(sum, spec)) < config.MIN_MENTIONS_PER_WEEK
-        for spec in (current, previous)
-    )
-    assert sent.wow.is_below_minimum == expected_below
-    assert (sov.share is None) == expected_below and (sent.net is None) == expected_below
+    # D018 / PRE-REG v1.1.3: the level estimates gate on the current period only;
+    # the WoW delta gates on either period.
+    point_below = _below_minimum(current)
+    wow_below = point_below or _below_minimum(previous)
+    assert sent.wow.is_below_minimum == wow_below
+    assert (sov.share is None) == point_below and (sent.net is None) == point_below
     below = [a for a in result.abstentions if a.brand == "Nubank" and a.reason == "below_minimum"]
-    assert (len(below) == 2) == expected_below
+    assert (len(below) == 2) == wow_below
     assert result.sentiment[1].wow.verdict != "ABSTAIN"
     assemble_digest(result, [])
