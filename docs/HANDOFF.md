@@ -196,6 +196,29 @@ isn't possible either. Resolve in the W8.1 cycle: either add
 `make validate` (golden stats seed 777) + `sonar verify`. Not a W6.1
 blocker.
 
+### 2026-09-04 evening — W6.1-clean is the demo candidate; Monid degrading
+
+- **`out/w6.1-clean/`** (key 3, session `20260904T030429Z-nubank-d554d5`):
+  **verdict RECONCILED, `sonar verify` ok.** 277 mentions, 272 labelled.
+  D018 confirmed live — **Nubank SoV 0.288 [0.20,0.38], net +0.013 [-0.16,
+  0.18]; Itaú SoV 0.336 [0.25,0.43], net +0.023 [-0.14,0.19]**; C6 (14) and
+  PicPay (38) abstain (thin — partly the BLOCKED rate). 13 topics, 6 events,
+  WoW abstains for all. **ratio 82× vs Brand24** ($4.24/mo equiv). Monid
+  $0.9151 + OpenAI $0.1462. brief.mp3 written. 36/77 source runs BLOCKED.
+- **A `sonar reconcile` foot-gun (my error, and a sonar bug):** running
+  another Monid job between a session finishing and reconciling it pollutes
+  the first session's window (`reconciled_at = now`, not `finish + slack`).
+  I ran W6.1-v3 before reconciling W6.1-clean → its receipt went PARTIAL
+  with ~40 "unmatched" that were v3's runs. Restored with a bounded
+  `reconcile_session(now=finish+5s)`. *sonar fix:* bound the reconcile
+  window to the session's own `finished_at`, not wall-clock now.
+- **W6.1-v3** was worse (92/116 BLOCKED, C6+PicPay got 0 mentions) —
+  discarded. Monid/Apify is degrading through the evening.
+- **Not frozen yet.** Waiting for Monid to stabilise enough for either a
+  cleaner 3-4 brand W6.1 or at least the Avenza demo-empty run (freezing
+  `results/demo/` without `results/demo-empty/` breaks `make check-claims`).
+  Fallback: freeze W6.1-clean as-is (2/4 brands report — honest, functional).
+
 ### 2026-09-04 — the "outage" was a wallet mix-up; W6.1 dry run; D018
 
 - The 4.5h of `BLOCKED` was **not** a Monid outage. Raw `/v1/run` returns a
